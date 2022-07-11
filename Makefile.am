@@ -193,7 +193,7 @@ AUTHORS                       \
 CREDITS                       \
 NEWS                          \
 TODO                          \
-README                        \
+README.md                     \
 plugin_sample.c
 
 

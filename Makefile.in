@@ -85,7 +85,7 @@ build_triplet = @build@
 host_triplet = @host@
 bin_PROGRAMS = lcd4linux$(EXEEXT)
 subdir = .
-DIST_COMMON = INSTALL NEWS README AUTHORS ChangeLog \
+DIST_COMMON = INSTALL NEWS README.md AUTHORS ChangeLog \
 	$(srcdir)/Makefile.in $(srcdir)/Makefile.am \
 	$(top_srcdir)/configure $(am__configure_deps) \
 	$(srcdir)/config.h.in mkinstalldirs depcomp COPYING TODO \
@@ -523,7 +523,7 @@ AUTHORS                       \
 CREDITS                       \
 NEWS                          \
 TODO                          \
-README                        \
+README.md                     \
 plugin_sample.c
 
 all: config.h

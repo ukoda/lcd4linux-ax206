@@ -25,3 +25,26 @@ Be aware that AIDA64 is actually Windows software, not the displays themselves. 
 - The generic install instructions don't work.  The default build system tools are ver 1.14 but the current versions in Rocky (cicia 2022) are version 1.16 so I am moving the build system to use that.
 - Code, for AX206 display atleast, uses libusb version 0.1 where as Rocky currently uses 1.0 and gets really pissy if you try to install 0.1 so I am updating source code to use 1.0 libraries.
 - The confiuration options used by lcd4linux at runtime were originally conceived for mono text LCDs, not colour graphics LCDs.  There are bugs with some colour names, such as 'white', not working.  These can be worked around but I wish get to the bottom it so common sense conf files can be used.  Likewise I would like to be able to change the colour of bar graphs depending on the value range e.g. green below 90% and red above that.
+
+## Building
+
+These are the additions to the generic instructions that I needed in able to build the project.
+
+### Rocky
+
+This will probably apply to similar RHEL distros.
+
+In my case I found it helped to install these packages:
+- dnf install ncurses-devel ncurses
+- dnf install libX11-devel
+- dnf install gd-devel.x86_64
+- dnf install libjpeg-turbo-devel
+- dnf install usblib* 
+
+Confuire the build enviroment. To keep it simple I configured only for the DPF driver, which is the one that supports AX206 displays. From the top level of the repo directory:
+- aclocal
+- libtoolize --copy --force 
+- autoheader
+- automake --add-missing --copy --foreign 
+- autoconf
+- ./configure --with-drivers=DPF
