@@ -94,13 +94,13 @@ static pid_t drv_generic_serial_lock_port(const char *Port)
     int fd, len, pid;
 
     if (strncmp(Port, "/dev/", 5) == 0) {
-	port = strdup(Port + 5);
+        port = strdup(Port + 5);
     } else {
-	port = strdup(Port);
+        port = strdup(Port);
     }
 
     while ((p = strchr(port, '/')) != NULL) {
-	*p = '_';
+        *p = '_';
     }
 
     qprintf(lockfile, sizeof(lockfile), LOCK, port);
@@ -109,75 +109,75 @@ static pid_t drv_generic_serial_lock_port(const char *Port)
     free(port);
 
     if ((fd = mkstemp(tempfile)) == -1) {
-	error("mkstemp(%s) failed: %s", tempfile, strerror(errno));
-	return -1;
+        error("mkstemp(%s) failed: %s", tempfile, strerror(errno));
+        return -1;
     }
 
     if (fchmod(fd, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH) == -1) {
-	error("fchmod(%s) failed: %s", tempfile, strerror(errno));
-	close(fd);
-	unlink(tempfile);
-	return -1;
+        error("fchmod(%s) failed: %s", tempfile, strerror(errno));
+        close(fd);
+        unlink(tempfile);
+        return -1;
     }
 
     snprintf(buffer, sizeof(buffer), "%10d\n", (int) getpid());
     len = strlen(buffer);
     if (write(fd, buffer, len) != len) {
-	error("write(%s) failed: %s", tempfile, strerror(errno));
-	close(fd);
-	unlink(tempfile);
-	return -1;
+        error("write(%s) failed: %s", tempfile, strerror(errno));
+        close(fd);
+        unlink(tempfile);
+        return -1;
     }
     close(fd);
 
 
     while (link(tempfile, lockfile) == -1) {
 
-	if (errno != EEXIST) {
-	    error("link(%s, %s) failed: %s", tempfile, lockfile, strerror(errno));
-	    unlink(tempfile);
-	    return -1;
-	}
+        if (errno != EEXIST) {
+            error("link(%s, %s) failed: %s", tempfile, lockfile, strerror(errno));
+            unlink(tempfile);
+            return -1;
+        }
 
-	if ((fd = open(lockfile, O_RDONLY)) == -1) {
-	    if (errno == ENOENT)
-		continue;	/* lockfile disappared */
-	    error("open(%s) failed: %s", lockfile, strerror(errno));
-	    unlink(tempfile);
-	    return -1;
-	}
+        if ((fd = open(lockfile, O_RDONLY)) == -1) {
+            if (errno == ENOENT)
+                continue;       /* lockfile disappared */
+            error("open(%s) failed: %s", lockfile, strerror(errno));
+            unlink(tempfile);
+            return -1;
+        }
 
-	len = read(fd, buffer, sizeof(buffer) - 1);
-	if (len < 0) {
-	    error("read(%s) failed: %s", lockfile, strerror(errno));
-	    unlink(tempfile);
-	    return -1;
-	}
+        len = read(fd, buffer, sizeof(buffer) - 1);
+        if (len < 0) {
+            error("read(%s) failed: %s", lockfile, strerror(errno));
+            unlink(tempfile);
+            return -1;
+        }
 
-	buffer[len] = '\0';
-	if (sscanf(buffer, "%d", &pid) != 1 || pid == 0) {
-	    error("scan(%s) failed.", lockfile);
-	    unlink(tempfile);
-	    return -1;
-	}
+        buffer[len] = '\0';
+        if (sscanf(buffer, "%d", &pid) != 1 || pid == 0) {
+            error("scan(%s) failed.", lockfile);
+            unlink(tempfile);
+            return -1;
+        }
 
-	if (pid == getpid()) {
-	    error("%s already locked by us. uh-oh...", lockfile);
-	    unlink(tempfile);
-	    return 0;
-	}
+        if (pid == getpid()) {
+            error("%s already locked by us. uh-oh...", lockfile);
+            unlink(tempfile);
+            return 0;
+        }
 
-	if ((kill(pid, 0) == -1) && errno == ESRCH) {
-	    error("removing stale lockfile %s", lockfile);
-	    if (unlink(lockfile) == -1 && errno != ENOENT) {
-		error("unlink(%s) failed: %s", lockfile, strerror(errno));
-		unlink(tempfile);
-		return pid;
-	    }
-	    continue;
-	}
-	unlink(tempfile);
-	return pid;
+        if ((kill(pid, 0) == -1) && errno == ESRCH) {
+            error("removing stale lockfile %s", lockfile);
+            if (unlink(lockfile) == -1 && errno != ENOENT) {
+                error("unlink(%s) failed: %s", lockfile, strerror(errno));
+                unlink(tempfile);
+                return pid;
+            }
+            continue;
+        }
+        unlink(tempfile);
+        return pid;
     }
 
     unlink(tempfile);
@@ -191,13 +191,13 @@ static pid_t drv_generic_serial_unlock_port(const char *Port)
     char *port, *p;
 
     if (strncmp(Port, "/dev/", 5) == 0) {
-	port = strdup(Port + 5);
+        port = strdup(Port + 5);
     } else {
-	port = strdup(Port);
+        port = strdup(Port);
     }
 
     while ((p = strchr(port, '/')) != NULL) {
-	*p = '_';
+        *p = '_';
     }
 
     qprintf(lockfile, sizeof(lockfile), LOCK, port);
@@ -212,18 +212,18 @@ int drv_generic_serial_open_handshake(const char *section, const char *driver, c
     int fd;
     struct termios portset;
     struct serial_struct serinfo;
-    fd = drv_generic_serial_open(section, driver, flags);	/* Open the Port with the original function */
+    fd = drv_generic_serial_open(section, driver, flags);       /* Open the Port with the original function */
 
     /* We activate the Usage of the Handshake Pins */
-    tcgetattr(fd, &portset);	/* Get Port Attributes */
-    portset.c_cflag |= CRTSCTS;	/* Set Handshake */
-    tcsetattr(fd, TCSANOW, &portset);	/* Set Port Attrributes */
+    tcgetattr(fd, &portset);    /* Get Port Attributes */
+    portset.c_cflag |= CRTSCTS; /* Set Handshake */
+    tcsetattr(fd, TCSANOW, &portset);   /* Set Port Attrributes */
 
     /* This sets the UART-Type to the simplest one: 8250. No Fifos or other Features */
     /* Fifo destroys Handshake so needs to be disabled */
-    ioctl(fd, TIOCGSERIAL, &serinfo);	/* Get Serial Info */
-    serinfo.type = PORT_8250;	/* Set to super-simple Port Type */
-    ioctl(fd, TIOCSSERIAL, &serinfo);	/* Write Back modified Info */
+    ioctl(fd, TIOCGSERIAL, &serinfo);   /* Get Serial Info */
+    serinfo.type = PORT_8250;   /* Set to super-simple Port Type */
+    ioctl(fd, TIOCSSERIAL, &serinfo);   /* Write Back modified Info */
     return fd;
 }
 
@@ -238,68 +238,68 @@ int drv_generic_serial_open(const char *section, const char *driver, const unsig
 
     Port = cfg_get(section, "Port", NULL);
     if (Port == NULL || *Port == '\0') {
-	error("%s: no '%s.Port' entry from %s", Driver, section, cfg_source());
-	return -1;
+        error("%s: no '%s.Port' entry from %s", Driver, section, cfg_source());
+        return -1;
     }
 
     if (cfg_number(section, "Speed", 19200, 1200, 230400, &i) < 0)
-	return -1;
+        return -1;
     switch (i) {
     case 1200:
-	Speed = B1200;
-	break;
+        Speed = B1200;
+        break;
     case 2400:
-	Speed = B2400;
-	break;
+        Speed = B2400;
+        break;
     case 4800:
-	Speed = B4800;
-	break;
+        Speed = B4800;
+        break;
     case 9600:
-	Speed = B9600;
-	break;
+        Speed = B9600;
+        break;
     case 19200:
-	Speed = B19200;
-	break;
+        Speed = B19200;
+        break;
     case 38400:
-	Speed = B38400;
-	break;
+        Speed = B38400;
+        break;
     case 57600:
-	Speed = B57600;
-	break;
+        Speed = B57600;
+        break;
     case 115200:
-	Speed = B115200;
-	break;
+        Speed = B115200;
+        break;
 #ifdef B230400
     case 230400:
-	Speed = B230400;
-	break;
+        Speed = B230400;
+        break;
 #endif
     default:
-	error("%s: unsupported speed '%d' from %s", Driver, i, cfg_source());
-	return -1;
+        error("%s: unsupported speed '%d' from %s", Driver, i, cfg_source());
+        return -1;
     }
 
     info("%s: using port '%s' at %d baud", Driver, Port, i);
 
     if ((pid = drv_generic_serial_lock_port(Port)) != 0) {
-	if (pid == -1)
-	    error("%s: port %s could not be locked", Driver, Port);
-	else
-	    error("%s: port %s is locked by process %d", Driver, Port, pid);
-	return -1;
+        if (pid == -1)
+            error("%s: port %s could not be locked", Driver, Port);
+        else
+            error("%s: port %s is locked by process %d", Driver, Port, pid);
+        return -1;
     }
 
     fd = open(Port, O_RDWR | O_NOCTTY | O_NDELAY);
     if (fd == -1) {
-	error("%s: open(%s) failed: %s", Driver, Port, strerror(errno));
-	drv_generic_serial_unlock_port(Port);
-	return -1;
+        error("%s: open(%s) failed: %s", Driver, Port, strerror(errno));
+        drv_generic_serial_unlock_port(Port);
+        return -1;
     }
 
     if (tcgetattr(fd, &portset) == -1) {
-	error("%s: tcgetattr(%s) failed: %s", Driver, Port, strerror(errno));
-	drv_generic_serial_unlock_port(Port);
-	return -1;
+        error("%s: tcgetattr(%s) failed: %s", Driver, Port, strerror(errno));
+        drv_generic_serial_unlock_port(Port);
+        return -1;
     }
 
     cfmakeraw(&portset);
@@ -307,9 +307,9 @@ int drv_generic_serial_open(const char *section, const char *driver, const unsig
     cfsetispeed(&portset, Speed);
     cfsetospeed(&portset, Speed);
     if (tcsetattr(fd, TCSANOW, &portset) == -1) {
-	error("%s: tcsetattr(%s) failed: %s", Driver, Port, strerror(errno));
-	drv_generic_serial_unlock_port(Port);
-	return -1;
+        error("%s: tcsetattr(%s) failed: %s", Driver, Port, strerror(errno));
+        drv_generic_serial_unlock_port(Port);
+        return -1;
     }
 
     Device = fd;
@@ -321,10 +321,10 @@ int drv_generic_serial_poll(char *string, const int len)
 {
     int ret;
     if (Device == -1)
-	return -1;
+        return -1;
     ret = read(Device, string, len);
     if (ret < 0 && errno != EAGAIN) {
-	error("%s: read(%s) failed: %s", Driver, Port, strerror(errno));
+        error("%s: read(%s) failed: %s", Driver, Port, strerror(errno));
     }
     return ret;
 }
@@ -337,15 +337,15 @@ int drv_generic_serial_read(char *string, const int len)
     count = len < 0 ? -len : len;
 
     for (run = 0; run < 10; run++) {
-	ret = drv_generic_serial_poll(string, count);
-	if (ret >= 0 || errno != EAGAIN)
-	    break;
-	info("%s: read(%s): EAGAIN", Driver, Port);
-	usleep(1000);
+        ret = drv_generic_serial_poll(string, count);
+        if (ret >= 0 || errno != EAGAIN)
+            break;
+        info("%s: read(%s): EAGAIN", Driver, Port);
+        usleep(1000);
     }
 
     if (ret > 0 && ret != count && len > 0) {
-	error("%s: partial read(%s): len=%d ret=%d", Driver, Port, len, ret);
+        error("%s: partial read(%s): len=%d ret=%d", Driver, Port, len, ret);
     }
 
     return ret;
@@ -355,16 +355,16 @@ void drv_generic_serial_write_rts(const char *string, const int len)
 {
     int serial, p, tocnt;
 
-    for (p = 0; p < len; p++) {	/* Send Byte-by-Byte checking RTS-Line */
-	/* Timeout is 500ms */
-	tocnt = 250;		/* 250 * 2 */
-	ioctl(Device, TIOCMGET, &serial);	/* Get status of Control Lines */
-	while (!(serial & TIOCM_RTS) && tocnt) {	/* Wait until RTS is set or timeout */
-	    tocnt--;		/* decrease timeout counter */
-	    usleep(2000);	/* Wait two milliseconds */
-	    ioctl(Device, TIOCMGET, &serial);
-	}
-	drv_generic_serial_write(&string[p], 1);	/* Actually send one byte */
+    for (p = 0; p < len; p++) { /* Send Byte-by-Byte checking RTS-Line */
+        /* Timeout is 500ms */
+        tocnt = 250;            /* 250 * 2 */
+        ioctl(Device, TIOCMGET, &serial);       /* Get status of Control Lines */
+        while (!(serial & TIOCM_RTS) && tocnt) {        /* Wait until RTS is set or timeout */
+            tocnt--;            /* decrease timeout counter */
+            usleep(2000);       /* Wait two milliseconds */
+            ioctl(Device, TIOCMGET, &serial);
+        }
+        drv_generic_serial_write(&string[p], 1);        /* Actually send one byte */
     }
 }
 
@@ -374,32 +374,32 @@ void drv_generic_serial_write(const char *string, const int len)
     int run, ret;
 
     if (Device == -1) {
-	error("%s: write to closed port %s failed!", Driver, Port);
-	return;
+        error("%s: write to closed port %s failed!", Driver, Port);
+        return;
     }
 
     for (run = 0; run < 10; run++) {
-	ret = write(Device, string, len);
-	if (ret >= 0 || errno != EAGAIN) {
-	    break;
-	}
-	/* EAGAIN: retry 10 times, emit message after 2nd retry */
-	if (run > 0) {
-	    info("%s: write(%s): EAGAIN #%d", Driver, Port, run);
-	}
-	usleep(1000);
+        ret = write(Device, string, len);
+        if (ret >= 0 || errno != EAGAIN) {
+            break;
+        }
+        /* EAGAIN: retry 10 times, emit message after 2nd retry */
+        if (run > 0) {
+            info("%s: write(%s): EAGAIN #%d", Driver, Port, run);
+        }
+        usleep(1000);
     }
 
     if (ret < 0) {
-	error("%s: write(%s) failed: %s", Driver, Port, strerror(errno));
-	if (++error > 10) {
-	    error("%s: too much errors, giving up", Driver);
-	    got_signal = -1;
-	}
+        error("%s: write(%s) failed: %s", Driver, Port, strerror(errno));
+        if (++error > 10) {
+            error("%s: too much errors, giving up", Driver);
+            got_signal = -1;
+        }
     } else if (ret != len) {
-	error("%s: partial write(%s): len=%d ret=%d", Driver, Port, len, ret);
+        error("%s: partial write(%s): len=%d ret=%d", Driver, Port, len, ret);
     } else {
-	error = 0;
+        error = 0;
     }
     return;
 }

@@ -61,11 +61,11 @@ void widget_gpo_update(void *Self)
 
     /* finally, draw it! */
     if (W->class->draw)
-	W->class->draw(W);
+        W->class->draw(W);
 
     /* add a new one-shot timer */
     if (P2N(&GPO->update) > 0) {
-	timer_add_widget(widget_gpo_update, Self, P2N(&GPO->update), 1);
+        timer_add_widget(widget_gpo_update, Self, P2N(&GPO->update), 1);
     }
 
 }
@@ -91,7 +91,7 @@ int widget_gpo_init(WIDGET * Self)
 
     /* sanity checks */
     if (!property_valid(&GPO->expression)) {
-	error("Warning: widget %s has no expression", section);
+        error("Warning: widget %s has no expression", section);
     }
 
     free(section);
@@ -110,11 +110,11 @@ int widget_gpo_init(WIDGET * Self)
 int widget_gpo_quit(WIDGET * Self)
 {
     if (Self && Self->data) {
-	WIDGET_GPO *GPO = Self->data;
-	property_free(&GPO->expression);
-	property_free(&GPO->update);
-	free(Self->data);
-	Self->data = NULL;
+        WIDGET_GPO *GPO = Self->data;
+        property_free(&GPO->expression);
+        property_free(&GPO->update);
+        free(Self->data);
+        Self->data = NULL;
     }
     return 0;
 }

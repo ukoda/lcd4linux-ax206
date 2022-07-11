@@ -69,13 +69,13 @@
 
 static char Name[] = "VNC";
 
-static int xres = 320;		/* screen settings */
+static int xres = 320;          /* screen settings */
 static int yres = 200;
 static int BPP = 4;
-static int max_clients = 2;	/* max connected clients */
-static int osd_showtime = 2000;	/* time to display the osd in ms */
-static int buttons = 2;		/* number of keypad buttons */
-static int buttonsize = 50;	/* size of keypad buttons */
+static int max_clients = 2;     /* max connected clients */
+static int osd_showtime = 2000; /* time to display the osd in ms */
+static int buttons = 2;         /* number of keypad buttons */
+static int buttonsize = 50;     /* size of keypad buttons */
 static int keypadxofs = 0;
 static int keypadyofs = 0;
 static int keypadgap = 0;
@@ -85,10 +85,10 @@ static unsigned char framer = 0;
 static unsigned char frameg = 0;
 static unsigned char frameb = 0;
 
-static rfbScreenInfoPtr server;	/* vnc device */
+static rfbScreenInfoPtr server; /* vnc device */
 static struct timeval osd_timestamp;
-static int show_keypad_osd = 0;	/* is the osd active? */
-static int clientCount = 0;	/* currently connected clients */
+static int show_keypad_osd = 0; /* is the osd active? */
+static int clientCount = 0;     /* currently connected clients */
 static int mouse_x = 0;
 static int mouse_y = 0;
 static int mouse_stat_old = 0;
@@ -109,33 +109,33 @@ int draw_rect(int x, int y, int size, unsigned char col, char *buffer)
 
     /* check if mouse is in current rect */
     if (mouse_x > x && mouse_x < (x + size))
-	if (mouse_y > y && mouse_y < (y + size)) {
-	    colr = framer;
-	    colg = frameg;
-	    col = frameb;
-	    ret = 1;
-	}
+        if (mouse_y > y && mouse_y < (y + size)) {
+            colr = framer;
+            colg = frameg;
+            col = frameb;
+            ret = 1;
+        }
 
     ofs2 = size * xres * BPP;
     for (i = x; i < x + size; i++) {
-	ofs = (i + xres * y) * BPP;
-	buffer[ofs + ofs2] = colr;
-	buffer[ofs++] = colr;
-	buffer[ofs + ofs2] = colg;
-	buffer[ofs++] = colg;
-	buffer[ofs + ofs2] = col;
-	buffer[ofs++] = col;
+        ofs = (i + xres * y) * BPP;
+        buffer[ofs + ofs2] = colr;
+        buffer[ofs++] = colr;
+        buffer[ofs + ofs2] = colg;
+        buffer[ofs++] = colg;
+        buffer[ofs + ofs2] = col;
+        buffer[ofs++] = col;
     }
 
     ofs2 = size * BPP;
     for (i = y; i <= y + size; i++) {
-	ofs = (i * xres + x) * BPP;
-	buffer[ofs + ofs2] = colr;
-	buffer[ofs++] = colr;
-	buffer[ofs + ofs2] = colg;
-	buffer[ofs++] = colg;
-	buffer[ofs + ofs2] = col;
-	buffer[ofs++] = col;
+        ofs = (i * xres + x) * BPP;
+        buffer[ofs + ofs2] = colr;
+        buffer[ofs++] = colr;
+        buffer[ofs + ofs2] = colg;
+        buffer[ofs++] = colg;
+        buffer[ofs + ofs2] = col;
+        buffer[ofs++] = col;
     }
     return ret;
 }
@@ -145,24 +145,24 @@ void display_keypad()
     int i, rectx, recty;
     int active;
     for (i = 0; i < buttons; i++) {
-	rectx = keypadxofs + (i * (buttonsize + keypadgap));
-	recty = keypadyofs /*+ (i*(buttonsize+gap)) */ ;
-	active = draw_rect(rectx, recty, buttonsize, 0, server->frameBuffer);
+        rectx = keypadxofs + (i * (buttonsize + keypadgap));
+        recty = keypadyofs /*+ (i*(buttonsize+gap)) */ ;
+        active = draw_rect(rectx, recty, buttonsize, 0, server->frameBuffer);
 
-	/* if the lmb button is pressed and we didnt processed the event yet - do it now */
-	if (active == 1 && process_event == 1) {
-	    drv_generic_keypad_press(i + 1);
-	    //debug("mouse in keypad nr %d", i);
-	    process_event = 0;
-	}
+        /* if the lmb button is pressed and we didnt processed the event yet - do it now */
+        if (active == 1 && process_event == 1) {
+            drv_generic_keypad_press(i + 1);
+            //debug("mouse in keypad nr %d", i);
+            process_event = 0;
+        }
     }
 }
 
 /* called if a vnc client disconnects */
-static void clientgone( __attribute__ ((unused)) rfbClientPtr cl)
+static void clientgone( __attribute__((unused)) rfbClientPtr cl)
 {
     if (clientCount > 0)
-	clientCount--;
+        clientCount--;
     debug("%d clients connected", clientCount);
 }
 
@@ -170,13 +170,13 @@ static void clientgone( __attribute__ ((unused)) rfbClientPtr cl)
 static enum rfbNewClientAction hook_newclient(rfbClientPtr cl)
 {
     if (clientCount < max_clients) {
-	clientCount++;
-	cl->clientGoneHook = clientgone;
-	debug("%d clients connected", clientCount);
-	return RFB_CLIENT_ACCEPT;
+        clientCount++;
+        cl->clientGoneHook = clientgone;
+        debug("%d clients connected", clientCount);
+        return RFB_CLIENT_ACCEPT;
     } else {
-	info("client refused due max. client connections (%d)", clientCount);
-	return RFB_CLIENT_REFUSE;
+        info("client refused due max. client connections (%d)", clientCount);
+        return RFB_CLIENT_REFUSE;
     }
 }
 
@@ -184,27 +184,27 @@ static enum rfbNewClientAction hook_newclient(rfbClientPtr cl)
 static void hook_mouseaction(int buttonMask, int x, int y, rfbClientPtr cl)
 {
     if (x >= 0 && y >= 0 && x < xres && y < yres) {
-	process_event = 0;
+        process_event = 0;
 
-	/* process ONLY if mouse button is released. */
-	if (buttonMask == NO_MOUSE_BUTTON_PRESSED && mouse_stat_old == LEFT_MOUSE_BUTTON_PRESSED) {
-	    gettimeofday(&osd_timestamp, NULL);
-	    process_event = 1;
-	    mouse_x = x;
-	    mouse_y = y;
-	}
-	//debug("btnMask: %d, old state: %d, processevent: %d", buttonMask, mouse_stat_old, process_event);
+        /* process ONLY if mouse button is released. */
+        if (buttonMask == NO_MOUSE_BUTTON_PRESSED && mouse_stat_old == LEFT_MOUSE_BUTTON_PRESSED) {
+            gettimeofday(&osd_timestamp, NULL);
+            process_event = 1;
+            mouse_x = x;
+            mouse_y = y;
+        }
+        //debug("btnMask: %d, old state: %d, processevent: %d", buttonMask, mouse_stat_old, process_event);
 
-	/* show osd display if mouse is pressed */
-	if (buttonMask == 1) {
-	    gettimeofday(&osd_timestamp, NULL);
-	    mouse_x = x;
-	    mouse_y = y;
-	    if (show_keypad_osd == 0) {
-		/* no osd until yet, activate osd keypad ... */
-		show_keypad_osd = 1;
-	    }
-	}
+        /* show osd display if mouse is pressed */
+        if (buttonMask == 1) {
+            gettimeofday(&osd_timestamp, NULL);
+            mouse_x = x;
+            mouse_y = y;
+            if (show_keypad_osd == 0) {
+                /* no osd until yet, activate osd keypad ... */
+                show_keypad_osd = 1;
+            }
+        }
 
     }
 
@@ -218,25 +218,25 @@ static int drv_vnc_keypad(const int num)
 
     switch (num) {
     case 1:
-	val += WIDGET_KEY_UP;
-	break;
+        val += WIDGET_KEY_UP;
+        break;
     case 2:
-	val += WIDGET_KEY_DOWN;
-	break;
+        val += WIDGET_KEY_DOWN;
+        break;
     case 3:
-	val += WIDGET_KEY_LEFT;
-	break;
+        val += WIDGET_KEY_LEFT;
+        break;
     case 4:
-	val += WIDGET_KEY_RIGHT;
-	break;
+        val += WIDGET_KEY_RIGHT;
+        break;
     case 5:
-	val += WIDGET_KEY_CONFIRM;
-	break;
+        val += WIDGET_KEY_CONFIRM;
+        break;
     case 6:
-	val += WIDGET_KEY_CANCEL;
-	break;
+        val += WIDGET_KEY_CANCEL;
+        break;
     default:
-	error("%s: unknown keypad value %d", Name, num);
+        error("%s: unknown keypad value %d", Name, num);
     }
 
     return val;
@@ -247,59 +247,59 @@ static int drv_vnc_open(const char *Section)
 {
     int keypadcol;
     if (cfg_number(Section, "Xres", 320, 32, 2048, &xres) < 1) {
-	info("[DRV_VNC] no '%s.Xres' entry from %s using default %d", Section, cfg_source(), xres);
+        info("[DRV_VNC] no '%s.Xres' entry from %s using default %d", Section, cfg_source(), xres);
     }
     if (cfg_number(Section, "Yres", 200, 32, 2048, &yres) < 1) {
-	info("[DRV_VNC] no '%s.Yres' entry from %s using default %d", Section, cfg_source(), yres);
+        info("[DRV_VNC] no '%s.Yres' entry from %s using default %d", Section, cfg_source(), yres);
     }
     if (cfg_number(Section, "Bpp", 4, 1, 4, &BPP) < 1) {
-	info("[DRV_VNC] no '%s.Bpp' entry from %s using default %d", Section, cfg_source(), BPP);
+        info("[DRV_VNC] no '%s.Bpp' entry from %s using default %d", Section, cfg_source(), BPP);
     }
     if (cfg_number(Section, "Maxclients", 2, 1, 64, &max_clients) < 1) {
-	info("[DRV_VNC] no '%s.Maxclients' entry from %s using default %d", Section, cfg_source(), max_clients);
+        info("[DRV_VNC] no '%s.Maxclients' entry from %s using default %d", Section, cfg_source(), max_clients);
     }
     if (cfg_number(Section, "Osd_showtime", 2000, 500, 60000, &osd_showtime) < 1) {
-	info("[DRV_VNC] no '%s.Osd_showtime' entry from %s using default %d", Section, cfg_source(), osd_showtime);
+        info("[DRV_VNC] no '%s.Osd_showtime' entry from %s using default %d", Section, cfg_source(), osd_showtime);
     }
     if (cfg_number(Section, "Buttons", 2, 0, 6, &buttons) < 1) {
-	info("[DRV_VNC] no '%s.Buttons' entry from %s using default %d", Section, cfg_source(), buttons);
+        info("[DRV_VNC] no '%s.Buttons' entry from %s using default %d", Section, cfg_source(), buttons);
     }
     if (cfg_number(Section, "Buttonsize", 50, 8, 256, &buttonsize) < 1) {
-	info("[DRV_VNC] no '%s.Buttonsize' entry from %s using default %d", Section, cfg_source(), buttonsize);
+        info("[DRV_VNC] no '%s.Buttonsize' entry from %s using default %d", Section, cfg_source(), buttonsize);
     }
     if (cfg_number(Section, "Keypadxofs", 0, 0, 4096, &keypadxofs) < 1) {
-	info("[DRV_VNC] no '%s.Keypadxofs' entry from %s using default %d", Section, cfg_source(), keypadxofs);
+        info("[DRV_VNC] no '%s.Keypadxofs' entry from %s using default %d", Section, cfg_source(), keypadxofs);
     }
     if (cfg_number(Section, "Keypadyofs", 0, 0, 4096, &keypadyofs) < 1) {
-	info("[DRV_VNC] no '%s.Keypadyofs' entry from %s using default %d", Section, cfg_source(), keypadyofs);
+        info("[DRV_VNC] no '%s.Keypadyofs' entry from %s using default %d", Section, cfg_source(), keypadyofs);
     }
     if (cfg_number(Section, "Keypadgap", 10, 0, 2048, &keypadgap) < 1) {
-	info("[DRV_VNC] no '%s.Keypadgap' entry from %s using default %d", Section, cfg_source(), keypadgap);
+        info("[DRV_VNC] no '%s.Keypadgap' entry from %s using default %d", Section, cfg_source(), keypadgap);
     }
     if (cfg_number(Section, "Keypadcol", 255, 0, 0xffffff, &keypadcol) < 1) {
-	info("[DRV_VNC] no '%s.Keypadcol' entry from %s using default red", Section, cfg_source());
-	framer = 255;
+        info("[DRV_VNC] no '%s.Keypadcol' entry from %s using default red", Section, cfg_source());
+        framer = 255;
     } else {
-	framer = keypadcol & 0xff;
-	frameg = (keypadcol & 0xff00) >> 8;
-	frameb = (keypadcol & 0xff0000) >> 16;
+        framer = keypadcol & 0xff;
+        frameg = (keypadcol & 0xff00) >> 8;
+        frameb = (keypadcol & 0xff0000) >> 16;
     }
     if (cfg_number(Section, "Port", 5900, 1, 65535, &port) < 1) {
-	info("[DRV_VNC] no '%s.Port' entry from %s using default %d", Section, cfg_source(), port);
+        info("[DRV_VNC] no '%s.Port' entry from %s using default %d", Section, cfg_source(), port);
     }
     if (cfg_number(Section, "HttpPort", 5800, 1, 65535, &httpPort) < 1) {
-	info("[DRV_VNC] no '%s.HttpPort' entry from %s using default %d", Section, cfg_source(), httpPort);
+        info("[DRV_VNC] no '%s.HttpPort' entry from %s using default %d", Section, cfg_source(), httpPort);
     }
     if (cfg_number(Section, "Maxfps", -1, -1, 512, &maxfps) < 1) {
-	info("[DRV_VNC] no '%s.Maxfps' entry from %s using default %d", Section, cfg_source(), maxfps);
+        info("[DRV_VNC] no '%s.Maxfps' entry from %s using default %d", Section, cfg_source(), maxfps);
     }
     password = cfg_get(Section, "Password", NULL);
     if (password != NULL) {
-	info("[DRV_VNC] password enabled");
+        info("[DRV_VNC] password enabled");
     }
     javaClassFiles = cfg_get(Section, "HttpDir", NULL);
     if (javaClassFiles != NULL) {
-	info("[DRV_VNC] HTTP server enabled");
+        info("[DRV_VNC] HTTP server enabled");
     }
     return 0;
 }
@@ -321,55 +321,55 @@ static void drv_vnc_blit_it(const int row, const int col, const int height, cons
     RGBA p;
 
     for (r = row; r < row + height; r++) {
-	for (c = col; c < col + width; c++) {
-	    p = drv_generic_graphic_rgb(r, c);
-	    ofs = (r * xres + c) * BPP;
-	    buffer[ofs++] = p.R;
-	    buffer[ofs++] = p.G;
-	    buffer[ofs++] = p.B;
-	    buffer[ofs] = 255;
-	}
+        for (c = col; c < col + width; c++) {
+            p = drv_generic_graphic_rgb(r, c);
+            ofs = (r * xres + c) * BPP;
+            buffer[ofs++] = p.R;
+            buffer[ofs++] = p.G;
+            buffer[ofs++] = p.B;
+            buffer[ofs] = 255;
+        }
     }
 
     /* display osd keypad */
     if (show_keypad_osd == 1) {
-	display_keypad();
+        display_keypad();
 
-	/* check if the osd should be disabled after the waittime */
-	struct timeval now;
-	gettimeofday(&now, NULL);
-	int timedelta = (now.tv_sec - osd_timestamp.tv_sec) * 1000 + (now.tv_usec - osd_timestamp.tv_usec) / 1000;
+        /* check if the osd should be disabled after the waittime */
+        struct timeval now;
+        gettimeofday(&now, NULL);
+        int timedelta = (now.tv_sec - osd_timestamp.tv_sec) * 1000 + (now.tv_usec - osd_timestamp.tv_usec) / 1000;
 
-	if (timedelta > osd_showtime) {
-	    show_keypad_osd = 0;
-	}
+        if (timedelta > osd_showtime) {
+            show_keypad_osd = 0;
+        }
     }
     frames++;
     if ((frames % 10) == 0 && maxfps > 0) {
-	struct timeval blittime;
-	gettimeofday(&blittime, NULL);
-	int time_since_start =
-	    (blittime.tv_sec - startDriver.tv_sec) * 1000 + (blittime.tv_usec - startDriver.tv_usec) / 1000;
+        struct timeval blittime;
+        gettimeofday(&blittime, NULL);
+        int time_since_start =
+            (blittime.tv_sec - startDriver.tv_sec) * 1000 + (blittime.tv_usec - startDriver.tv_usec) / 1000;
 
-	/* if time changed since start of lcd4linux */
-	if (time_since_start < 0) {
-	    gettimeofday(&startDriver, NULL);
-	    time_since_start =
-		(blittime.tv_sec - startDriver.tv_sec) * 1000 + (blittime.tv_usec - startDriver.tv_usec) / 1000;
-	    if (time_since_start == 0)
-		time_since_start = 1;
-	}
-	//info("time :%d, frames: %d, sleep: %d", time_since_start, frames, sleep);
+        /* if time changed since start of lcd4linux */
+        if (time_since_start < 0) {
+            gettimeofday(&startDriver, NULL);
+            time_since_start =
+                (blittime.tv_sec - startDriver.tv_sec) * 1000 + (blittime.tv_usec - startDriver.tv_usec) / 1000;
+            if (time_since_start == 0)
+                time_since_start = 1;
+        }
+        //info("time :%d, frames: %d, sleep: %d", time_since_start, frames, sleep);
 
-	int fps = (int) (1000 * frames / time_since_start);
+        int fps = (int) (1000 * frames / time_since_start);
 
-	if (fps > maxfps) {
-	    sleep += SLEEP_STEPS;
-	}
+        if (fps > maxfps) {
+            sleep += SLEEP_STEPS;
+        }
 
-	if (fps < maxfps && sleep >= SLEEP_STEPS) {
-	    sleep -= SLEEP_STEPS;
-	}
+        if (fps < maxfps && sleep >= SLEEP_STEPS) {
+            sleep -= SLEEP_STEPS;
+        }
     }
     usleep(sleep);
 
@@ -380,12 +380,12 @@ static void drv_vnc_blit(const int row, const int col, const int height, const i
 {
 
     if (rfbIsActive(server)) {
-	drv_vnc_blit_it(row, col, height, width, (unsigned char *) server->frameBuffer);
+        drv_vnc_blit_it(row, col, height, width, (unsigned char *) server->frameBuffer);
 
-	if (clientCount > 0) {
-	    rfbMarkRectAsModified(server, 0, 0, xres, yres);
-	}
-	rfbProcessEvents(server, server->deferUpdateTime * 500);
+        if (clientCount > 0) {
+            rfbMarkRectAsModified(server, 0, 0, xres, yres);
+        }
+        rfbProcessEvents(server, server->deferUpdateTime * 500);
     }
 }
 
@@ -396,26 +396,26 @@ static int drv_vnc_start(const char *section)
 
     s = cfg_get(section, "Font", "6x8");
     if (s == NULL || *s == '\0') {
-	error("%s: no '%s.Font' entry from %s", Name, section, cfg_source());
-	return -1;
+        error("%s: no '%s.Font' entry from %s", Name, section, cfg_source());
+        return -1;
     }
 
     XRES = -1;
     YRES = -1;
     if (sscanf(s, "%dx%d", &XRES, &YRES) != 2 || XRES < 1 || YRES < 1) {
-	error("%s: bad Font '%s' from %s", Name, s, cfg_source());
-	return -1;
+        error("%s: bad Font '%s' from %s", Name, s, cfg_source());
+        return -1;
     }
 
     /* Fixme: provider other fonts someday... */
     if (XRES != 6 && YRES != 8) {
-	error("%s: bad Font '%s' from %s (only 6x8 at the moment)", Name, s, cfg_source());
-	return -1;
+        error("%s: bad Font '%s' from %s (only 6x8 at the moment)", Name, s, cfg_source());
+        return -1;
     }
 
     /* open communication with the display */
     if (drv_vnc_open(section) < 0) {
-	return -1;
+        return -1;
     }
 
     /* you surely want to allocate a framebuffer or something... */
@@ -428,16 +428,16 @@ static int drv_vnc_start(const char *section)
     server->newClientHook = hook_newclient;
 
     if (password != NULL) {
-	char **passwds = malloc(sizeof(char **) * 2);
-	passwds[0] = password;
-	passwds[1] = 0;
-	server->authPasswdData = (void *) passwds;
-	server->passwordCheck = rfbCheckPasswordByList;
+        char **passwds = malloc(sizeof(char **) * 2);
+        passwds[0] = password;
+        passwds[1] = 0;
+        server->authPasswdData = (void *) passwds;
+        server->passwordCheck = rfbCheckPasswordByList;
     }
     if (javaClassFiles != NULL) {
-	server->httpDir = javaClassFiles;
-	server->httpEnableProxyConnect = TRUE;
-	server->httpPort = httpPort;
+        server->httpDir = javaClassFiles;
+        server->httpEnableProxyConnect = TRUE;
+        server->httpPort = httpPort;
     }
     /* Initialize the server */
     rfbInitServer(server);
@@ -487,23 +487,23 @@ int drv_vnc_init(const char *section, const int quiet)
 
     /* start display */
     if ((ret = drv_vnc_start(section)) != 0)
-	return ret;
+        return ret;
 
     /* initialize generic graphic driver */
     if ((ret = drv_generic_graphic_init(section, Name)) != 0)
-	return ret;
+        return ret;
 
     /* initialize generic key pad driver */
     if ((ret = drv_generic_keypad_init(section, Name)) != 0)
-	return ret;
+        return ret;
 
     if (!quiet) {
-	char buffer[40];
-	qprintf(buffer, sizeof(buffer), "%s %dx%d", Name, DCOLS, DROWS);
-	if (drv_generic_graphic_greet(buffer, NULL)) {
-	    sleep(3);
-	    drv_generic_graphic_clear();
-	}
+        char buffer[40];
+        qprintf(buffer, sizeof(buffer), "%s %dx%d", Name, DCOLS, DROWS);
+        if (drv_generic_graphic_greet(buffer, NULL)) {
+            sleep(3);
+            drv_generic_graphic_clear();
+        }
     }
 
     return 0;
@@ -520,16 +520,16 @@ int drv_vnc_quit(const int quiet)
 
     /* say goodbye... */
     if (!quiet) {
-	drv_generic_graphic_greet("goodbye!", NULL);
+        drv_generic_graphic_greet("goodbye!", NULL);
     }
 
     drv_generic_graphic_quit();
     drv_generic_keypad_quit();
     if (password != NULL) {
-	free(password);
+        free(password);
     }
     if (javaClassFiles != NULL) {
-	free(javaClassFiles);
+        free(javaClassFiles);
     }
 
     debug("closing connection");

@@ -62,25 +62,25 @@ static void my_readline(RESULT * result, RESULT * arg1, RESULT * arg2)
     reqline = R2N(arg2);
     fp = fopen(R2S(arg1), "r");
     if (!fp) {
-	info("readline couldn't open file '%s'", R2S(arg1));
-	value[0] = '\0';
+        info("readline couldn't open file '%s'", R2S(arg1));
+        value[0] = '\0';
     } else {
-	i = 0;
-	while (!feof(fp) && i++ < reqline) {
-	    fgets(val2, sizeof(val2), fp);
-	    size = strcspn(val2, "\r\n");
-	    strncpy(value, val2, size);
-	    value[size] = '\0';
-	    /* more than 256 chars, chew up rest of line */
-	    while (!feof(fp) && strchr(val2, '\n') == NULL) {
-		fgets(val2, sizeof(val2), fp);
-	    }
-	}
-	fclose(fp);
-	if (i <= reqline) {
-	    info("readline requested line %d but file only had %d lines", reqline, i - 1);
-	    value[0] = '\0';
-	}
+        i = 0;
+        while (!feof(fp) && i++ < reqline) {
+            fgets(val2, sizeof(val2), fp);
+            size = strcspn(val2, "\r\n");
+            strncpy(value, val2, size);
+            value[size] = '\0';
+            /* more than 256 chars, chew up rest of line */
+            while (!feof(fp) && strchr(val2, '\n') == NULL) {
+                fgets(val2, sizeof(val2), fp);
+            }
+        }
+        fclose(fp);
+        if (i <= reqline) {
+            info("readline requested line %d but file only had %d lines", reqline, i - 1);
+            value[0] = '\0';
+        }
     }
 
     /* store result */
@@ -93,16 +93,16 @@ static void my_readline(RESULT * result, RESULT * arg1, RESULT * arg2)
 
 static void my_exist(RESULT * result, RESULT * arg1)
 {
-	char *value;
-	value = strdup("0");
+    char *value;
+    value = strdup("0");
 
-	/* int access() return 0 if permitted, -1 otherwise */
-	if ( access(R2S(arg1), F_OK) == 0 ) {
-		value = strdup("1");
-	}
+    /* int access() return 0 if permitted, -1 otherwise */
+    if (access(R2S(arg1), F_OK) == 0) {
+        value = strdup("1");
+    }
 
-	/* store result */
-	SetResult(&result, R_STRING, value);
+    /* store result */
+    SetResult(&result, R_STRING, value);
 }
 
 /* plugin initialization */

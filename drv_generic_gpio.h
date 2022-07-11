@@ -30,12 +30,12 @@
 
 #include "widget.h"
 
-extern int GPIS;		/* number of GPI's */
-extern int GPOS;		/* number of GPO's */
+extern int GPIS;                /* number of GPI's */
+extern int GPOS;                /* number of GPO's */
 
 /* these function must be implemented by the real driver */
-extern int (*drv_generic_gpio_real_set) (const int num, const int val);
-extern int (*drv_generic_gpio_real_get) (const int num);
+extern int (*drv_generic_gpio_real_set)(const int num, const int val);
+extern int (*drv_generic_gpio_real_get)(const int num);
 
 /* generic functions and widget callbacks */
 int drv_generic_gpio_init(const char *section, const char *driver);

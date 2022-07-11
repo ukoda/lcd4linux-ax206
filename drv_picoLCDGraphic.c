@@ -139,43 +139,43 @@ static int drv_pLG_open(void)
     busses = usb_get_busses();
 
     for (bus = busses; bus; bus = bus->next) {
-	for (dev = bus->devices; dev; dev = dev->next) {
-	    if ((dev->descriptor.idVendor == picoLCD_VENDOR) && (dev->descriptor.idProduct == picoLCD_DEVICE)) {
+        for (dev = bus->devices; dev; dev = dev->next) {
+            if ((dev->descriptor.idVendor == picoLCD_VENDOR) && (dev->descriptor.idProduct == picoLCD_DEVICE)) {
 
-		info("%s: found picoLCD on bus %s device %s", Name, bus->dirname, dev->filename);
+                info("%s: found picoLCD on bus %s device %s", Name, bus->dirname, dev->filename);
 
-		lcd = usb_open(dev);
+                lcd = usb_open(dev);
 
-		ret = usb_get_driver_np(lcd, 0, driver, sizeof(driver));
+                ret = usb_get_driver_np(lcd, 0, driver, sizeof(driver));
 
-		if (ret == 0) {
-		    info("%s: interface 0 already claimed by '%s'", Name, driver);
-		    info("%s: attempting to detach driver...", Name);
-		    if (usb_detach_kernel_driver_np(lcd, 0) < 0) {
-			error("%s: usb_detach_kernel_driver_np() failed!", Name);
-			return -1;
-		    }
-		}
+                if (ret == 0) {
+                    info("%s: interface 0 already claimed by '%s'", Name, driver);
+                    info("%s: attempting to detach driver...", Name);
+                    if (usb_detach_kernel_driver_np(lcd, 0) < 0) {
+                        error("%s: usb_detach_kernel_driver_np() failed!", Name);
+                        return -1;
+                    }
+                }
 
-		usb_set_configuration(lcd, 1);
-		usleep(100);
+                usb_set_configuration(lcd, 1);
+                usleep(100);
 
-		if (usb_claim_interface(lcd, 0) < 0) {
-		    error("%s: usb_claim_interface() failed!", Name);
-		    return -1;
-		}
+                if (usb_claim_interface(lcd, 0) < 0) {
+                    error("%s: usb_claim_interface() failed!", Name);
+                    return -1;
+                }
 
-		usb_set_altinterface(lcd, 0);
+                usb_set_altinterface(lcd, 0);
 
-		usb_get_string_simple(lcd, dev->descriptor.iProduct, product, sizeof(product));
-		usb_get_string_simple(lcd, dev->descriptor.iManufacturer, manufacturer, sizeof(manufacturer));
-		usb_get_string_simple(lcd, dev->descriptor.iSerialNumber, serialnumber, sizeof(serialnumber));
+                usb_get_string_simple(lcd, dev->descriptor.iProduct, product, sizeof(product));
+                usb_get_string_simple(lcd, dev->descriptor.iManufacturer, manufacturer, sizeof(manufacturer));
+                usb_get_string_simple(lcd, dev->descriptor.iSerialNumber, serialnumber, sizeof(serialnumber));
 
-		info("%s: Manufacturer='%s' Product='%s' SerialNumber='%s'", Name, manufacturer, product, serialnumber);
+                info("%s: Manufacturer='%s' Product='%s' SerialNumber='%s'", Name, manufacturer, product, serialnumber);
 
-		return 0;
-	    }
-	}
+                return 0;
+            }
+        }
     }
     error("%s: could not find a picoLCD", Name);
     return -1;
@@ -189,7 +189,7 @@ static int drv_pLG_read(unsigned char *data, int size)
 
 static void drv_pLG_send(unsigned char *data, int size)
 {
-    int __attribute__ ((unused)) ret;
+    int __attribute__((unused)) ret;
     ret = usb_interrupt_write(lcd, USB_ENDPOINT_OUT + 1, (char *) data, size, 1000);
     //fprintf(stderr, "%s written %d bytes\n", __FUNCTION__, ret);
 }
@@ -204,8 +204,8 @@ static int drv_pLG_close(void)
 
 static void drv_pLG_update_img()
 {
-    unsigned char cmd3[64] = { OUT_REPORT_CMD_DATA };	/* send command + data */
-    unsigned char cmd4[64] = { OUT_REPORT_DATA };	/* send data only */
+    unsigned char cmd3[64] = { OUT_REPORT_CMD_DATA };   /* send command + data */
+    unsigned char cmd4[64] = { OUT_REPORT_DATA };       /* send data only */
 
     int index, bit, x, y;
     unsigned char cs, line;
@@ -214,66 +214,66 @@ static void drv_pLG_update_img()
     /* do not redraw display if frame buffer has not changed, unless
        "direct updates" have been requested (update is zero) */
     if ((!dirty) && (update > 0)) {
-	debug("Skipping %s\n", __FUNCTION__);
-	return;
+        debug("Skipping %s\n", __FUNCTION__);
+        return;
     }
 
     debug("In %s\n", __FUNCTION__);
 
     for (cs = 0; cs < 4; cs++) {
-	unsigned char chipsel = (cs << 2);	//chipselect
-	for (line = 0; line < 8; line++) {
-	    //ha64_1.setHIDPkt(OUT_REPORT_CMD_DATA, 8+3+32, 8, chipsel, 0x02, 0x00, 0x00, 0xb8|j, 0x00, 0x00, 0x40);
-	    cmd3[0] = OUT_REPORT_CMD_DATA;
-	    cmd3[1] = chipsel;
-	    cmd3[2] = 0x02;
-	    cmd3[3] = 0x00;
-	    cmd3[4] = 0x00;
-	    cmd3[5] = 0xb8 | line;
-	    cmd3[6] = 0x00;
-	    cmd3[7] = 0x00;
-	    cmd3[8] = 0x40;
-	    cmd3[9] = 0x00;
-	    cmd3[10] = 0x00;
-	    cmd3[11] = 32;
+        unsigned char chipsel = (cs << 2);      //chipselect
+        for (line = 0; line < 8; line++) {
+            //ha64_1.setHIDPkt(OUT_REPORT_CMD_DATA, 8+3+32, 8, chipsel, 0x02, 0x00, 0x00, 0xb8|j, 0x00, 0x00, 0x40);
+            cmd3[0] = OUT_REPORT_CMD_DATA;
+            cmd3[1] = chipsel;
+            cmd3[2] = 0x02;
+            cmd3[3] = 0x00;
+            cmd3[4] = 0x00;
+            cmd3[5] = 0xb8 | line;
+            cmd3[6] = 0x00;
+            cmd3[7] = 0x00;
+            cmd3[8] = 0x40;
+            cmd3[9] = 0x00;
+            cmd3[10] = 0x00;
+            cmd3[11] = 32;
 
-	    //ha64_2.setHIDPkt(OUT_REPORT_DATA, 4+32, 4, chipsel | 0x01, 0x00, 0x00, 32);
+            //ha64_2.setHIDPkt(OUT_REPORT_DATA, 4+32, 4, chipsel | 0x01, 0x00, 0x00, 32);
 
-	    cmd4[0] = OUT_REPORT_DATA;
-	    cmd4[1] = chipsel | 0x01;
-	    cmd4[2] = 0x00;
-	    cmd4[3] = 0x00;
-	    cmd4[4] = 32;
+            cmd4[0] = OUT_REPORT_DATA;
+            cmd4[1] = chipsel | 0x01;
+            cmd4[2] = 0x00;
+            cmd4[3] = 0x00;
+            cmd4[4] = 32;
 
-	    for (index = 0; index < 32; index++) {
-		pixel = 0x00;
+            for (index = 0; index < 32; index++) {
+                pixel = 0x00;
 
-		for (bit = 0; bit < 8; bit++) {
-		    x = cs * 64 + index;
-		    y = (line * 8 + bit + 0) % SCREEN_H;
+                for (bit = 0; bit < 8; bit++) {
+                    x = cs * 64 + index;
+                    y = (line * 8 + bit + 0) % SCREEN_H;
 
-		    if (pLG_framebuffer[y * 256 + x] ^ inverted)
-			pixel |= (1 << bit);
-		}
-		cmd3[12 + index] = pixel;
-	    }
+                    if (pLG_framebuffer[y * 256 + x] ^ inverted)
+                        pixel |= (1 << bit);
+                }
+                cmd3[12 + index] = pixel;
+            }
 
-	    for (index = 32; index < 64; index++) {
-		pixel = 0x00;
+            for (index = 32; index < 64; index++) {
+                pixel = 0x00;
 
-		for (bit = 0; bit < 8; bit++) {
-		    x = cs * 64 + index;
-		    y = (line * 8 + bit + 0) % SCREEN_H;
-		    if (pLG_framebuffer[y * 256 + x] ^ inverted)
-			pixel |= (1 << bit);
-		}
+                for (bit = 0; bit < 8; bit++) {
+                    x = cs * 64 + index;
+                    y = (line * 8 + bit + 0) % SCREEN_H;
+                    if (pLG_framebuffer[y * 256 + x] ^ inverted)
+                        pixel |= (1 << bit);
+                }
 
-		cmd4[5 + (index - 32)] = pixel;
-	    }
+                cmd4[5 + (index - 32)] = pixel;
+            }
 
-	    drv_pLG_send(cmd3, 44);
-	    drv_pLG_send(cmd4, 38);
-	}
+            drv_pLG_send(cmd3, 44);
+            drv_pLG_send(cmd4, 38);
+        }
     }
 
     /* mark display as up-to-date */
@@ -292,14 +292,14 @@ static void drv_pLG_update_keypad()
     unsigned char read_packet[_USBLCD_MAX_DATA_LEN];
     ret = drv_pLG_read(read_packet, _USBLCD_MAX_DATA_LEN);
     if ((ret > 0) && (read_packet[0] == IN_REPORT_KEY_STATE)) {
-	debug("picoLCD: pressed key= 0x%02x\n", read_packet[1]);
-	int new_pressed_key = read_packet[1];
-	if (pressed_key != new_pressed_key) {
-	    /* negative values mark a key release */
-	    drv_generic_keypad_press(-pressed_key);
-	    drv_generic_keypad_press(new_pressed_key);
-	    pressed_key = new_pressed_key;
-	}
+        debug("picoLCD: pressed key= 0x%02x\n", read_packet[1]);
+        int new_pressed_key = read_packet[1];
+        if (pressed_key != new_pressed_key) {
+            /* negative values mark a key release */
+            drv_generic_keypad_press(-pressed_key);
+            drv_generic_keypad_press(new_pressed_key);
+            pressed_key = new_pressed_key;
+        }
     }
 }
 
@@ -312,11 +312,11 @@ static void drv_pLG_blit(const int row, const int col, const int height, const i
     //DEBUG(fprintf(stderr, "In %s called with row %d col %d height %d width %d\n", __FUNCTION__, row, col, height, width));
 
     for (r = row; r < row + height; r++) {
-	for (c = col; c < col + width; c++) {
-	    pLG_framebuffer[r * 256 + c] = drv_generic_graphic_black(r, c);
-	    //fprintf(stderr, "%d", pLG_framebuffer[r * 256 + c]);
-	}
-	//fprintf(stderr, "\n");
+        for (c = col; c < col + width; c++) {
+            pLG_framebuffer[r * 256 + c] = drv_generic_graphic_black(r, c);
+            //fprintf(stderr, "%d", pLG_framebuffer[r * 256 + c]);
+        }
+        //fprintf(stderr, "\n");
     }
 
     /*
@@ -333,16 +333,16 @@ static void drv_pLG_blit(const int row, const int col, const int height, const i
 
     /* if "direct updates" have been requested, redraw now */
     if (update <= 0)
-	drv_pLG_update_img();
+        drv_pLG_update_img();
 }
 
 
 void drv_pLG_clear(void)
 {
-    unsigned char cmd[3] = { 0x93, 0x01, 0x00 };	/* init display */
-    unsigned char cmd2[9] = { OUT_REPORT_CMD };	/* init display */
-    unsigned char cmd3[64] = { OUT_REPORT_CMD_DATA };	/* clear screen */
-    unsigned char cmd4[64] = { OUT_REPORT_CMD_DATA };	/* clear screen */
+    unsigned char cmd[3] = { 0x93, 0x01, 0x00 };        /* init display */
+    unsigned char cmd2[9] = { OUT_REPORT_CMD }; /* init display */
+    unsigned char cmd3[64] = { OUT_REPORT_CMD_DATA };   /* clear screen */
+    unsigned char cmd4[64] = { OUT_REPORT_CMD_DATA };   /* clear screen */
 
     int init, index;
     unsigned char cs, line;
@@ -352,72 +352,72 @@ void drv_pLG_clear(void)
     drv_pLG_send(cmd, 3);
 
     for (init = 0; init < 4; init++) {
-	unsigned char cs = ((init << 2) & 0xFF);
+        unsigned char cs = ((init << 2) & 0xFF);
 
-	cmd2[0] = OUT_REPORT_CMD;
-	cmd2[1] = cs;
-	cmd2[2] = 0x02;
-	cmd2[3] = 0x00;
-	cmd2[4] = 0x64;
-	cmd2[5] = 0x3F;
-	cmd2[6] = 0x00;
-	cmd2[7] = 0x64;
-	cmd2[8] = 0xC0;
+        cmd2[0] = OUT_REPORT_CMD;
+        cmd2[1] = cs;
+        cmd2[2] = 0x02;
+        cmd2[3] = 0x00;
+        cmd2[4] = 0x64;
+        cmd2[5] = 0x3F;
+        cmd2[6] = 0x00;
+        cmd2[7] = 0x64;
+        cmd2[8] = 0xC0;
 
-	drv_pLG_send(cmd2, 9);
+        drv_pLG_send(cmd2, 9);
     }
 
 
     for (cs = 0; cs < 4; cs++) {
-	unsigned char chipsel = (cs << 2);	//chipselect
-	for (line = 0; line < 8; line++) {
-	    //ha64_1.setHIDPkt(OUT_REPORT_CMD_DATA, 8+3+32, 8, cs, 0x02, 0x00, 0x00, 0xb8|j, 0x00, 0x00, 0x40);
-	    cmd3[0] = OUT_REPORT_CMD_DATA;
-	    cmd3[1] = chipsel;
-	    cmd3[2] = 0x02;
-	    cmd3[3] = 0x00;
-	    cmd3[4] = 0x00;
-	    cmd3[5] = 0xb8 | line;
-	    cmd3[6] = 0x00;
-	    cmd3[7] = 0x00;
-	    cmd3[8] = 0x40;
-	    cmd3[9] = 0x00;
-	    cmd3[10] = 0x00;
-	    cmd3[11] = 32;
+        unsigned char chipsel = (cs << 2);      //chipselect
+        for (line = 0; line < 8; line++) {
+            //ha64_1.setHIDPkt(OUT_REPORT_CMD_DATA, 8+3+32, 8, cs, 0x02, 0x00, 0x00, 0xb8|j, 0x00, 0x00, 0x40);
+            cmd3[0] = OUT_REPORT_CMD_DATA;
+            cmd3[1] = chipsel;
+            cmd3[2] = 0x02;
+            cmd3[3] = 0x00;
+            cmd3[4] = 0x00;
+            cmd3[5] = 0xb8 | line;
+            cmd3[6] = 0x00;
+            cmd3[7] = 0x00;
+            cmd3[8] = 0x40;
+            cmd3[9] = 0x00;
+            cmd3[10] = 0x00;
+            cmd3[11] = 32;
 
-	    unsigned char temp = 0;
+            unsigned char temp = 0;
 
-	    for (index = 0; index < 32; index++) {
-		cmd3[12 + index] = temp;
-	    }
+            for (index = 0; index < 32; index++) {
+                cmd3[12 + index] = temp;
+            }
 
-	    drv_pLG_send(cmd3, 64);
+            drv_pLG_send(cmd3, 64);
 
-	    //ha64_2.setHIDPkt(OUT_REPORT_DATA, 4+32, 4, cs | 0x01, 0x00, 0x00, 32);
+            //ha64_2.setHIDPkt(OUT_REPORT_DATA, 4+32, 4, cs | 0x01, 0x00, 0x00, 32);
 
-	    cmd4[0] = OUT_REPORT_DATA;
-	    cmd4[1] = chipsel | 0x01;
-	    cmd4[2] = 0x00;
-	    cmd4[3] = 0x00;
-	    cmd4[4] = 32;
+            cmd4[0] = OUT_REPORT_DATA;
+            cmd4[1] = chipsel | 0x01;
+            cmd4[2] = 0x00;
+            cmd4[3] = 0x00;
+            cmd4[4] = 32;
 
-	    for (index = 32; index < 64; index++) {
-		temp = 0x00;
-		cmd4[5 + (index - 32)] = temp;
-	    }
-	    drv_pLG_send(cmd4, 64);
-	}
+            for (index = 32; index < 64; index++) {
+                temp = 0x00;
+                cmd4[5 + (index - 32)] = temp;
+            }
+            drv_pLG_send(cmd4, 64);
+        }
     }
 }
 
 static int drv_pLG_contrast(int contrast)
 {
-    unsigned char cmd[2] = { 0x92 };	/* set contrast */
+    unsigned char cmd[2] = { 0x92 };    /* set contrast */
 
     if (contrast < 0)
-	contrast = 0;
+        contrast = 0;
     if (contrast > 255)
-	contrast = 255;
+        contrast = 255;
 
     cmd[1] = contrast;
     drv_pLG_send(cmd, 2);
@@ -428,12 +428,12 @@ static int drv_pLG_contrast(int contrast)
 
 static int drv_pLG_backlight(int backlight)
 {
-    unsigned char cmd[2] = { 0x91 };	/* set backlight */
+    unsigned char cmd[2] = { 0x91 };    /* set backlight */
 
     if (backlight < 0)
-	backlight = 0;
+        backlight = 0;
     if (backlight > 255)
-	backlight = 255;
+        backlight = 255;
 
     cmd[1] = backlight;
     drv_pLG_send(cmd, 2);
@@ -441,15 +441,15 @@ static int drv_pLG_backlight(int backlight)
     return backlight;
 }
 
-static int drv_pLG_gpi( __attribute__ ((unused))
-		       int num)
+static int drv_pLG_gpi( __attribute__((unused))
+                       int num)
 {
     int ret;
     unsigned char read_packet[_USBLCD_MAX_DATA_LEN];
     ret = drv_pLG_read(read_packet, _USBLCD_MAX_DATA_LEN);
     if ((ret > 0) && (read_packet[0] == IN_REPORT_KEY_STATE)) {
-	debug("picoLCD: pressed key= 0x%02x\n", read_packet[1]);
-	return read_packet[1];
+        debug("picoLCD: pressed key= 0x%02x\n", read_packet[1]);
+        return read_packet[1];
     }
     return 0;
 }
@@ -457,23 +457,23 @@ static int drv_pLG_gpi( __attribute__ ((unused))
 
 static int drv_pLG_gpo(int num, int val)
 {
-    unsigned char cmd[2] = { 0x81 };	/* set GPO */
+    unsigned char cmd[2] = { 0x81 };    /* set GPO */
 
     if (num < 0)
-	num = 0;
+        num = 0;
     if (num > 7)
-	num = 7;
+        num = 7;
 
     if (val < 0)
-	val = 0;
+        val = 0;
     if (val > 1)
-	val = 1;
+        val = 1;
 
     /* set led bit to 1 or 0 */
     if (val)
-	gpo |= 1 << num;
+        gpo |= 1 << num;
     else
-	gpo &= ~(1 << num);
+        gpo &= ~(1 << num);
 
     cmd[1] = gpo;
     drv_pLG_send(cmd, 2);
@@ -496,69 +496,69 @@ static int drv_pLG_start(const char *section, const int quiet)
 
     s = cfg_get(section, "Size", NULL);
     if (s == NULL || *s == '\0') {
-	error("%s: no '%s.Size' entry from %s", Name, section, cfg_source());
-	return -1;
+        error("%s: no '%s.Size' entry from %s", Name, section, cfg_source());
+        return -1;
     }
     if (sscanf(s, "%dx%d", &cols, &rows) != 2 || rows < 1 || cols < 1) {
-	error("%s: bad %s.Size '%s' from %s", Name, section, s, cfg_source());
-	free(s);
-	return -1;
+        error("%s: bad %s.Size '%s' from %s", Name, section, s, cfg_source());
+        free(s);
+        return -1;
     }
 
     if (cfg_number(section, "Inverted", 0, 0, 1, &value) > 0) {
-	info("Setting display inverted to %d", value);
-	inverted = value;
+        info("Setting display inverted to %d", value);
+        inverted = value;
     }
 
     DROWS = SCREEN_H;
     DCOLS = SCREEN_W;
 
     if (drv_pLG_open() < 0) {
-	return -1;
+        return -1;
     }
 
     /* Init the command buffer */
     Buffer = (char *) malloc(1024);
     if (Buffer == NULL) {
-	error("%s: command buffer could not be allocated: malloc() failed", Name);
-	return -1;
+        error("%s: command buffer could not be allocated: malloc() failed", Name);
+        return -1;
     }
     BufPtr = Buffer;
 
     /* Init framebuffer buffer */
     pLG_framebuffer = malloc(SCREEN_W * SCREEN_H * sizeof(unsigned char));
     if (!pLG_framebuffer)
-	return -1;
+        return -1;
 
     DEBUG("allocated");
     memset(pLG_framebuffer, 0, SCREEN_W * SCREEN_H);
     DEBUG("zeroed");
 
     if (cfg_number(section, "Contrast", 0, 0, 255, &value) > 0) {
-	info("Setting contrast to %d", value);
-	drv_pLG_contrast(value);
+        info("Setting contrast to %d", value);
+        drv_pLG_contrast(value);
     }
 
     if (cfg_number(section, "Backlight", 0, 0, 1, &value) > 0) {
-	info("Setting backlight to %d", value);
-	drv_pLG_backlight(value);
+        info("Setting backlight to %d", value);
+        drv_pLG_backlight(value);
     }
 
-    drv_pLG_clear();		/* clear display */
+    drv_pLG_clear();            /* clear display */
 
     if (!quiet) {
-	char buffer[40];
-	qprintf(buffer, sizeof(buffer), "%s %dx%d", Name, SCREEN_W, SCREEN_H);
-	if (drv_generic_graphic_greet(buffer, "http://www.picolcd.com")) {
-	    sleep(3);
-	    drv_pLG_clear();
-	}
+        char buffer[40];
+        qprintf(buffer, sizeof(buffer), "%s %dx%d", Name, SCREEN_W, SCREEN_H);
+        if (drv_generic_graphic_greet(buffer, "http://www.picolcd.com")) {
+            sleep(3);
+            drv_pLG_clear();
+        }
     }
 
     /* setup a timer that regularly redraws the display from the frame
        buffer (unless "direct updates" have been requested */
     if (update > 0)
-	timer_add(drv_pLG_update_img, NULL, update, 0);
+        timer_add(drv_pLG_update_img, NULL, update, 0);
 
     /* setup a timer that regularly checks the keypad for pressed or
        released keys */
@@ -626,36 +626,36 @@ static int drv_pLG_keypad(const int num)
     int new_num = num;
 
     if (new_num == 0)
-	return 0;
+        return 0;
     else if (new_num > 0)
-	val = WIDGET_KEY_PRESSED;
+        val = WIDGET_KEY_PRESSED;
     else {
-	/* negative values mark a key release */
-	new_num = -num;
-	val = WIDGET_KEY_RELEASED;
+        /* negative values mark a key release */
+        new_num = -num;
+        val = WIDGET_KEY_RELEASED;
     }
 
     switch (new_num) {
     case 1:
-	val += WIDGET_KEY_CANCEL;
-	break;
+        val += WIDGET_KEY_CANCEL;
+        break;
     case 2:
-	val += WIDGET_KEY_LEFT;
-	break;
+        val += WIDGET_KEY_LEFT;
+        break;
     case 3:
-	val += WIDGET_KEY_RIGHT;
-	break;
+        val += WIDGET_KEY_RIGHT;
+        break;
     case 5:
-	val += WIDGET_KEY_UP;
-	break;
+        val += WIDGET_KEY_UP;
+        break;
     case 6:
-	val += WIDGET_KEY_CONFIRM;
-	break;
+        val += WIDGET_KEY_CONFIRM;
+        break;
     case 7:
-	val += WIDGET_KEY_DOWN;
-	break;
+        val += WIDGET_KEY_DOWN;
+        break;
     default:
-	error("%s: unknown keypad value %d", Name, num);
+        error("%s: unknown keypad value %d", Name, num);
     }
 
     return val;
@@ -672,8 +672,8 @@ int drv_pLG_init(const char *section, const int quiet)
     info("PICOLCD Graphic initialization\n");
 
     /* display preferences */
-    XRES = 6;			/* pixel width of one char  */
-    YRES = 8;			/* pixel height of one char  */
+    XRES = 6;                   /* pixel width of one char  */
+    YRES = 8;                   /* pixel height of one char  */
     GPOS = 8;
     GPIS = 1;
     /* real worker functions */
@@ -685,23 +685,23 @@ int drv_pLG_init(const char *section, const int quiet)
 
     /* start display */
     if ((ret = drv_pLG_start(section, quiet)) != 0)
-	return ret;
+        return ret;
 
 
     /* initialize generic graphic driver */
     if ((ret = drv_generic_graphic_init(section, Name)) != 0)
-	return ret;
+        return ret;
 
 
     /* initialize generic key pad driver */
     if ((ret = drv_generic_keypad_init(section, Name)) != 0)
-	return ret;
+        return ret;
 
 
     /* GPO's init */
 
     if ((ret = drv_generic_gpio_init(section, Name)) != 0)
-	return ret;
+        return ret;
 
     /* register plugins */
 
@@ -724,14 +724,14 @@ int drv_pLG_quit(const int quiet)
 
     /* say goodbye... */
     if (!quiet) {
-	drv_generic_graphic_greet("goodbye!", NULL);
+        drv_generic_graphic_greet("goodbye!", NULL);
     }
 
     drv_pLG_close();
 
     if (Buffer) {
-	free(Buffer);
-	BufPtr = NULL;
+        free(Buffer);
+        BufPtr = NULL;
     }
 
     drv_generic_graphic_quit();

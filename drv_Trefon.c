@@ -94,22 +94,22 @@ static int drv_TF_open(void)
     busses = usb_get_busses();
 
     for (bus = busses; bus; bus = bus->next) {
-	for (dev = bus->devices; dev; dev = dev->next) {
-	    if ((dev->descriptor.idVendor == LCD_USB_VENDOR) && (dev->descriptor.idProduct == LCD_USB_DEVICE)) {
-		info("%s: found TREFON USB LCD on bus %s device %s", Name, bus->dirname, dev->filename);
-		lcd = usb_open(dev);
-		if (usb_set_configuration(lcd, 1) < 0) {
-		    error("%s: usb_set_configuration() failed!", Name);
-		    return -1;
-		}
-		interface = 0;
-		if (usb_claim_interface(lcd, interface) < 0) {
-		    error("%s: usb_claim_interface() failed!", Name);
-		    return -1;
-		}
-		return 0;
-	    }
-	}
+        for (dev = bus->devices; dev; dev = dev->next) {
+            if ((dev->descriptor.idVendor == LCD_USB_VENDOR) && (dev->descriptor.idProduct == LCD_USB_DEVICE)) {
+                info("%s: found TREFON USB LCD on bus %s device %s", Name, bus->dirname, dev->filename);
+                lcd = usb_open(dev);
+                if (usb_set_configuration(lcd, 1) < 0) {
+                    error("%s: usb_set_configuration() failed!", Name);
+                    return -1;
+                }
+                interface = 0;
+                if (usb_claim_interface(lcd, interface) < 0) {
+                    error("%s: usb_claim_interface() failed!", Name);
+                    return -1;
+                }
+                return 0;
+            }
+        }
     }
     return -1;
 }
@@ -157,26 +157,26 @@ static void drv_TF_write(const int row, const int col, const char *data, const i
     unsigned char *p;
     int pos = 0;
 
-    if (DCOLS == 8 && DROWS == 1) {	/* 8x1 Characters */
-	pos = row * 0x40 + col;
-    } else if (DCOLS == 16 && DROWS == 2) {	/* 16x2 Characters */
-	pos = row * 0x40 + col;
-    } else if (DCOLS == 20 && DROWS == 4) {	/* 20x4 Characters */
-	pos = row * 0x20 + col;
+    if (DCOLS == 8 && DROWS == 1) {     /* 8x1 Characters */
+        pos = row * 0x40 + col;
+    } else if (DCOLS == 16 && DROWS == 2) {     /* 16x2 Characters */
+        pos = row * 0x40 + col;
+    } else if (DCOLS == 20 && DROWS == 4) {     /* 20x4 Characters */
+        pos = row * 0x20 + col;
     } else {
-	error("%s: internal error: DCOLS=%d DROWS=%d", Name, DCOLS, DROWS);
-	return;
+        error("%s: internal error: DCOLS=%d DROWS=%d", Name, DCOLS, DROWS);
+        return;
     }
 
     /* combine the GOTO and the data into one packet */
     p = buffer;
     *p++ = PKT_START;
-    *p++ = PKT_CTRL;		/* Goto */
+    *p++ = PKT_CTRL;            /* Goto */
     *p++ = 0x80 | pos;
-    *p++ = PKT_DATA;		/* Data */
+    *p++ = PKT_DATA;            /* Data */
     *p++ = (char) len;
     for (pos = 0; pos < len; pos++) {
-	*p++ = *data++;
+        *p++ = *data++;
     }
     *p++ = PKT_END;
 
@@ -196,9 +196,9 @@ static void drv_TF_defchar(const int ascii, const unsigned char *matrix)
     *p++ = PKT_CTRL;
     *p++ = 0x40 | 8 * ascii;
     *p++ = PKT_DATA;
-    *p++ = 8;			/* data length */
+    *p++ = 8;                   /* data length */
     for (i = 0; i < 8; i++) {
-	*p++ = *matrix++ & 0x1f;
+        *p++ = *matrix++ & 0x1f;
     }
     *p++ = PKT_END;
 
@@ -211,9 +211,9 @@ static int drv_TF_backlight(int backlight)
     unsigned char buffer[4] = { PKT_START, PKT_BACKLIGHT, 0, PKT_END };
 
     if (backlight < 0)
-	backlight = 0;
+        backlight = 0;
     if (backlight > 1)
-	backlight = 1;
+        backlight = 1;
 
     buffer[2] = backlight;
     drv_TF_send(buffer, 4);
@@ -227,11 +227,11 @@ int drv_TF_valid_resolution(int rows, int cols)
 {
 
     if (rows == 1 && cols == 8) {
-	return 0;
+        return 0;
     } else if (rows == 2 && cols == 16) {
-	return 0;
+        return 0;
     } else if (rows == 4 && cols == 20) {
-	return 0;
+        return 0;
     }
     return -1;
 }
@@ -245,36 +245,36 @@ static int drv_TF_start(const char *section, const int quiet)
 
     s = cfg_get(section, "Size", NULL);
     if (s == NULL || *s == '\0') {
-	error("%s: no '%s.Size' entry from %s", Name, section, cfg_source());
-	return -1;
+        error("%s: no '%s.Size' entry from %s", Name, section, cfg_source());
+        return -1;
     }
     if (sscanf(s, "%dx%d", &cols, &rows) != 2 || drv_TF_valid_resolution(rows, cols) < 0) {
-	error("%s: bad %s.Size '%s' (only 8x1/16x2/20x4) from %s", Name, section, s, cfg_source());
-	free(s);
-	return -1;
+        error("%s: bad %s.Size '%s' (only 8x1/16x2/20x4) from %s", Name, section, s, cfg_source());
+        free(s);
+        return -1;
     }
 
     DROWS = rows;
     DCOLS = cols;
 
     if (drv_TF_open() < 0) {
-	error("%s: could not find a TREFON USB LCD", Name);
-	return -1;
+        error("%s: could not find a TREFON USB LCD", Name);
+        return -1;
     }
 
     if (cfg_number(section, "Backlight", 1, 0, 1, &backlight) > 0) {
-	drv_TF_backlight(backlight);
+        drv_TF_backlight(backlight);
     }
 
-    drv_TF_clear();		/* clear display */
+    drv_TF_clear();             /* clear display */
 
     if (!quiet) {
-	char buffer[40];
-	qprintf(buffer, sizeof(buffer), "%s %dx%d", Name, DCOLS, DROWS);
-	if (drv_generic_text_greet(buffer, "www.trefon.de")) {
-	    sleep(3);
-	    drv_TF_clear();
-	}
+        char buffer[40];
+        qprintf(buffer, sizeof(buffer), "%s %dx%d", Name, DCOLS, DROWS);
+        if (drv_generic_text_greet(buffer, "www.trefon.de")) {
+            sleep(3);
+            drv_TF_clear();
+        }
     }
 
     return 0;
@@ -327,11 +327,11 @@ int drv_TF_init(const char *section, const int quiet)
     info("%s: %s", Name, "$Rev$");
 
     /* display preferences */
-    XRES = 5;			/* pixel width of one char  */
-    YRES = 8;			/* pixel height of one char  */
-    CHARS = 8;			/* number of user-defineable characters */
-    CHAR0 = 1;			/* ASCII of first user-defineable char */
-    GOTO_COST = 64;		/* number of bytes a goto command requires */
+    XRES = 5;                   /* pixel width of one char  */
+    YRES = 8;                   /* pixel height of one char  */
+    CHARS = 8;                  /* number of user-defineable characters */
+    CHAR0 = 1;                  /* ASCII of first user-defineable char */
+    GOTO_COST = 64;             /* number of bytes a goto command requires */
 
     /* real worker functions */
     drv_generic_text_real_write = drv_TF_write;
@@ -340,28 +340,28 @@ int drv_TF_init(const char *section, const int quiet)
 
     /* start display */
     if ((ret = drv_TF_start(section, quiet)) != 0)
-	return ret;
+        return ret;
 
     /* initialize generic text driver */
     if ((ret = drv_generic_text_init(section, Name)) != 0)
-	return ret;
+        return ret;
 
     /* initialize generic icon driver */
     if ((ret = drv_generic_text_icon_init()) != 0)
-	return ret;
+        return ret;
 
     /* initialize generic bar driver */
     if ((ret = drv_generic_text_bar_init(0)) != 0)
-	return ret;
+        return ret;
 
     /* add fixed chars to the bar driver */
     /* most displays have a full block on ascii 255, but some have kind of  */
     /* an 'inverted P'. If you specify 'asc255bug 1 in the config, this */
     /* char will not be used, but rendered by the bar driver */
     cfg_number(section, "asc255bug", 0, 0, 1, &asc255bug);
-    drv_generic_text_bar_add_segment(0, 0, 255, 32);	/* ASCII  32 = blank */
+    drv_generic_text_bar_add_segment(0, 0, 255, 32);    /* ASCII  32 = blank */
     if (!asc255bug)
-	drv_generic_text_bar_add_segment(255, 255, 255, 255);	/* ASCII 255 = block */
+        drv_generic_text_bar_add_segment(255, 255, 255, 255);   /* ASCII 255 = block */
 
     /* register text widget */
     wc = Widget_Text;
@@ -398,7 +398,7 @@ int drv_TF_quit(const int quiet)
 
     /* say goodbye... */
     if (!quiet) {
-	drv_generic_text_greet("goodbye!", NULL);
+        drv_generic_text_greet("goodbye!", NULL);
     }
 
     debug("closing USB connection");

@@ -74,36 +74,36 @@ typedef struct {
 /* Fixme #2: protocol should be verified */
 
 static MODEL Models[] = {
-    {0x01, "LCD0821", 2, 8, 0, 1, 1},
-    {0x03, "LCD2021", 2, 20, 0, 1, 1},
-    {0x04, "LCD1641", 4, 16, 0, 1, 1},
-    {0x05, "LCD2041", 4, 20, 0, 1, 1},
-    {0x06, "LCD4021", 2, 40, 0, 1, 1},
-    {0x07, "LCD4041", 4, 40, 0, 1, 1},
-    {0x08, "LK202-25", 2, 20, 8, 8, 2},
-    {0x09, "LK204-25", 4, 20, 8, 8, 2},
-    {0x0a, "LK404-55", 4, 40, 8, 8, 2},
-    {0x0b, "VFD2021", 2, 20, 0, 1, 1},
-    {0x0c, "VFD2041", 4, 20, 0, 1, 1},
-    {0x0d, "VFD4021", 2, 40, 0, 1, 1},
-    {0x0e, "VK202-25", 2, 20, 0, 1, 1},
-    {0x0f, "VK204-25", 4, 20, 0, 1, 1},
-    {0x10, "GLC12232", -1, -1, 0, 1, 1},
-    {0x13, "GLC24064", -1, -1, 0, 1, 1},
-    {0x15, "GLK24064-25", -1, -1, 0, 1, 1},
-    {0x22, "GLK12232-25", -1, -1, 0, 1, 1},
-    {0x31, "LK404-AT", 4, 40, 8, 8, 2},
-    {0x32, "VFD1621", 2, 16, 0, 1, 1},
-    {0x33, "LK402-12", 2, 40, 8, 8, 2},
-    {0x34, "LK162-12", 2, 16, 8, 8, 2},
-    {0x35, "LK204-25PC", 4, 20, 8, 8, 2},
-    {0x36, "LK202-24-USB", 2, 20, 8, 8, 2},
-    {0x38, "LK204-24-USB", 4, 20, 8, 8, 2},
-    {0x39, "VK204-24-USB", 4, 20, 8, 8, 2},
-    {0x40, "DE-LD011", 2, 16, 0, 0, 3},	/* Sure electronics USB LCD board Rev.I */
-    {0x41, "DE-LD021", 4, 20, 0, 0, 3},
-    {0x42, "DE-LD023", 4, 20, 0, 0, 4},
-    {0xff, "Unknown", -1, -1, 0, 0, 0}
+    { 0x01, "LCD0821", 2, 8, 0, 1, 1 },
+    { 0x03, "LCD2021", 2, 20, 0, 1, 1 },
+    { 0x04, "LCD1641", 4, 16, 0, 1, 1 },
+    { 0x05, "LCD2041", 4, 20, 0, 1, 1 },
+    { 0x06, "LCD4021", 2, 40, 0, 1, 1 },
+    { 0x07, "LCD4041", 4, 40, 0, 1, 1 },
+    { 0x08, "LK202-25", 2, 20, 8, 8, 2 },
+    { 0x09, "LK204-25", 4, 20, 8, 8, 2 },
+    { 0x0a, "LK404-55", 4, 40, 8, 8, 2 },
+    { 0x0b, "VFD2021", 2, 20, 0, 1, 1 },
+    { 0x0c, "VFD2041", 4, 20, 0, 1, 1 },
+    { 0x0d, "VFD4021", 2, 40, 0, 1, 1 },
+    { 0x0e, "VK202-25", 2, 20, 0, 1, 1 },
+    { 0x0f, "VK204-25", 4, 20, 0, 1, 1 },
+    { 0x10, "GLC12232", -1, -1, 0, 1, 1 },
+    { 0x13, "GLC24064", -1, -1, 0, 1, 1 },
+    { 0x15, "GLK24064-25", -1, -1, 0, 1, 1 },
+    { 0x22, "GLK12232-25", -1, -1, 0, 1, 1 },
+    { 0x31, "LK404-AT", 4, 40, 8, 8, 2 },
+    { 0x32, "VFD1621", 2, 16, 0, 1, 1 },
+    { 0x33, "LK402-12", 2, 40, 8, 8, 2 },
+    { 0x34, "LK162-12", 2, 16, 8, 8, 2 },
+    { 0x35, "LK204-25PC", 4, 20, 8, 8, 2 },
+    { 0x36, "LK202-24-USB", 2, 20, 8, 8, 2 },
+    { 0x38, "LK204-24-USB", 4, 20, 8, 8, 2 },
+    { 0x39, "VK204-24-USB", 4, 20, 8, 8, 2 },
+    { 0x40, "DE-LD011", 2, 16, 0, 0, 3 },       /* Sure electronics USB LCD board Rev.I */
+    { 0x41, "DE-LD021", 4, 20, 0, 0, 3 },
+    { 0x42, "DE-LD023", 4, 20, 0, 0, 4 },
+    { 0xff, "Unknown", -1, -1, 0, 0, 0 }
 };
 
 
@@ -115,17 +115,17 @@ static void drv_MO_write(const int row, const int col, const char *data, const i
 {
     char cmd[5] = "\376Gyx";
 
-    if (Models[Model].protocol == 3 || Models[Model].protocol == 4) {	// Sure electronics USB LCD board - full line output
-	cmd[2] = (char) 1;
-	cmd[3] = (char) row + 1;
-	strncpy(&(dispBuffer[row][col]), data, len);
-	drv_generic_serial_write(cmd, 4);
-	drv_generic_serial_write(dispBuffer[row], Models[Model].cols);
+    if (Models[Model].protocol == 3 || Models[Model].protocol == 4) {   // Sure electronics USB LCD board - full line output
+        cmd[2] = (char) 1;
+        cmd[3] = (char) row + 1;
+        strncpy(&(dispBuffer[row][col]), data, len);
+        drv_generic_serial_write(cmd, 4);
+        drv_generic_serial_write(dispBuffer[row], Models[Model].cols);
     } else {
-	cmd[2] = (char) col + 1;
-	cmd[3] = (char) row + 1;
-	drv_generic_serial_write(cmd, 4);
-	drv_generic_serial_write(data, len);
+        cmd[2] = (char) col + 1;
+        cmd[3] = (char) row + 1;
+        drv_generic_serial_write(cmd, 4);
+        drv_generic_serial_write(data, len);
     }
 }
 
@@ -136,22 +136,22 @@ static void drv_MO_clear(void)
 
     switch (Protocol) {
     case 1:
-	drv_generic_serial_write("\014", 1);	/* Clear Screen */
-	break;
+        drv_generic_serial_write("\014", 1);    /* Clear Screen */
+        break;
     case 2:
-	drv_generic_serial_write("\376\130", 2);	/* Clear Screen */
-	break;
+        drv_generic_serial_write("\376\130", 2);        /* Clear Screen */
+        break;
 
     default:
-	/* Sure electronics USB LCD board - clear buffer */
-	/* protocol 3 and 4 */
-	for (i = 0; i < Models[Model].rows; i++) {
-	    for (j = 0; j < Models[Model].cols; j++) {
-		dispBuffer[i][j] = ' ';
-	    }
-	    drv_MO_write(1, i + 1, dispBuffer[i], Models[Model].cols);
-	}
-	break;
+        /* Sure electronics USB LCD board - clear buffer */
+        /* protocol 3 and 4 */
+        for (i = 0; i < Models[Model].rows; i++) {
+            for (j = 0; j < Models[Model].cols; j++) {
+                dispBuffer[i][j] = ' ';
+            }
+            drv_MO_write(1, i + 1, dispBuffer[i], Models[Model].cols);
+        }
+        break;
     }
 }
 
@@ -163,7 +163,7 @@ static void drv_MO_defchar(const int ascii, const unsigned char *matrix)
 
     cmd[2] = (char) ascii;
     for (i = 0; i < 8; i++) {
-	cmd[i + 3] = matrix[i] & 0x1f;
+        cmd[i + 3] = matrix[i] & 0x1f;
     }
     drv_generic_serial_write(cmd, 11);
 }
@@ -176,12 +176,12 @@ static int drv_MO_contrast(int contrast)
 
     /* -1 is used to query the current contrast */
     if (contrast == -1)
-	return Contrast;
+        return Contrast;
 
     if (contrast < 0)
-	contrast = 0;
+        contrast = 0;
     if (contrast > 255)
-	contrast = 255;
+        contrast = 255;
     Contrast = contrast;
 
     cmd[2] = Contrast;
@@ -199,21 +199,21 @@ static int drv_MO_backlight(int backlight)
 
     /* -1 is used to query the current backlight */
     if (backlight == -1)
-	return Backlight;
+        return Backlight;
 
     if (backlight < 0)
-	backlight = 0;
+        backlight = 0;
     if (backlight > 255)
-	backlight = 255;
+        backlight = 255;
     Backlight = backlight;
 
     if (backlight <= 0) {
-	/* backlight off */
-	drv_generic_serial_write("\376F", 2);
+        /* backlight off */
+        drv_generic_serial_write("\376F", 2);
     } else {
-	/* backlight on for n minutes */
-	cmd[2] = Backlight;
-	drv_generic_serial_write(cmd, 3);
+        /* backlight on for n minutes */
+        cmd[2] = Backlight;
+        drv_generic_serial_write(cmd, 3);
     }
 
     return Backlight;
@@ -227,31 +227,31 @@ static int drv_MO_GPI(const int num)
 
 
     if (num < 0 || num > 7) {
-	return 0;
+        return 0;
     }
 
     /* read RPM every two seconds */
     if (time(&now) - T[num] >= 2) {
 
-	char cmd[3];
-	unsigned char ans[7];
+        char cmd[3];
+        unsigned char ans[7];
 
-	T[num] = now;
+        T[num] = now;
 
-	cmd[0] = '\376';
-	cmd[1] = '\301';
-	cmd[2] = (char) num + 1;
-	drv_generic_serial_write(cmd, 3);
-	usleep(100000);
+        cmd[0] = '\376';
+        cmd[1] = '\301';
+        cmd[2] = (char) num + 1;
+        drv_generic_serial_write(cmd, 3);
+        usleep(100000);
 
-	if (drv_generic_serial_read((char *) ans, 7) == 7) {
-	    if (ans[0] == 0x23 && ans[1] == 0x2a && ans[2] == 0x03 && ans[3] == 0x52 && ans[4] == num + 1) {
-		GPI[num] = 18750000 / (256 * ans[5] + ans[6]);
-	    } else {
-		error("%s: strange answer %02x %02x %02x %02x %02x %02x %02x", Name, ans[0], ans[1], ans[2], ans[3],
-		      ans[4], ans[5], ans[6]);
-	    }
-	}
+        if (drv_generic_serial_read((char *) ans, 7) == 7) {
+            if (ans[0] == 0x23 && ans[1] == 0x2a && ans[2] == 0x03 && ans[3] == 0x52 && ans[4] == num + 1) {
+                GPI[num] = 18750000 / (256 * ans[5] + ans[6]);
+            } else {
+                error("%s: strange answer %02x %02x %02x %02x %02x %02x %02x", Name, ans[0], ans[1], ans[2], ans[3],
+                      ans[4], ans[5], ans[6]);
+            }
+        }
     }
 
     return GPI[num];
@@ -265,39 +265,39 @@ static int drv_MO_GPO(const int num, const int val)
 
     switch (Protocol) {
     case 1:
-	if (num == 0) {
-	    if (val > 0) {
-		v = 1;
-		drv_generic_serial_write("\376W", 2);	/* GPO on */
-	    } else {
-		v = 0;
-		drv_generic_serial_write("\376V", 2);	/* GPO off */
-	    }
-	}
-	break;
+        if (num == 0) {
+            if (val > 0) {
+                v = 1;
+                drv_generic_serial_write("\376W", 2);   /* GPO on */
+            } else {
+                v = 0;
+                drv_generic_serial_write("\376V", 2);   /* GPO off */
+            }
+        }
+        break;
 
     case 2:
-	if (val <= 0) {
-	    v = 0;
-	    cmd[0] = '\376';
-	    cmd[1] = 'V';	/* GPO off */
-	    cmd[2] = (char) num + 1;
-	    drv_generic_serial_write(cmd, 3);
-	} else if (val >= 255) {
-	    v = 255;
-	    cmd[0] = '\376';
-	    cmd[1] = 'W';	/* GPO on */
-	    cmd[2] = (char) num + 1;
-	    drv_generic_serial_write(cmd, 3);
-	} else {
-	    v = val;
-	    cmd[0] = '\376';
-	    cmd[1] = '\300';	/* PWM control */
-	    cmd[2] = (char) num + 1;
-	    cmd[3] = (char) v;
-	    drv_generic_serial_write(cmd, 4);
-	}
-	break;
+        if (val <= 0) {
+            v = 0;
+            cmd[0] = '\376';
+            cmd[1] = 'V';       /* GPO off */
+            cmd[2] = (char) num + 1;
+            drv_generic_serial_write(cmd, 3);
+        } else if (val >= 255) {
+            v = 255;
+            cmd[0] = '\376';
+            cmd[1] = 'W';       /* GPO on */
+            cmd[2] = (char) num + 1;
+            drv_generic_serial_write(cmd, 3);
+        } else {
+            v = val;
+            cmd[0] = '\376';
+            cmd[1] = '\300';    /* PWM control */
+            cmd[2] = (char) num + 1;
+            cmd[3] = (char) v;
+            drv_generic_serial_write(cmd, 4);
+        }
+        break;
     }
 
     return v;
@@ -312,58 +312,58 @@ static int drv_MO_start(const char *section, const int quiet)
 
     model = cfg_get(section, "Model", NULL);
     if (model != NULL && *model != '\0') {
-	for (i = 0; Models[i].type != 0xff; i++) {
-	    if (strcasecmp(Models[i].name, model) == 0)
-		break;
-	}
-	if (Models[i].type == 0xff) {
-	    error("%s: %s.Model '%s' is unknown from %s", Name, section, model, cfg_source());
-	    return -1;
-	}
-	Model = i;
-	info("%s: using model '%s'", Name, Models[Model].name);
+        for (i = 0; Models[i].type != 0xff; i++) {
+            if (strcasecmp(Models[i].name, model) == 0)
+                break;
+        }
+        if (Models[i].type == 0xff) {
+            error("%s: %s.Model '%s' is unknown from %s", Name, section, model, cfg_source());
+            return -1;
+        }
+        Model = i;
+        info("%s: using model '%s'", Name, Models[Model].name);
     } else {
-	info("%s: no '%s.Model' entry from %s, auto-dedecting", Name, section, cfg_source());
-	Model = -1;
+        info("%s: no '%s.Model' entry from %s, auto-dedecting", Name, section, cfg_source());
+        Model = -1;
     }
 
-    if (Model != -1 && (Models[Model].protocol == 3 || Models[Model].protocol == 4)) {	// Sure electronics USB LCD board - full line output
-	int i, j;
-	for (i = 0; i < Models[Model].rows; i++) {	// Clear buffer
-	    for (j = 0; j < Models[Model].cols; j++) {
-		dispBuffer[i][j] = ' ';
-	    }
-	}
+    if (Model != -1 && (Models[Model].protocol == 3 || Models[Model].protocol == 4)) {  // Sure electronics USB LCD board - full line output
+        int i, j;
+        for (i = 0; i < Models[Model].rows; i++) {      // Clear buffer
+            for (j = 0; j < Models[Model].cols; j++) {
+                dispBuffer[i][j] = ' ';
+            }
+        }
     }
 
     if (drv_generic_serial_open(section, Name, 0) < 0)
-	return -1;
+        return -1;
 
     if (Model == -1 || Models[Model].protocol > 1) {
-	/* read module type */
-	drv_generic_serial_write("\3767", 2);
-	usleep(1000);
-	if (drv_generic_serial_read(buffer, 1) == 1) {
-	    for (i = 0; Models[i].type != 0xff; i++) {
-		if (Models[i].type == (int) *buffer)
-		    break;
-	    }
-	    info("%s: display reports model '%s' (type 0x%02x)", Name, Models[i].name, Models[i].type);
+        /* read module type */
+        drv_generic_serial_write("\3767", 2);
+        usleep(1000);
+        if (drv_generic_serial_read(buffer, 1) == 1) {
+            for (i = 0; Models[i].type != 0xff; i++) {
+                if (Models[i].type == (int) *buffer)
+                    break;
+            }
+            info("%s: display reports model '%s' (type 0x%02x)", Name, Models[i].name, Models[i].type);
 
-	    /* auto-dedection */
-	    if (Model == -1)
-		Model = i;
+            /* auto-dedection */
+            if (Model == -1)
+                Model = i;
 
-	    /* auto-dedection matches specified model? */
-	    if (Models[i].type != 0xff && Model != i) {
-		error("%s: %s.Model '%s' from %s does not match dedected Model '%s'", Name, section, model,
-		      cfg_source(), Models[i].name);
-		return -1;
-	    }
+            /* auto-dedection matches specified model? */
+            if (Models[i].type != 0xff && Model != i) {
+                error("%s: %s.Model '%s' from %s does not match dedected Model '%s'", Name, section, model,
+                      cfg_source(), Models[i].name);
+                return -1;
+            }
 
-	} else {
-	    info("%s: display detection failed.", Name);
-	}
+        } else {
+            info("%s: display detection failed.", Name);
+        }
     }
 
     /* initialize global variables */
@@ -374,55 +374,55 @@ static int drv_MO_start(const char *section, const int quiet)
     Protocol = Models[Model].protocol;
 
     if (Protocol > 1) {
-	/* read serial number */
-	drv_generic_serial_write("\3765", 2);
-	usleep(100000);
-	if (drv_generic_serial_read(buffer, 2) == 2) {
-	    info("%s: display reports serial number 0x%x", Name, *(short *) buffer);
-	}
+        /* read serial number */
+        drv_generic_serial_write("\3765", 2);
+        usleep(100000);
+        if (drv_generic_serial_read(buffer, 2) == 2) {
+            info("%s: display reports serial number 0x%x", Name, *(short *) buffer);
+        }
 
-	/* read version number */
-	drv_generic_serial_write("\3766", 2);
-	usleep(100000);
-	if (drv_generic_serial_read(buffer, 1) == 1) {
-	    info("%s: display reports firmware version 0x%x", Name, *buffer);
-	}
+        /* read version number */
+        drv_generic_serial_write("\3766", 2);
+        usleep(100000);
+        if (drv_generic_serial_read(buffer, 1) == 1) {
+            info("%s: display reports firmware version 0x%x", Name, *buffer);
+        }
     }
 
     char cmd[5];
     if (Protocol == 4) {
-	/* send init string */
-	cmd[0] = '\376';
-	cmd[1] = 'S';
-	cmd[2] = 'u';
-	cmd[3] = 'r';
-	cmd[4] = 'e';
-	drv_generic_serial_write(cmd, 5);
+        /* send init string */
+        cmd[0] = '\376';
+        cmd[1] = 'S';
+        cmd[2] = 'u';
+        cmd[3] = 'r';
+        cmd[4] = 'e';
+        drv_generic_serial_write(cmd, 5);
     }
 
     drv_MO_clear();
 
-    drv_generic_serial_write("\376B", 3);	/* backlight on */
-    drv_generic_serial_write("\376K", 2);	/* cursor off */
-    drv_generic_serial_write("\376T", 2);	/* blink off */
-    drv_generic_serial_write("\376D", 2);	/* line wrapping off */
-    drv_generic_serial_write("\376R", 2);	/* auto scroll off */
+    drv_generic_serial_write("\376B", 3);       /* backlight on */
+    drv_generic_serial_write("\376K", 2);       /* cursor off */
+    drv_generic_serial_write("\376T", 2);       /* blink off */
+    drv_generic_serial_write("\376D", 2);       /* line wrapping off */
+    drv_generic_serial_write("\376R", 2);       /* auto scroll off */
 
     /* set contrast */
     if (cfg_number(section, "Contrast", 0, 0, 255, &i) > 0) {
-	drv_MO_contrast(i);
+        drv_MO_contrast(i);
     }
 
     /* set backlight */
     if (cfg_number(section, "Backlight", 0, 0, 255, &i) > 0) {
-	drv_MO_backlight(i);
+        drv_MO_backlight(i);
     }
 
     if (!quiet) {
-	if (drv_generic_text_greet(Models[Model].name, "MatrixOrbital")) {
-	    sleep(3);
-	    drv_MO_clear();
-	}
+        if (drv_generic_text_greet(Models[Model].name, "MatrixOrbital")) {
+            sleep(3);
+            drv_MO_clear();
+        }
     }
 
     return 0;
@@ -440,16 +440,16 @@ static void plugin_contrast(RESULT * result, const int argc, RESULT * argv[])
 
     switch (argc) {
     case 0:
-	contrast = drv_MO_contrast(-1);
-	SetResult(&result, R_NUMBER, &contrast);
-	break;
+        contrast = drv_MO_contrast(-1);
+        SetResult(&result, R_NUMBER, &contrast);
+        break;
     case 1:
-	contrast = drv_MO_contrast(R2N(argv[0]));
-	SetResult(&result, R_NUMBER, &contrast);
-	break;
+        contrast = drv_MO_contrast(R2N(argv[0]));
+        SetResult(&result, R_NUMBER, &contrast);
+        break;
     default:
-	error("%s::contrast(): wrong number of parameters", Name);
-	SetResult(&result, R_STRING, "");
+        error("%s::contrast(): wrong number of parameters", Name);
+        SetResult(&result, R_STRING, "");
     }
 }
 
@@ -460,16 +460,16 @@ static void plugin_backlight(RESULT * result, const int argc, RESULT * argv[])
 
     switch (argc) {
     case 0:
-	backlight = drv_MO_backlight(-1);
-	SetResult(&result, R_NUMBER, &backlight);
-	break;
+        backlight = drv_MO_backlight(-1);
+        SetResult(&result, R_NUMBER, &backlight);
+        break;
     case 1:
-	backlight = drv_MO_backlight(R2N(argv[0]));
-	SetResult(&result, R_NUMBER, &backlight);
-	break;
+        backlight = drv_MO_backlight(R2N(argv[0]));
+        SetResult(&result, R_NUMBER, &backlight);
+        break;
     default:
-	error("%s::backlight(): wrong number of parameters", Name);
-	SetResult(&result, R_STRING, "");
+        error("%s::backlight(): wrong number of parameters", Name);
+        SetResult(&result, R_STRING, "");
     }
 }
 
@@ -495,7 +495,7 @@ int drv_MO_list(void)
     int i;
 
     for (i = 0; Models[i].type != 0xff; i++) {
-	printf("%s ", Models[i].name);
+        printf("%s ", Models[i].name);
     }
     return 0;
 }
@@ -511,11 +511,11 @@ int drv_MO_init(const char *section, const int quiet)
     info("%s: %s", Name, "$Rev$");
 
     /* display preferences */
-    XRES = 5;			/* pixel width of one char  */
-    YRES = 8;			/* pixel height of one char  */
-    CHARS = 8;			/* number of user-defineable characters */
-    CHAR0 = 0;			/* ASCII of first user-defineable char */
-    GOTO_COST = 4;		/* number of bytes a goto command requires */
+    XRES = 5;                   /* pixel width of one char  */
+    YRES = 8;                   /* pixel height of one char  */
+    CHARS = 8;                  /* number of user-defineable characters */
+    CHAR0 = 0;                  /* ASCII of first user-defineable char */
+    GOTO_COST = 4;              /* number of bytes a goto command requires */
 
     /* real worker functions */
     drv_generic_text_real_write = drv_MO_write;
@@ -526,32 +526,32 @@ int drv_MO_init(const char *section, const int quiet)
 
     /* start display */
     if ((ret = drv_MO_start(section, quiet)) != 0)
-	return ret;
+        return ret;
 
     /* initialize generic text driver */
     if ((ret = drv_generic_text_init(section, Name)) != 0)
-	return ret;
+        return ret;
 
     /* initialize generic icon driver */
     if ((ret = drv_generic_text_icon_init()) != 0)
-	return ret;
+        return ret;
 
     /* initialize generic bar driver */
     if ((ret = drv_generic_text_bar_init(0)) != 0)
-	return ret;
+        return ret;
 
     /* add fixed chars to the bar driver */
     /* most displays have a full block on ascii 255, but some have kind of  */
     /* an 'inverted P'. If you specify 'asc255bug 1 in the config, this */
     /* char will not be used, but rendered by the bar driver */
     cfg_number(section, "asc255bug", 0, 0, 1, &asc255bug);
-    drv_generic_text_bar_add_segment(0, 0, 255, 32);	/* ASCII  32 = blank */
+    drv_generic_text_bar_add_segment(0, 0, 255, 32);    /* ASCII  32 = blank */
     if (!asc255bug)
-	drv_generic_text_bar_add_segment(255, 255, 255, 255);	/* ASCII 255 = block */
+        drv_generic_text_bar_add_segment(255, 255, 255, 255);   /* ASCII 255 = block */
 
     /* initialize generic GPIO driver */
     if ((ret = drv_generic_gpio_init(section, Name)) != 0)
-	return ret;
+        return ret;
 
     /* register text widget */
     wc = Widget_Text;
@@ -592,7 +592,7 @@ int drv_MO_quit(const int quiet)
 
     /* say goodbye... */
     if (!quiet) {
-	drv_generic_text_greet("goodbye!", NULL);
+        drv_generic_text_greet("goodbye!", NULL);
     }
 
     usleep(300000);

@@ -70,14 +70,14 @@ static int drv_st2205_open(const char *section)
 
     dev = cfg_get(section, "Port", NULL);
     if (dev == NULL || *dev == '\0') {
-	error("st2205: no '%s.Port' entry from %s", section, cfg_source());
-	return -1;
+        error("st2205: no '%s.Port' entry from %s", section, cfg_source());
+        return -1;
     }
 
     h = st2205_open(dev);
     if (h == NULL) {
-	error("st2205: cannot open st2205 device %s", dev);
-	return -1;
+        error("st2205: cannot open st2205 device %s", dev);
+        return -1;
     }
 
     return 0;
@@ -97,12 +97,12 @@ static void drv_st2205_blit(const int row, const int col, const int height, cons
     int r, c;
     RGBA p;
     for (r = row; r < row + height; r++) {
-	for (c = col; c < col + width; c++) {
-	    p = drv_generic_graphic_rgb(r, c);
-	    fb[(r * h->width + c) * 3 + 0] = p.R;
-	    fb[(r * h->width + c) * 3 + 1] = p.G;
-	    fb[(r * h->width + c) * 3 + 2] = p.B;
-	}
+        for (c = col; c < col + width; c++) {
+            p = drv_generic_graphic_rgb(r, c);
+            fb[(r * h->width + c) * 3 + 0] = p.R;
+            fb[(r * h->width + c) * 3 + 1] = p.G;
+            fb[(r * h->width + c) * 3 + 2] = p.B;
+        }
     }
     st2205_send_data(h, fb);
 }
@@ -115,27 +115,27 @@ static int drv_st2205_start2(const char *section)
 
     s = cfg_get(section, "Font", "6x8");
     if (s == NULL || *s == '\0') {
-	error("%s: no '%s.Font' entry from %s", Name, section, cfg_source());
-	return -1;
+        error("%s: no '%s.Font' entry from %s", Name, section, cfg_source());
+        return -1;
     }
 
     XRES = -1;
     YRES = -1;
     if (sscanf(s, "%dx%d", &XRES, &YRES) != 2 || XRES < 1 || YRES < 1) {
-	error("%s: bad Font '%s' from %s", Name, s, cfg_source());
-	return -1;
+        error("%s: bad Font '%s' from %s", Name, s, cfg_source());
+        return -1;
     }
 
     /* Fixme: provider other fonts someday... */
     if (XRES != 6 && YRES != 8) {
-	error("%s: bad Font '%s' from %s (only 6x8 at the moment)", Name, s, cfg_source());
-	return -1;
+        error("%s: bad Font '%s' from %s (only 6x8 at the moment)", Name, s, cfg_source());
+        return -1;
     }
 
 
     /* open communication with the display */
     if (drv_st2205_open(section) < 0) {
-	return -1;
+        return -1;
     }
 
     /* you surely want to allocate a framebuffer or something... */
@@ -195,19 +195,19 @@ int drv_st2205_init2(const char *section, const int quiet)
 
     /* start display */
     if ((ret = drv_st2205_start2(section)) != 0)
-	return ret;
+        return ret;
 
     /* initialize generic graphic driver */
     if ((ret = drv_generic_graphic_init(section, Name)) != 0)
-	return ret;
+        return ret;
 
     if (!quiet) {
-	char buffer[40];
-	qprintf(buffer, sizeof(buffer), "%s %dx%d", Name, DCOLS, DROWS);
-	if (drv_generic_graphic_greet(buffer, NULL)) {
-	    sleep(3);
-	    drv_generic_graphic_clear();
-	}
+        char buffer[40];
+        qprintf(buffer, sizeof(buffer), "%s %dx%d", Name, DCOLS, DROWS);
+        if (drv_generic_graphic_greet(buffer, NULL)) {
+            sleep(3);
+            drv_generic_graphic_clear();
+        }
     }
 
     /* register plugins */
@@ -227,7 +227,7 @@ int drv_st2205_quit2(const int quiet)
 
     /* say goodbye... */
     if (!quiet) {
-	drv_generic_graphic_greet("goodbye!", NULL);
+        drv_generic_graphic_greet("goodbye!", NULL);
     }
 
     drv_generic_graphic_quit();

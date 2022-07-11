@@ -57,8 +57,8 @@ int drv_generic_spidev_open(const char *section, const char *driver)
     info("%s: initializing SPI device %s", generic_spidev_driver, spidev);
     generic_spidev_fd = open(spidev, O_WRONLY);
     if (generic_spidev_fd < 0) {
-	error("%s: unable to open SPI device %s!\n", generic_spidev_driver, spidev);
-	goto exit_error;
+        error("%s: unable to open SPI device %s!\n", generic_spidev_driver, spidev);
+        goto exit_error;
     }
 
     return 0;
@@ -80,9 +80,8 @@ int drv_generic_spidev_transfer(const int count, struct spi_ioc_transfer *tr)
 
     ret = ioctl(generic_spidev_fd, SPI_IOC_MESSAGE(count), tr);
     if (ret < count) {
-	error("%s: can't send SPI message! (%s)\n",
-		generic_spidev_driver, strerror(errno));
-	return -1;
+        error("%s: can't send SPI message! (%s)\n", generic_spidev_driver, strerror(errno));
+        return -1;
     }
 
     return 0;

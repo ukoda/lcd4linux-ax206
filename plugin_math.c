@@ -118,11 +118,11 @@ static void my_round(RESULT * result, RESULT * arg)
 {
     double value;
     if (R2N(arg) > 0)
-	value = (int)(R2N(arg) + 0.5);
+        value = (int) (R2N(arg) + 0.5);
     else if (R2N(arg) < 0)
-	value = (int)(R2N(arg) - 0.5);
+        value = (int) (R2N(arg) - 0.5);
     else
-	value = 0;
+        value = 0;
     SetResult(&result, R_NUMBER, &value);
 }
 
@@ -131,16 +131,16 @@ static void my_decode(RESULT * result, int argc, RESULT * argv[])
     int index;
 
     if (argc < 2) {
-	error("decode(): wrong number of parameters");
-	SetResult(&result, R_STRING, "");
-	return;
+        error("decode(): wrong number of parameters");
+        SetResult(&result, R_STRING, "");
+        return;
     }
 
     index = R2N(argv[0]);
 
     if (index < 0 || index >= argc - 1) {
-	SetResult(&result, R_STRING, "");
-	return;
+        SetResult(&result, R_STRING, "");
+        return;
     }
 
     CopyResult(&result, argv[index + 1]);

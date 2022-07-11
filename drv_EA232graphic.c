@@ -145,30 +145,30 @@ typedef struct {
 
 static MODEL Models[] = {
     /* Protocol 1 models */
-    {"GE120-5NV24", 120, 32, 20, 8, 8, 1},
-    {"GE128-6N3V24", 128, 64, 0, 0, 8, 1},
+    { "GE120-5NV24", 120, 32, 20, 8, 8, 1 },
+    { "GE128-6N3V24", 128, 64, 0, 0, 8, 1 },
 
     /* Protocol 2 models */
-    {"GE128-6N9V24", 128, 64, 63, 40, 0, 2},
-    {"KIT160-6", 160, 80, 0, 0, 8, 2},
-    {"KIT160-7", 160, 128, 0, 0, 8, 2},
-    {"KIT240-6", 240, 64, 0, 0, 8, 2},
-    {"KIT240-7", 240, 128, 0, 0, 8, 2},
-    {"KIT320-8", 320, 240, 0, 0, 8, 2},
+    { "GE128-6N9V24", 128, 64, 63, 40, 0, 2 },
+    { "KIT160-6", 160, 80, 0, 0, 8, 2 },
+    { "KIT160-7", 160, 128, 0, 0, 8, 2 },
+    { "KIT240-6", 240, 64, 0, 0, 8, 2 },
+    { "KIT240-7", 240, 128, 0, 0, 8, 2 },
+    { "KIT320-8", 320, 240, 0, 0, 8, 2 },
 
     /* Protocol 3 models */
-    {"GE128-7KV24", 128, 128, 0, 0, 8, 3},
-    {"GE240-6KV24", 240, 64, 0, 0, 8, 3},
-    {"GE240-6KCV24", 240, 64, 0, 0, 8, 3},
-    {"GE240-7KV24", 240, 128, 0, 0, 8, 3},
-    {"GE240-7KLWV24", 240, 128, 0, 0, 8, 3},
-    {"GE240-6KLWV24", 240, 64, 0, 0, 8, 3},
+    { "GE128-7KV24", 128, 128, 0, 0, 8, 3 },
+    { "GE240-6KV24", 240, 64, 0, 0, 8, 3 },
+    { "GE240-6KCV24", 240, 64, 0, 0, 8, 3 },
+    { "GE240-7KV24", 240, 128, 0, 0, 8, 3 },
+    { "GE240-7KLWV24", 240, 128, 0, 0, 8, 3 },
+    { "GE240-6KLWV24", 240, 64, 0, 0, 8, 3 },
 
     /* Protocol 4 models */
-    {"KIT120-5", 120, 32, 0, 0, 5, 4},
-    {"KIT129-6", 128, 64, 0, 0, 8, 4},
+    { "KIT120-5", 120, 32, 0, 0, 5, 4 },
+    { "KIT129-6", 128, 64, 0, 0, 8, 4 },
 
-    {NULL, 0, 0, 0, 0, 0, 0}
+    { NULL, 0, 0, 0, 0, 0, 0 }
 };
 
 static MODEL *Model;
@@ -184,7 +184,7 @@ static int drv_EA232graphic_open(const char *section)
     /* open serial port */
     /* don't mind about device, speed and stuff, this function will take care of */
     if (drv_generic_serial_open_handshake(section, Name, 0) < 0)
-	return -1;
+        return -1;
 
     return 0;
 }
@@ -213,48 +213,48 @@ static void drv_EA232graphic_clear_display()
     switch (Model->protocol) {
     case 1:
     case 3:
-	/* Clear Display */
-	cmd[0] = 'D';
-	cmd[1] = 'L';
-	drv_EA232graphic_send(cmd, 2);
-	break;
+        /* Clear Display */
+        cmd[0] = 'D';
+        cmd[1] = 'L';
+        drv_EA232graphic_send(cmd, 2);
+        break;
     case 2:
-	/* Clear Display */
-	cmd[0] = ESC;
-	cmd[1] = 'D';
-	cmd[2] = 'L';
-	drv_EA232graphic_send(cmd, 3);
-	usleep(500000);
-	/* Disable Cursor */
-	cmd[0] = ESC;
-	cmd[1] = 'Q';
-	cmd[2] = 'C';
-	cmd[3] = '0';
-	drv_EA232graphic_send(cmd, 4);
-	break;
+        /* Clear Display */
+        cmd[0] = ESC;
+        cmd[1] = 'D';
+        cmd[2] = 'L';
+        drv_EA232graphic_send(cmd, 3);
+        usleep(500000);
+        /* Disable Cursor */
+        cmd[0] = ESC;
+        cmd[1] = 'Q';
+        cmd[2] = 'C';
+        cmd[3] = '0';
+        drv_EA232graphic_send(cmd, 4);
+        break;
     case 4:
-	/* Set all GPIO to Output */
-	cmd[0] = ESC;
-	cmd[1] = 'Y';
-	cmd[2] = 'M';
-	cmd[3] = 8;
-	drv_EA232graphic_send(cmd, 4);
-	/* Clear Display */
-	cmd[0] = ESC;
-	cmd[1] = 'D';
-	cmd[2] = 'L';
-	drv_EA232graphic_send(cmd, 3);
-	usleep(500000);
-	/* Disable Cursor */
-	cmd[0] = ESC;
-	cmd[1] = 'Q';
-	cmd[2] = 'C';
-	cmd[3] = '0';
-	drv_EA232graphic_send(cmd, 4);
-	break;
+        /* Set all GPIO to Output */
+        cmd[0] = ESC;
+        cmd[1] = 'Y';
+        cmd[2] = 'M';
+        cmd[3] = 8;
+        drv_EA232graphic_send(cmd, 4);
+        /* Clear Display */
+        cmd[0] = ESC;
+        cmd[1] = 'D';
+        cmd[2] = 'L';
+        drv_EA232graphic_send(cmd, 3);
+        usleep(500000);
+        /* Disable Cursor */
+        cmd[0] = ESC;
+        cmd[1] = 'Q';
+        cmd[2] = 'C';
+        cmd[3] = '0';
+        drv_EA232graphic_send(cmd, 4);
+        break;
     default:
-	error("%s: undefined protocol type", Name);
-	return;
+        error("%s: undefined protocol type", Name);
+        return;
     }
 }
 
@@ -272,22 +272,22 @@ static void drv_EA232graphic_blit(const int row, const int col, const int height
     switch (Model->protocol) {
     case 1:
     case 4:
-	l = ((height + 7) / 8) * width;
-	break;
+        l = ((height + 7) / 8) * width;
+        break;
     case 2:
     case 3:
-	l = ((width + 7) / 8) * height;
-	break;
+        l = ((width + 7) / 8) * height;
+        break;
     default:
-	error("%s: undefined protocol type", Name);
-	return;
+        error("%s: undefined protocol type", Name);
+        return;
     }
 
     /* add maximum length of command header */
     cmd = (char *) malloc(l + 10);
     if (cmd == NULL) {
-	error("%s: allocation of buffer failed: %s", Name, strerror(errno));
-	return;
+        error("%s: allocation of buffer failed: %s", Name, strerror(errno));
+        return;
     }
     p = 0;
 
@@ -295,26 +295,26 @@ static void drv_EA232graphic_blit(const int row, const int col, const int height
     switch (Model->protocol) {
     case 1:
     case 3:
-	cmd[p++] = 'U';
-	cmd[p++] = col;
-	cmd[p++] = row;
-	cmd[p++] = width;
-	cmd[p++] = height;
-	break;
+        cmd[p++] = 'U';
+        cmd[p++] = col;
+        cmd[p++] = row;
+        cmd[p++] = width;
+        cmd[p++] = height;
+        break;
     case 2:
     case 4:
-	cmd[p++] = ESC;
-	cmd[p++] = 'U';
-	cmd[p++] = 'L';
-	cmd[p++] = col;
-	cmd[p++] = row;
-	cmd[p++] = width;
-	cmd[p++] = height;
-	break;
+        cmd[p++] = ESC;
+        cmd[p++] = 'U';
+        cmd[p++] = 'L';
+        cmd[p++] = col;
+        cmd[p++] = row;
+        cmd[p++] = width;
+        cmd[p++] = height;
+        break;
     default:
-	error("%s: undefined protocol type", Name);
-	free(cmd);
-	return;
+        error("%s: undefined protocol type", Name);
+        free(cmd);
+        return;
     }
 
     /* clear all pixels */
@@ -324,37 +324,37 @@ static void drv_EA232graphic_blit(const int row, const int col, const int height
     switch (Model->protocol) {
     case 1:
     case 4:
-	for (r = 0; r < height; r++) {
-	    for (c = 0; c < width; c++) {
-		if (drv_generic_graphic_black(r + row, c + col)) {
-		    cmd[(r / 8) * width + c + p] |= (LSB_BYTE << (r % 8));
-		}
-	    }
-	}
-	break;
+        for (r = 0; r < height; r++) {
+            for (c = 0; c < width; c++) {
+                if (drv_generic_graphic_black(r + row, c + col)) {
+                    cmd[(r / 8) * width + c + p] |= (LSB_BYTE << (r % 8));
+                }
+            }
+        }
+        break;
     case 2:
-	d = ((width + 7) / 8);
-	for (r = 0; r < height; r++) {
-	    for (c = 0; c < width; c++) {
-		if (drv_generic_graphic_black(r + row, c + col)) {
-		    cmd[(c / 8) + (d * r) + p] |= (MSB_BYTE >> (c % 8));
-		}
-	    }
-	}
-	break;
+        d = ((width + 7) / 8);
+        for (r = 0; r < height; r++) {
+            for (c = 0; c < width; c++) {
+                if (drv_generic_graphic_black(r + row, c + col)) {
+                    cmd[(c / 8) + (d * r) + p] |= (MSB_BYTE >> (c % 8));
+                }
+            }
+        }
+        break;
     case 3:
-	for (c = 0; c < width; c++) {
-	    for (r = 0; r < height; r++) {
-		if (drv_generic_graphic_black(r + row, c + col)) {
-		    cmd[(c / 8) * height + r + p] |= (MSB_BYTE >> (c % 8));
-		}
-	    }
-	}
-	break;
+        for (c = 0; c < width; c++) {
+            for (r = 0; r < height; r++) {
+                if (drv_generic_graphic_black(r + row, c + col)) {
+                    cmd[(c / 8) * height + r + p] |= (MSB_BYTE >> (c % 8));
+                }
+            }
+        }
+        break;
     default:
-	error("%s: undefined protocol type", Name);
-	free(cmd);
-	return;
+        error("%s: undefined protocol type", Name);
+        free(cmd);
+        return;
     }
 
     drv_EA232graphic_send(cmd, p + l);
@@ -368,33 +368,33 @@ static int drv_EA232graphic_GPO(const int num, const int val)
     char cmd[5];
 
     if (Model->gpo == 0) {
-	error("%s: GPO not supported on this model.", Name);
-	return -1;
+        error("%s: GPO not supported on this model.", Name);
+        return -1;
     }
 
 
     if (Model->gpo < num) {
-	error("%s: GPO %d is not available.", Name, num);
-	return -1;
+        error("%s: GPO %d is not available.", Name, num);
+        return -1;
     }
 
     switch (Model->protocol) {
     case 1:
     case 3:
-	cmd[0] = 'Y';
-	cmd[1] = num;
-	cmd[2] = (val > 0) ? 1 : 0;
-	drv_EA232graphic_send(cmd, 3);
-	break;
+        cmd[0] = 'Y';
+        cmd[1] = num;
+        cmd[2] = (val > 0) ? 1 : 0;
+        drv_EA232graphic_send(cmd, 3);
+        break;
     case 2:
     case 4:
-	cmd[0] = ESC;
-	cmd[1] = 'Y';
-	cmd[2] = 'W';
-	cmd[3] = num + 1;
-	cmd[4] = (val > 0) ? 1 : 0;
-	drv_EA232graphic_send(cmd, 5);
-	break;
+        cmd[0] = ESC;
+        cmd[1] = 'Y';
+        cmd[2] = 'W';
+        cmd[3] = num + 1;
+        cmd[4] = (val > 0) ? 1 : 0;
+        drv_EA232graphic_send(cmd, 5);
+        break;
     }
 
     return 0;
@@ -407,33 +407,33 @@ static int drv_EA232graphic_contrast(int contrast)
     char cmd[4];
 
     if (Model->max_contrast == 0) {
-	error("%s: contrast setting not support by model", Name);
-	return -1;
+        error("%s: contrast setting not support by model", Name);
+        return -1;
     }
 
     /* adjust limits according to the display */
     if (contrast < 0)
-	contrast = 0;
+        contrast = 0;
     if (contrast > Model->max_contrast)
-	contrast = Model->max_contrast;
+        contrast = Model->max_contrast;
 
 
     switch (Model->protocol) {
     case 1:
-	cmd[0] = 'K';
-	cmd[1] = contrast;
-	drv_EA232graphic_send(cmd, 2);
-	break;
+        cmd[0] = 'K';
+        cmd[1] = contrast;
+        drv_EA232graphic_send(cmd, 2);
+        break;
     case 2:
-	cmd[0] = ESC;
-	cmd[1] = 'D';
-	cmd[2] = 'K';
-	cmd[3] = contrast;
-	drv_EA232graphic_send(cmd, 4);
-	break;
+        cmd[0] = ESC;
+        cmd[1] = 'D';
+        cmd[2] = 'K';
+        cmd[3] = contrast;
+        drv_EA232graphic_send(cmd, 4);
+        break;
     default:
-	error("%s: undefined protocol type", Name);
-	return -1;
+        error("%s: undefined protocol type", Name);
+        return -1;
     }
 
     return contrast;
@@ -450,18 +450,18 @@ static int drv_EA232graphic_start(const char *section)
     /* read model from configuration */
     s = cfg_get(section, "Model", NULL);
     if (s == NULL || *s == '\0') {
-	error("%s: no '%s.Model' entry from %s", Name, section, cfg_source());
-	return -1;
+        error("%s: no '%s.Model' entry from %s", Name, section, cfg_source());
+        return -1;
     }
 
     for (i = 0; Models[i].name != NULL; i++) {
-	if (strcasecmp(Models[i].name, s) == 0)
-	    break;
+        if (strcasecmp(Models[i].name, s) == 0)
+            break;
     }
     if (!Models[i].name) {
-	error("%s: %s.Model '%s' is unknown from %s", Name, section, s, cfg_source());
-	free(s);
-	return -1;
+        error("%s: %s.Model '%s' is unknown from %s", Name, section, s, cfg_source());
+        free(s);
+        return -1;
     }
     Model = &Models[i];
     info("%s: using model '%s'", Name, Model->name);
@@ -477,29 +477,29 @@ static int drv_EA232graphic_start(const char *section)
     /* read font size from configuration */
     s = cfg_get(section, "Font", "6x8");
     if (s == NULL || *s == '\0') {
-	error("%s: no '%s.Font' entry from %s", Name, section, cfg_source());
-	return -1;
+        error("%s: no '%s.Font' entry from %s", Name, section, cfg_source());
+        return -1;
     }
 
     XRES = -1;
     YRES = -1;
     if (sscanf(s, "%dx%d", &XRES, &YRES) != 2 || XRES < 1 || YRES < 1) {
-	error("%s: bad Font '%s' from %s", Name, s, cfg_source());
-	free(s);
-	return -1;
+        error("%s: bad Font '%s' from %s", Name, s, cfg_source());
+        free(s);
+        return -1;
     }
     free(s);
 
     /* open communication with the display */
     if (drv_EA232graphic_open(section) < 0) {
-	return -1;
+        return -1;
     }
 
     /* reset & initialize display */
     drv_EA232graphic_clear_display();
 
     if (cfg_number(section, "Contrast", Model->default_contrast, 0, Model->max_contrast, &contrast) > 0) {
-	drv_EA232graphic_contrast(contrast);
+        drv_EA232graphic_contrast(contrast);
     }
 
     return 0;
@@ -541,7 +541,7 @@ int drv_EA232graphic_list(void)
     int i;
 
     for (i = 0; Models[i].name; i++) {
-	printf("%s ", Models[i].name);
+        printf("%s ", Models[i].name);
     }
 
     return 0;
@@ -559,23 +559,23 @@ int drv_EA232graphic_init(const char *section, const int quiet)
 
     /* start display */
     if ((ret = drv_EA232graphic_start(section)) != 0)
-	return ret;
+        return ret;
 
     /* initialize generic graphic driver */
     if ((ret = drv_generic_graphic_init(section, Name)) != 0)
-	return ret;
+        return ret;
 
     /* initialize GPO */
     if (Model->gpo > 0 && (ret = drv_generic_gpio_init(section, Name)) != 0)
-	return ret;
+        return ret;
 
     if (!quiet) {
-	char buffer[40];
-	qprintf(buffer, sizeof(buffer), "%s %dx%d", Name, DCOLS, DROWS);
-	if (drv_generic_graphic_greet(buffer, NULL)) {
-	    sleep(3);
-	    drv_generic_graphic_clear();
-	}
+        char buffer[40];
+        qprintf(buffer, sizeof(buffer), "%s %dx%d", Name, DCOLS, DROWS);
+        if (drv_generic_graphic_greet(buffer, NULL)) {
+            sleep(3);
+            drv_generic_graphic_clear();
+        }
     }
 
     /* register plugins */
@@ -595,13 +595,13 @@ int drv_EA232graphic_quit(const int quiet)
 
     /* say goodbye... */
     if (!quiet) {
-	drv_generic_graphic_greet("goodbye!", NULL);
+        drv_generic_graphic_greet("goodbye!", NULL);
     }
 
     drv_generic_graphic_quit();
 
     if (Model->gpo > 0)
-	drv_generic_gpio_quit();
+        drv_generic_gpio_quit();
 
     debug("%s: closing connection", Name);
     drv_EA232graphic_close();

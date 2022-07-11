@@ -63,12 +63,12 @@ void widget_timer_update(void *Self)
     /* get new update interval */
     update = P2N(&Timer->update);
     if (update < 10)
-	update = 10;
+        update = 10;
 
     /* finally, fire it! */
     active = P2N(&Timer->active);
     if (active > 0) {
-	property_eval(&Timer->expression);
+        property_eval(&Timer->expression);
     }
 
     /* add a new one-shot timer */
@@ -111,17 +111,17 @@ int widget_timer_init(WIDGET * Self)
 int widget_timer_quit(WIDGET * Self)
 {
     if (Self) {
-	/* do not deallocate child widget! */
-	if (Self->parent == NULL) {
-	    if (Self->data) {
-		WIDGET_TIMER *Timer = Self->data;
-		property_free(&Timer->expression);
-		property_free(&Timer->update);
-		property_free(&Timer->active);
-		free(Self->data);
-		Self->data = NULL;
-	    }
-	}
+        /* do not deallocate child widget! */
+        if (Self->parent == NULL) {
+            if (Self->data) {
+                WIDGET_TIMER *Timer = Self->data;
+                property_free(&Timer->expression);
+                property_free(&Timer->update);
+                property_free(&Timer->active);
+                free(Self->data);
+                Self->data = NULL;
+            }
+        }
     }
 
     return 0;

@@ -57,7 +57,7 @@ static char *itoa(char *buffer, const size_t size, unsigned int value)
 
     /* sanity checks */
     if (buffer == NULL || size < 2)
-	return (NULL);
+        return (NULL);
 
     /* p points to last char */
     p = buffer + size - 1;
@@ -66,8 +66,8 @@ static char *itoa(char *buffer, const size_t size, unsigned int value)
     *p = '\0';
 
     do {
-	*--p = value % 10 + '0';
-	value = value / 10;
+        *--p = value % 10 + '0';
+        value = value / 10;
     } while (value != 0 && p > buffer);
 
     return p;
@@ -90,73 +90,73 @@ char *struptime(const unsigned int uptime, const char *format)
 
     while (len < size) {
 
-	if (*src == '%') {
-	    src++;
+        if (*src == '%') {
+            src++;
 
-	    if (strchr("sSmMhHd", *src) != NULL) {
-		char buffer[12], *s;
-		unsigned int value = 0;
-		int leading_zero = 0;
-		switch (*src++) {
-		case 's':
-		    value = uptime;
-		    break;
-		case 'S':
-		    value = uptime % 60;
-		    leading_zero = 1;
-		    break;
-		case 'm':
-		    value = uptime / 60;
-		    break;
-		case 'M':
-		    value = (uptime / 60) % 60;
-		    leading_zero = 1;
-		    break;
-		case 'h':
-		    value = uptime / 60 / 60;
-		    break;
-		case 'H':
-		    value = (uptime / 60 / 60) % 24;
-		    leading_zero = 1;
-		    break;
-		case 'd':
-		    value = uptime / 60 / 60 / 24;
-		    break;
-		}
+            if (strchr("sSmMhHd", *src) != NULL) {
+                char buffer[12], *s;
+                unsigned int value = 0;
+                int leading_zero = 0;
+                switch (*src++) {
+                case 's':
+                    value = uptime;
+                    break;
+                case 'S':
+                    value = uptime % 60;
+                    leading_zero = 1;
+                    break;
+                case 'm':
+                    value = uptime / 60;
+                    break;
+                case 'M':
+                    value = (uptime / 60) % 60;
+                    leading_zero = 1;
+                    break;
+                case 'h':
+                    value = uptime / 60 / 60;
+                    break;
+                case 'H':
+                    value = (uptime / 60 / 60) % 24;
+                    leading_zero = 1;
+                    break;
+                case 'd':
+                    value = uptime / 60 / 60 / 24;
+                    break;
+                }
 
-		if (leading_zero && value < 10) {
-		    len++;
-		    *dst++ = '0';
-		}
+                if (leading_zero && value < 10) {
+                    len++;
+                    *dst++ = '0';
+                }
 
-		s = itoa(buffer, sizeof(buffer), value);
-		while (len < size && *s != '\0') {
-		    len++;
-		    *dst++ = *s++;
-		}
+                s = itoa(buffer, sizeof(buffer), value);
+                while (len < size && *s != '\0') {
+                    len++;
+                    *dst++ = *s++;
+                }
 
-	    } else if (*src == '%') {
-		len++;
-		*dst++ = '%';
+            } else if (*src == '%') {
+                len++;
+                *dst++ = '%';
 
-	    } else {
-		len += 2;
-		*dst++ = '%';
-		*dst++ = *src++;
-	    }
+            } else {
+                len += 2;
+                *dst++ = '%';
+                *dst++ = *src++;
+            }
 
-	} else {
-	    len++;
-	    *dst++ = *src;
-	    if (*src++ == '\0')
-		break;
-	}
+        } else {
+            len++;
+            *dst++ = *src;
+            if (*src++ == '\0')
+                break;
+        }
     }
 
     /* enforce terminating zero */
     if (len >= size && *(dst - 1) != '\0') {
-	len++;
-	*dst = '\0';
+        len++;
+        *dst = '\0';
     }
 
     return string;
@@ -169,15 +169,15 @@ double getuptime(void)
     int i;
 
     if (fd == -2)
-	fd = open("/proc/uptime", O_RDONLY);
+        fd = open("/proc/uptime", O_RDONLY);
     if (fd < 0)
-	return -1;
+        return -1;
 
     lseek(fd, 0, SEEK_SET);
 
     i = read(fd, buffer, sizeof(buffer) - 1);
     if (i < 0)
-	return -1;
+        return -1;
 
     buffer[i - 1] = '\0';
 
@@ -194,9 +194,9 @@ static void my_uptime(RESULT * result, const int argc, RESULT * argv[])
     struct timeval now;
 
     if (argc > 1) {
-	error("uptime(): wrong number of parameters");
-	SetResult(&result, R_STRING, "");
-	return;
+        error("uptime(): wrong number of parameters");
+        SetResult(&result, R_STRING, "");
+        return;
     }
 
     gettimeofday(&now, NULL);
@@ -204,20 +204,20 @@ static void my_uptime(RESULT * result, const int argc, RESULT * argv[])
     age = (now.tv_sec - last_value.tv_sec) * 1000 + (now.tv_usec - last_value.tv_usec) / 1000;
     /* reread every 100 msec only */
     if (fd == -2 || age == 0 || age > 100) {
-	uptime = getuptime();
-	if (uptime < 0.0) {
-	    error("parse(/proc/uptime) failed!");
-	    SetResult(&result, R_STRING, "");
-	    return;
-	}
+        uptime = getuptime();
+        if (uptime < 0.0) {
+            error("parse(/proc/uptime) failed!");
+            SetResult(&result, R_STRING, "");
+            return;
+        }
 
-	last_value = now;
+        last_value = now;
     }
 
     if (argc == 0) {
-	SetResult(&result, R_NUMBER, &uptime);
+        SetResult(&result, R_NUMBER, &uptime);
     } else {
-	SetResult(&result, R_STRING, struptime(uptime, R2S(argv[0])));
+        SetResult(&result, R_STRING, struptime(uptime, R2S(argv[0])));
     }
 
     return;
@@ -233,6 +233,6 @@ int plugin_init_uptime(void)
 void plugin_exit_uptime(void)
 {
     if (fd > 0)
-	close(fd);
+        close(fd);
     fd = -2;
 }

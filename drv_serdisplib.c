@@ -33,7 +33,7 @@
  */
 
 #include "config.h"
-#include "debug.h"		// verbose_level
+#include "debug.h"              // verbose_level
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -80,11 +80,11 @@ static void drv_SD_blit(const int row, const int col, const int height, const in
     RGBA p;
 
     for (r = row; r < row + height; r++) {
-	for (c = col; c < col + width; c++) {
-	    p = drv_generic_graphic_rgb(r, c);
-	    // printf("blit (%d,%d) A%d.R%d.G%d.B%d\n", c, r, p.A, p.R, p.G, p.B);
-	    serdisp_setcolour(dd, c, r, serdisp_pack2ARGB(0xff, p.R, p.G, p.B));
-	}
+        for (c = col; c < col + width; c++) {
+            p = drv_generic_graphic_rgb(r, c);
+            // printf("blit (%d,%d) A%d.R%d.G%d.B%d\n", c, r, p.A, p.R, p.G, p.B);
+            serdisp_setcolour(dd, c, r, serdisp_pack2ARGB(0xff, p.R, p.G, p.B));
+        }
     }
 
     serdisp_update(dd);
@@ -94,9 +94,9 @@ static void drv_SD_blit(const int row, const int col, const int height, const in
 static int drv_SD_contrast(int contrast)
 {
     if (contrast < 0)
-	contrast = 0;
+        contrast = 0;
     if (contrast > MAX_CONTRASTSTEP)
-	contrast = MAX_CONTRASTSTEP;
+        contrast = MAX_CONTRASTSTEP;
 
     serdisp_feature(dd, FEATURE_CONTRAST, contrast);
 
@@ -107,9 +107,9 @@ static int drv_SD_contrast(int contrast)
 static int drv_SD_backlight(int backlight)
 {
     if (backlight < FEATURE_NO)
-	backlight = FEATURE_NO;
+        backlight = FEATURE_NO;
     if (backlight > FEATURE_YES)
-	backlight = FEATURE_YES;
+        backlight = FEATURE_YES;
 
     serdisp_feature(dd, FEATURE_BACKLIGHT, backlight);
 
@@ -120,9 +120,9 @@ static int drv_SD_backlight(int backlight)
 static int drv_SD_reverse(int reverse)
 {
     if (reverse < FEATURE_NO)
-	reverse = FEATURE_NO;
+        reverse = FEATURE_NO;
     if (reverse > FEATURE_YES)
-	reverse = FEATURE_YES;
+        reverse = FEATURE_YES;
 
     serdisp_feature(dd, FEATURE_REVERSE, reverse);
 
@@ -133,9 +133,9 @@ static int drv_SD_reverse(int reverse)
 static int drv_SD_rotate(int rotate)
 {
     if (rotate < 0)
-	rotate = 0;
+        rotate = 0;
     if (rotate > 3)
-	rotate = 3;
+        rotate = 3;
 
     serdisp_feature(dd, FEATURE_ROTATE, rotate);
 
@@ -156,23 +156,23 @@ static int drv_SD_start(const char *section)
 
     port = cfg_get(section, "Port", NULL);
     if (port == NULL || *port == '\0') {
-	error("%s: no '%s.Port' entry from %s", Name, section, cfg_source());
-	return -1;
+        error("%s: no '%s.Port' entry from %s", Name, section, cfg_source());
+        return -1;
     }
 
     /* opening the output device */
     sdcd = SDCONN_open(port);
     if (sdcd == NULL) {
-	error("%s: open(%s) failed: %s", Name, port, sd_geterrormsg());
-	info("%s: examples:\n  serraw:/dev/ttyS0\n  par:/dev/parport0\n  USB:<vendor>/<product>", Name);
-	return -1;
+        error("%s: open(%s) failed: %s", Name, port, sd_geterrormsg());
+        info("%s: examples:\n  serraw:/dev/ttyS0\n  par:/dev/parport0\n  USB:<vendor>/<product>", Name);
+        return -1;
     }
 
 
     model = cfg_get(section, "Model", "");
     if (model == NULL || *model == '\0') {
-	error("%s: no '%s.Model' entry from %s", Name, section, cfg_source());
-	return -1;
+        error("%s: no '%s.Model' entry from %s", Name, section, cfg_source());
+        return -1;
     }
     info("%s: using model '%s'", Name, model);
 
@@ -182,17 +182,17 @@ static int drv_SD_start(const char *section)
     /* opening and initialising the display */
     dd = serdisp_init(sdcd, model, options);
     if (dd == NULL) {
-	error("%s: init(%s, %s, %s) failed: %s", Name, port, model, options, sd_geterrormsg());
-	SDCONN_close(sdcd);
-	return -1;
+        error("%s: init(%s, %s, %s) failed: %s", Name, port, model, options, sd_geterrormsg());
+        SDCONN_close(sdcd);
+        return -1;
     }
 
     /* print supported options by display */
     info("%s: options supported by display %s:", Name, model);
     serdisp_options_t optiondesc;
-    optiondesc.name = "";	/* start the iteration with assigning an empty string before the first call */
+    optiondesc.name = "";       /* start the iteration with assigning an empty string before the first call */
     while (serdisp_nextoptiondescription(dd, &optiondesc)) {
-	info("  %s", optiondesc.name);
+        info("  %s", optiondesc.name);
     }
 
 
@@ -205,37 +205,37 @@ static int drv_SD_start(const char *section)
     YRES = -1;
     s = cfg_get(section, "Font", "6x8");
     if (s == NULL || *s == '\0') {
-	error("%s: no '%s.Font' entry from %s", Name, section, cfg_source());
-	return -1;
+        error("%s: no '%s.Font' entry from %s", Name, section, cfg_source());
+        return -1;
     }
     if (sscanf(s, "%dx%d", &XRES, &YRES) != 2 || XRES < 1 || YRES < 1) {
-	error("%s: bad Font '%s' from %s", Name, s, cfg_source());
-	return -1;
+        error("%s: bad Font '%s' from %s", Name, s, cfg_source());
+        return -1;
     }
 
     /* Fixme: provider other fonts someday... */
     if (XRES != 6 && YRES != 8) {
-	error("%s: bad Font '%s' from %s (only 6x8 at the moment)", Name, s, cfg_source());
-	return -1;
+        error("%s: bad Font '%s' from %s (only 6x8 at the moment)", Name, s, cfg_source());
+        return -1;
     }
 
     /* clear display */
     serdisp_clear(dd);
 
     if (cfg_number(section, "Contrast", 0, 0, MAX_CONTRASTSTEP, &contrast) > 0) {
-	drv_SD_contrast(contrast);
+        drv_SD_contrast(contrast);
     }
 
     if (cfg_number(section, "Backlight", 0, 0, 1, &backlight) > 0) {
-	drv_SD_backlight(backlight);
+        drv_SD_backlight(backlight);
     }
 
     if (cfg_number(section, "Reverse", 0, 0, 1, &reverse) > 0) {
-	drv_SD_reverse(reverse);
+        drv_SD_reverse(reverse);
     }
 
     if (cfg_number(section, "Rotate", 0, 0, 3, &rotate) > 0) {
-	drv_SD_rotate(rotate);
+        drv_SD_rotate(rotate);
     }
 
     return 0;
@@ -294,7 +294,7 @@ int drv_SD_list(void)
 
     displaydesc.dispname = "";
     while (serdisp_nextdisplaydescription(&displaydesc)) {
-	printf("%s ", displaydesc.dispname);
+        printf("%s ", displaydesc.dispname);
     }
 
     return 0;
@@ -309,14 +309,14 @@ int drv_SD_list_verbose(void)
 
     version = serdisp_getversioncode();
     printf("%s: header version %d.%d, library version %d.%d, available sub-drivers:\n\n", Name,
-	   SERDISP_VERSION_MAJOR, SERDISP_VERSION_MINOR,
-	   SERDISP_VERSION_GET_MAJOR(version), SERDISP_VERSION_GET_MINOR(version));
+           SERDISP_VERSION_MAJOR, SERDISP_VERSION_MINOR,
+           SERDISP_VERSION_GET_MAJOR(version), SERDISP_VERSION_GET_MINOR(version));
 
     printf("display name        alias names           description\n");
     printf("------------------  --------------------  -----------------------------------\n");
     displaydesc.dispname = "";
     while (serdisp_nextdisplaydescription(&displaydesc)) {
-	printf("   %-15s  %-20s  %-35s\n", displaydesc.dispname, displaydesc.aliasnames, displaydesc.description);
+        printf("   %-15s  %-20s  %-35s\n", displaydesc.dispname, displaydesc.aliasnames, displaydesc.description);
     }
 
     return 0;
@@ -335,19 +335,19 @@ int drv_SD_init(const char *section, const int quiet)
 
     /* start display */
     if ((ret = drv_SD_start(section)) != 0)
-	return ret;
+        return ret;
 
     /* initialize generic graphic driver */
     if ((ret = drv_generic_graphic_init(section, Name)) != 0)
-	return ret;
+        return ret;
 
     if (!quiet) {
-	char buffer[40];
-	qprintf(buffer, sizeof(buffer), "%s %dx%d", Name, DCOLS, DROWS);
-	if (drv_generic_graphic_greet(buffer, NULL)) {
-	    sleep(3);
-	    drv_generic_graphic_clear();
-	}
+        char buffer[40];
+        qprintf(buffer, sizeof(buffer), "%s %dx%d", Name, DCOLS, DROWS);
+        if (drv_generic_graphic_greet(buffer, NULL)) {
+            sleep(3);
+            drv_generic_graphic_clear();
+        }
     }
 
     /* register plugins */
@@ -369,7 +369,7 @@ int drv_SD_quit(const int quiet)
     drv_generic_graphic_clear();
 
     if (!quiet) {
-	drv_generic_graphic_greet("goodbye!", NULL);
+        drv_generic_graphic_greet("goodbye!", NULL);
     }
 
     drv_generic_graphic_quit();

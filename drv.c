@@ -300,9 +300,9 @@ int drv_list(void)
     printf("available display drivers:");
 
     for (i = 0; Driver[i]; i++) {
-	printf("\n   %-20s: ", Driver[i]->name);
-	if (Driver[i]->list)
-	    Driver[i]->list();
+        printf("\n   %-20s: ", Driver[i]->name);
+        if (Driver[i]->list)
+            Driver[i]->list();
     }
     printf("\n");
 
@@ -319,12 +319,12 @@ int drv_init(const char *section, const char *driver, const int quiet)
 {
     int i;
     for (i = 0; Driver[i]; i++) {
-	if (strcmp(Driver[i]->name, driver) == 0) {
-	    Drv = Driver[i];
-	    if (Drv->init == NULL)
-		return 0;
-	    return Drv->init(section, quiet);
-	}
+        if (strcmp(Driver[i]->name, driver) == 0) {
+            Drv = Driver[i];
+            if (Drv->init == NULL)
+                return 0;
+            return Drv->init(section, quiet);
+        }
     }
     error("drv_init(%s) failed: no such driver", driver);
     return -1;
@@ -334,6 +334,6 @@ int drv_init(const char *section, const char *driver, const int quiet)
 int drv_quit(const int quiet)
 {
     if (Drv->quit == NULL)
-	return 0;
+        return 0;
     return Drv->quit(quiet);
 }

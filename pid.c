@@ -68,75 +68,75 @@ int pid_init(const char *pidfile)
     qprintf(tmpfile, sizeof(tmpfile), "%s.%s", pidfile, "XXXXXX");
 
     if ((fd = mkstemp(tmpfile)) == -1) {
-	error("mkstemp(%s) failed: %s", tmpfile, strerror(errno));
-	return -1;
+        error("mkstemp(%s) failed: %s", tmpfile, strerror(errno));
+        return -1;
     }
 
     if (fchmod(fd, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH) == -1) {
-	error("fchmod(%s) failed: %s", tmpfile, strerror(errno));
-	close(fd);
-	unlink(tmpfile);
-	return -1;
+        error("fchmod(%s) failed: %s", tmpfile, strerror(errno));
+        close(fd);
+        unlink(tmpfile);
+        return -1;
     }
 
     qprintf(buffer, sizeof(buffer), "%d\n", (int) getpid());
     len = strlen(buffer);
     if (write(fd, buffer, len) != len) {
-	error("write(%s) failed: %s", tmpfile, strerror(errno));
-	close(fd);
-	unlink(tmpfile);
-	return -1;
+        error("write(%s) failed: %s", tmpfile, strerror(errno));
+        close(fd);
+        unlink(tmpfile);
+        return -1;
     }
     close(fd);
 
 
     while (link(tmpfile, pidfile) == -1) {
 
-	if (errno != EEXIST) {
-	    error("link(%s, %s) failed: %s", tmpfile, pidfile, strerror(errno));
-	    unlink(tmpfile);
-	    return -1;
-	}
+        if (errno != EEXIST) {
+            error("link(%s, %s) failed: %s", tmpfile, pidfile, strerror(errno));
+            unlink(tmpfile);
+            return -1;
+        }
 
-	if ((fd = open(pidfile, O_RDONLY)) == -1) {
-	    if (errno == ENOENT)
-		continue;	/* pidfile disappared */
-	    error("open(%s) failed: %s", pidfile, strerror(errno));
-	    unlink(tmpfile);
-	    return -1;
-	}
+        if ((fd = open(pidfile, O_RDONLY)) == -1) {
+            if (errno == ENOENT)
+                continue;       /* pidfile disappared */
+            error("open(%s) failed: %s", pidfile, strerror(errno));
+            unlink(tmpfile);
+            return -1;
+        }
 
-	len = read(fd, buffer, sizeof(buffer) - 1);
-	if (len < 0) {
-	    error("read(%s) failed: %s", pidfile, strerror(errno));
-	    unlink(tmpfile);
-	    return -1;
-	}
+        len = read(fd, buffer, sizeof(buffer) - 1);
+        if (len < 0) {
+            error("read(%s) failed: %s", pidfile, strerror(errno));
+            unlink(tmpfile);
+            return -1;
+        }
 
-	buffer[len] = '\0';
-	if (sscanf(buffer, "%d", &pid) != 1 || pid == 0) {
-	    error("scan(%s) failed.", pidfile);
-	    unlink(tmpfile);
-	    return -1;
-	}
+        buffer[len] = '\0';
+        if (sscanf(buffer, "%d", &pid) != 1 || pid == 0) {
+            error("scan(%s) failed.", pidfile);
+            unlink(tmpfile);
+            return -1;
+        }
 
-	if (pid == getpid()) {
-	    error("%s already locked by us. uh-oh...", pidfile);
-	    unlink(tmpfile);
-	    return 0;
-	}
+        if (pid == getpid()) {
+            error("%s already locked by us. uh-oh...", pidfile);
+            unlink(tmpfile);
+            return 0;
+        }
 
-	if ((kill(pid, 0) == -1) && errno == ESRCH) {
-	    error("removing stale PID file %s", pidfile);
-	    if (unlink(pidfile) == -1 && errno != ENOENT) {
-		error("unlink(%s) failed: %s", pidfile, strerror(errno));
-		unlink(tmpfile);
-		return pid;
-	    }
-	    continue;
-	}
-	unlink(tmpfile);
-	return pid;
+        if ((kill(pid, 0) == -1) && errno == ESRCH) {
+            error("removing stale PID file %s", pidfile);
+            if (unlink(pidfile) == -1 && errno != ENOENT) {
+                error("unlink(%s) failed: %s", pidfile, strerror(errno));
+                unlink(tmpfile);
+                return pid;
+            }
+            continue;
+        }
+        unlink(tmpfile);
+        return pid;
     }
 
     unlink(tmpfile);

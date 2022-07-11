@@ -50,7 +50,7 @@ int SetVariable(const char *name, RESULT * value);
 int SetVariableNumeric(const char *name, const double value);
 int SetVariableString(const char *name, const char *value);
 
-int AddFunction(const char *name, const int argc, void (*func) ());
+int AddFunction(const char *name, const int argc, void (*func)());
 
 void DeleteVariables(void);
 void DeleteFunctions(void);

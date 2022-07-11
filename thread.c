@@ -99,8 +99,8 @@ int mutex_create(void)
 
     semid = semget(IPC_PRIVATE, 1, 0);
     if (semid == -1) {
-	error("fatal error: semget() failed: %s", strerror(errno));
-	return -1;
+        error("fatal error: semget() failed: %s", strerror(errno));
+        return -1;
     }
     semun.val = 1;
     semctl(semid, 0, SETVAL, semun);
@@ -142,14 +142,14 @@ int shm_create(void **buffer, const int size)
 
     shmid = shmget(IPC_PRIVATE, size, SHM_R | SHM_W);
     if (shmid == -1) {
-	error("fatal error: shmget() failed: %s", strerror(errno));
-	return -1;
+        error("fatal error: shmget() failed: %s", strerror(errno));
+        return -1;
     }
 
     *buffer = shmat(shmid, NULL, 0);
     if (*buffer == NULL) {
-	error("fatal error: shmat() failed: %s", strerror(errno));
-	return -1;
+        error("fatal error: shmat() failed: %s", strerror(errno));
+        return -1;
     }
 
     return shmid;
@@ -163,24 +163,24 @@ void shm_destroy(const int shmid, const void *buffer)
 }
 
 
-int thread_create(const char *name, void (*thread) (void *data), void *data)
+int thread_create(const char *name, void (*thread)(void *data), void *data)
 {
     pid_t pid;
 
     switch (pid = fork()) {
     case -1:
-	error("fatal error: fork(%s) failed: %s", name, strerror(errno));
-	return -1;
+        error("fatal error: fork(%s) failed: %s", name, strerror(errno));
+        return -1;
     case 0:
-	info("thread %s starting...", name);
-	if (thread_argc > 0) {
-	    strncpy(thread_argv[0], name, strlen(thread_argv[0]));
-	}
-	thread(data);
-	info("thread %s ended.", name);
-	exit(0);
+        info("thread %s starting...", name);
+        if (thread_argc > 0) {
+            strncpy(thread_argv[0], name, strlen(thread_argv[0]));
+        }
+        thread(data);
+        info("thread %s ended.", name);
+        exit(0);
     default:
-	info("forked process %d for thread %s", pid, name);
+        info("forked process %d for thread %s", pid, name);
     }
 
     return pid;

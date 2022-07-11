@@ -32,13 +32,13 @@
 #include "widget.h"
 #include "rgb.h"
 
-extern RGBA FG_COL;		/* foreground color */
-extern RGBA BG_COL;		/* background color */
-extern RGBA BL_COL;		/* backlight color */
-extern RGBA NO_COL;		/* no color (completely transparent) */
+extern RGBA FG_COL;             /* foreground color */
+extern RGBA BG_COL;             /* background color */
+extern RGBA BL_COL;             /* backlight color */
+extern RGBA NO_COL;             /* no color (completely transparent) */
 
 /* these functions must be implemented by the real driver */
-extern void (*drv_generic_graphic_real_blit) (const int row, const int col, const int height, const int width);
+extern void (*drv_generic_graphic_real_blit)(const int row, const int col, const int height, const int width);
 
 /* helper function to get pixel color or gray value */
 extern RGBA drv_generic_graphic_rgb(const int row, const int col);

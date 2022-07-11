@@ -43,8 +43,8 @@ typedef enum {
 } KEYPADKEY;
 
 typedef struct WIDGET_KEYPAD {
-    PROPERTY expression;	/* expression that delivers the value */
-    KEYPADKEY key;		/* which key */
+    PROPERTY expression;        /* expression that delivers the value */
+    KEYPADKEY key;              /* which key */
 } WIDGET_KEYPAD;
 
 

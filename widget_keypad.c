@@ -82,24 +82,24 @@ int widget_keypad_init(WIDGET * Self)
     /* state: pressed (default), released */
     c = cfg_get(section, "state", "pressed");
     if (!strcasecmp(c, "released"))
-	keypad->key = WIDGET_KEY_RELEASED;
+        keypad->key = WIDGET_KEY_RELEASED;
     else
-	keypad->key = WIDGET_KEY_PRESSED;
+        keypad->key = WIDGET_KEY_PRESSED;
 
     /* position: confirm (default), up, down, left, right, cancel */
     c = cfg_get(section, "position", "confirm");
     if (!strcasecmp(c, "up"))
-	keypad->key += WIDGET_KEY_UP;
+        keypad->key += WIDGET_KEY_UP;
     else if (!strcasecmp(c, "down"))
-	keypad->key += WIDGET_KEY_DOWN;
+        keypad->key += WIDGET_KEY_DOWN;
     else if (!strcasecmp(c, "left"))
-	keypad->key += WIDGET_KEY_LEFT;
+        keypad->key += WIDGET_KEY_LEFT;
     else if (!strcasecmp(c, "right"))
-	keypad->key += WIDGET_KEY_RIGHT;
+        keypad->key += WIDGET_KEY_RIGHT;
     else if (!strcasecmp(c, "cancel"))
-	keypad->key += WIDGET_KEY_CANCEL;
+        keypad->key += WIDGET_KEY_CANCEL;
     else
-	keypad->key += WIDGET_KEY_CONFIRM;
+        keypad->key += WIDGET_KEY_CONFIRM;
 
     free(section);
     Self->data = keypad;
@@ -115,9 +115,9 @@ int widget_keypad_find(WIDGET * Self, void *needle)
     KEYPADKEY key = *(KEYPADKEY *) needle;
 
     if (Self && Self->data) {
-	keypad = Self->data;
-	if (keypad->key == key)
-	    return 0;
+        keypad = Self->data;
+        if (keypad->key == key)
+            return 0;
     }
 
     return -1;
@@ -126,10 +126,10 @@ int widget_keypad_find(WIDGET * Self, void *needle)
 int widget_keypad_quit(WIDGET * Self)
 {
     if (Self && Self->data) {
-	WIDGET_KEYPAD *keypad = Self->data;
-	property_free(&keypad->expression);
-	free(Self->data);
-	Self->data = NULL;
+        WIDGET_KEYPAD *keypad = Self->data;
+        property_free(&keypad->expression);
+        free(Self->data);
+        Self->data = NULL;
     }
     return 0;
 }

@@ -84,9 +84,9 @@ static unsigned short CRC(const char *s)
     crc = 0xffff;
 
     while (*s != '\0') {
-	crc ^= *s++;
-	for (i = 0; i < 8; i++)
-	    crc = (crc >> 1) ^ ((crc & 1) ? CRCPOLY : 0);
+        crc ^= *s++;
+        for (i = 0; i < 8; i++)
+            crc = (crc >> 1) ^ ((crc & 1) ? CRCPOLY : 0);
     }
     return crc;
 }
@@ -104,34 +104,34 @@ static void exec_thread(void *data)
 
     /* forever... */
     while (1) {
-	pipe = popen(Thread->cmd, "r");
-	if (pipe == NULL) {
-	    error("exec error: could not run pipe '%s': %s", Thread->cmd, strerror(errno));
-	    len = 0;
-	} else {
-	    len = fread(buffer, 1, SHM_SIZE - 1, pipe);
-	    if (len <= 0) {
-		error("exec error: could not read from pipe '%s': %s", Thread->cmd, strerror(errno));
-		len = 0;
-	    }
-	    pclose(pipe);
-	}
+        pipe = popen(Thread->cmd, "r");
+        if (pipe == NULL) {
+            error("exec error: could not run pipe '%s': %s", Thread->cmd, strerror(errno));
+            len = 0;
+        } else {
+            len = fread(buffer, 1, SHM_SIZE - 1, pipe);
+            if (len <= 0) {
+                error("exec error: could not read from pipe '%s': %s", Thread->cmd, strerror(errno));
+                len = 0;
+            }
+            pclose(pipe);
+        }
 
-	/* force trailing zero */
-	buffer[len] = '\0';
+        /* force trailing zero */
+        buffer[len] = '\0';
 
-	/* remove trailing CR/LF */
-	while (len > 0 && (buffer[len - 1] == '\n' || buffer[len - 1] == '\r')) {
-	    buffer[--len] = '\0';
-	}
+        /* remove trailing CR/LF */
+        while (len > 0 && (buffer[len - 1] == '\n' || buffer[len - 1] == '\r')) {
+            buffer[--len] = '\0';
+        }
 
-	/* lock shared memory */
-	mutex_lock(Thread->mutex);
-	/* write data */
-	strncpy(Thread->ret, buffer, SHM_SIZE);
-	/* unlock shared memory */
-	mutex_unlock(Thread->mutex);
-	usleep(Thread->delay);
+        /* lock shared memory */
+        mutex_lock(Thread->mutex);
+        /* write data */
+        strncpy(Thread->ret, buffer, SHM_SIZE);
+        /* unlock shared memory */
+        mutex_unlock(Thread->mutex);
+        usleep(Thread->delay);
     }
 }
 
@@ -141,13 +141,13 @@ static void destroy_exec_thread(const int n)
     thread_destroy(Thread[n].pid);
 
     if (Thread[n].mutex != 0)
-	mutex_destroy(Thread[n].mutex);
+        mutex_destroy(Thread[n].mutex);
     if (Thread[n].cmd)
-	free(Thread[n].cmd);
+        free(Thread[n].cmd);
     if (Thread[n].key)
-	free(Thread[n].key);
+        free(Thread[n].key);
     if (Thread[n].ret)
-	shm_destroy(Thread[n].shmid, Thread[n].ret);
+        shm_destroy(Thread[n].shmid, Thread[n].ret);
 
     Thread[n].delay = 0;
     Thread[n].mutex = 0;
@@ -164,8 +164,8 @@ static int create_exec_thread(const char *cmd, const char *key, const int delay)
     char name[10];
 
     if (max_thread >= NUM_THREADS) {
-	error("cannot create exec thread <%s>: thread buffer full!", cmd);
-	return -1;
+        error("cannot create exec thread <%s>: thread buffer full!", cmd);
+        return -1;
     }
 
     max_thread++;
@@ -181,9 +181,9 @@ static int create_exec_thread(const char *cmd, const char *key, const int delay)
 
     /* catch error */
     if (Thread[max_thread].shmid < 0) {
-	error("cannot create exec thread <%s>: shared memory allocation failed!", cmd);
-	destroy_exec_thread(max_thread--);
-	return -1;
+        error("cannot create exec thread <%s>: shared memory allocation failed!", cmd);
+        destroy_exec_thread(max_thread--);
+        return -1;
     }
 
     /* create thread */
@@ -192,9 +192,9 @@ static int create_exec_thread(const char *cmd, const char *key, const int delay)
 
     /* catch error */
     if (Thread[max_thread].pid < 0) {
-	error("cannot create exec thread <%s>: fork failed?!", cmd);
-	destroy_exec_thread(max_thread--);
-	return -1;
+        error("cannot create exec thread <%s>: fork failed?!", cmd);
+        destroy_exec_thread(max_thread--);
+        return -1;
     }
 
     return 0;
@@ -208,33 +208,33 @@ static int do_exec(const char *cmd, const char *key, int delay)
     age = hash_age(&EXEC, key);
 
     if (age < 0) {
-	hash_put(&EXEC, key, "");
-	/* first-time call: create thread */
-	if (delay < 10) {
-	    error("exec(%s): delay %d is too short! using 10 msec", cmd, delay);
-	    delay = 10;
-	}
-	if (create_exec_thread(cmd, key, 1000 * delay)) {
-	    return -1;
-	}
-	return 0;
+        hash_put(&EXEC, key, "");
+        /* first-time call: create thread */
+        if (delay < 10) {
+            error("exec(%s): delay %d is too short! using 10 msec", cmd, delay);
+            delay = 10;
+        }
+        if (create_exec_thread(cmd, key, 1000 * delay)) {
+            return -1;
+        }
+        return 0;
     }
 
     /* reread every 10 msec only */
     if (age > 0 && age <= 10)
-	return 0;
+        return 0;
 
     /* find thread */
     for (i = 0; i <= max_thread; i++) {
-	if (strcmp(key, Thread[i].key) == 0) {
-	    /* lock shared memory */
-	    mutex_lock(Thread[i].mutex);
-	    /* copy data */
-	    hash_put(&EXEC, key, Thread[i].ret);
-	    /* unlock shared memory */
-	    mutex_unlock(Thread[i].mutex);
-	    return 0;
-	}
+        if (strcmp(key, Thread[i].key) == 0) {
+            /* lock shared memory */
+            mutex_lock(Thread[i].mutex);
+            /* copy data */
+            hash_put(&EXEC, key, Thread[i].ret);
+            /* unlock shared memory */
+            mutex_unlock(Thread[i].mutex);
+            return 0;
+        }
     }
 
     error("internal error: could not find thread exec-%s", key);
@@ -252,13 +252,13 @@ static void my_exec(RESULT * result, RESULT * arg1, RESULT * arg2)
     qprintf(key, sizeof(key), "%x", CRC(cmd));
 
     if (do_exec(cmd, key, delay) < 0) {
-	SetResult(&result, R_STRING, "");
-	return;
+        SetResult(&result, R_STRING, "");
+        return;
     }
 
     val = hash_get(&EXEC, key, NULL);
     if (val == NULL)
-	val = "";
+        val = "";
 
     SetResult(&result, R_STRING, val);
 }
@@ -277,7 +277,7 @@ void plugin_exit_exec(void)
     int i;
 
     for (i = 0; i <= max_thread; i++) {
-	destroy_exec_thread(i);
+        destroy_exec_thread(i);
     }
 
     hash_destroy(&EXEC);

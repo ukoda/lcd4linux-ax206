@@ -101,28 +101,28 @@ static int socket_open(const char *name, int port)
 
     sock = socket(PF_INET, SOCK_STREAM, 0);
     if (sock < 0) {
-	error("[hddtemp] failed to create socket: %s", strerror(errno));
-	return -1;
+        error("[hddtemp] failed to create socket: %s", strerror(errno));
+        return -1;
     }
 
     memset(&server, 0, sizeof(server));
     if ((addr = inet_addr(name)) != INADDR_NONE) {
-	memcpy((char *) &server.sin_addr, &addr, sizeof(addr));
+        memcpy((char *) &server.sin_addr, &addr, sizeof(addr));
     } else {
-	host_info = gethostbyname(name);
-	if (NULL == host_info) {
-	    error("[hddtemp] Unknown server: %s", name);
-	    return -1;
-	}
-	memcpy((char *) &server.sin_addr, host_info->h_addr, host_info->h_length);
+        host_info = gethostbyname(name);
+        if (NULL == host_info) {
+            error("[hddtemp] Unknown server: %s", name);
+            return -1;
+        }
+        memcpy((char *) &server.sin_addr, host_info->h_addr, host_info->h_length);
     }
 
     server.sin_family = AF_INET;
     server.sin_port = htons(port);
 
     if (connect(sock, (struct sockaddr *) &server, sizeof(server)) < 0) {
-	error("[hddtemp] can't connect to server %s: %s", name, strerror(errno));
-	return -1;
+        error("[hddtemp] can't connect to server %s: %s", name, strerror(errno));
+        return -1;
     }
 
     return sock;
@@ -135,22 +135,22 @@ static size_t hddtemp_read(int socket, char *buffer, size_t size)
     ssize_t len;
 
     while (count < size) {
-	len = read(socket, buffer + count, size - count);
-	if (len > 0) {
-	    count += len;
-	} else if (len < 0) {
-	    error("[hddtemp] couldn't read from socket: %s", strerror(errno));
-	    return -1;
-	} else {
-	    break;		/* remote socket has closed */
-	}
+        len = read(socket, buffer + count, size - count);
+        if (len > 0) {
+            count += len;
+        } else if (len < 0) {
+            error("[hddtemp] couldn't read from socket: %s", strerror(errno));
+            return -1;
+        } else {
+            break;              /* remote socket has closed */
+        }
     }
 
     // null-terminate the string
     if (count < size) {
-	buffer[count] = '\0';
+        buffer[count] = '\0';
     } else {
-	buffer[size - 1] = '\0';
+        buffer[size - 1] = '\0';
     }
 
     return count;
@@ -163,8 +163,8 @@ static int hddtemp_connect(const char *host, int port, char *buffer, size_t size
 
     socket = socket_open(host, port);
     if (socket < 0) {
-	error("[hddtemp] Error accessing %s:%d: %s", host, port, strerror(errno));
-	return -1;
+        error("[hddtemp] Error accessing %s:%d: %s", host, port, strerror(errno));
+        return -1;
     }
 
     ret = hddtemp_read(socket, buffer, size);
@@ -187,23 +187,23 @@ static char *split(const char *value, const int column)
     p = value;
     q = NULL;
     for (v = value; v && *v; v++) {
-	if (*v == '|') {
-	    if (c == column) {
-		q = v;
-		break;
-	    } else {
-		p = v + 1;
-	    }
-	    c++;
-	}
+        if (*v == '|') {
+            if (c == column) {
+                q = v;
+                break;
+            } else {
+                p = v + 1;
+            }
+            c++;
+        }
     }
 
     if (c < column)
-	return NULL;
+        return NULL;
 
     l = q ? (size_t) (q - p) : strlen(p);
     if (l >= sizeof(buffer))
-	l = sizeof(buffer) - 1;
+        l = sizeof(buffer) - 1;
     strncpy(buffer, p, l);
 
     buffer[l] = '\0';
@@ -218,18 +218,18 @@ static char *hddtemp_fetch(const char *host, int port, const char *device)
 
     /* fetch a buffer of all hddtemps */
     if (!hddtemp_connect(host, port, buffer, sizeof(buffer))) {
-	return "err";
+        return "err";
     }
 
     i = 1;
     while (1) {
-	key = split(buffer, i);
-	if (key == NULL)
-	    break;
-	if (strcmp(device, key) == 0) {
-	    return split(buffer, i + 2);
-	}
-	i += 5;
+        key = split(buffer, i);
+        if (key == NULL)
+            break;
+        if (strcmp(device, key) == 0) {
+            return split(buffer, i + 2);
+        }
+        i += 5;
     }
 
     return "n/a";
@@ -245,23 +245,23 @@ static void my_hddtemp(RESULT * result, int argc, RESULT * argv[])
 
     switch (argc) {
     case 0:
-	break;
+        break;
     case 1:
-	device = R2S(argv[0]);
-	break;
+        device = R2S(argv[0]);
+        break;
     case 2:
-	host = R2S(argv[0]);
-	device = R2S(argv[1]);
-	break;
+        host = R2S(argv[0]);
+        device = R2S(argv[1]);
+        break;
     case 3:
-	host = R2S(argv[0]);
-	port = (int) R2N(argv[1]);
-	device = R2S(argv[2]);
-	break;
+        host = R2S(argv[0]);
+        port = (int) R2N(argv[1]);
+        device = R2S(argv[2]);
+        break;
     default:
-	error("hddtemp(): too many parameters");
-	SetResult(&result, R_STRING, "");
-	return;
+        error("hddtemp(): too many parameters");
+        SetResult(&result, R_STRING, "");
+        return;
     }
 
     value = hddtemp_fetch(host, port, device);

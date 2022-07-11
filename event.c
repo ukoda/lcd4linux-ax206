@@ -71,7 +71,7 @@
 #endif
 
 typedef struct {
-    void (*callback) (event_flags_t flags, void *data);
+    void (*callback)(event_flags_t flags, void *data);
     void *data;
     int fd;
     int read;
@@ -86,8 +86,8 @@ static event_t *events = NULL;
 static int event_count = 0;
 static void free_events(void);
 
-int event_add(void (*callback) (event_flags_t flags, void *data), void *data, const int fd, const int read,
-	      const int write, const int active)
+int event_add(void (*callback)(event_flags_t flags, void *data), void *data, const int fd, const int read,
+              const int write, const int active)
 {
     event_count++;
     events = realloc(events, sizeof(event_t) * event_count);
@@ -109,19 +109,19 @@ int event_process(const struct timespec *timeout)
     int i, j;
     struct pollfd *fds = malloc(sizeof(struct pollfd) * event_count);
     for (i = 0, j = 0; i < event_count; i++) {
-	events[i].fds_id = -1;
-	if (events[i].active) {
-	    events[i].fds_id = j;
-	    fds[j].events = 0;
-	    fds[j].fd = events[i].fd;
-	    if (events[i].read) {
-		fds[j].events |= POLLIN;
-	    }
-	    if (events[i].write) {
-		fds[j].events |= POLLOUT;
-	    }
-	    j++;
-	}
+        events[i].fds_id = -1;
+        if (events[i].active) {
+            events[i].fds_id = j;
+            fds[j].events = 0;
+            fds[j].fd = events[i].fd;
+            if (events[i].read) {
+                fds[j].events |= POLLIN;
+            }
+            if (events[i].write) {
+                fds[j].events |= POLLOUT;
+            }
+            j++;
+        }
     }
 #if (__GLIBC__ >= 2 && __GLIBC_MINOR__ >= 4)
     int ready = ppoll(fds, j, timeout, NULL);
@@ -130,30 +130,30 @@ int event_process(const struct timespec *timeout)
 #endif
 
     if (ready > 0) {
-	//search the file descriptors, call all relavant callbacks
-	for (i = 0, j = 0; i < event_count; i++) {
-	    if (events[i].fds_id != j) {
-		continue;
-	    }
-	    if (fds[j].revents) {
-		int flags = 0;
-		if (fds[j].revents & POLLIN) {
-		    flags |= EVENT_READ;
-		}
-		if (fds[j].revents & POLLOUT) {
-		    flags |= EVENT_WRITE;
-		}
-		if (fds[j].revents & POLLHUP) {
-		    flags |= EVENT_HUP;
-		}
-		if (fds[j].revents & POLLERR) {
-		    flags |= EVENT_ERR;
-		}
-		events[i].callback(flags, events[i].data);
+        //search the file descriptors, call all relavant callbacks
+        for (i = 0, j = 0; i < event_count; i++) {
+            if (events[i].fds_id != j) {
+                continue;
+            }
+            if (fds[j].revents) {
+                int flags = 0;
+                if (fds[j].revents & POLLIN) {
+                    flags |= EVENT_READ;
+                }
+                if (fds[j].revents & POLLOUT) {
+                    flags |= EVENT_WRITE;
+                }
+                if (fds[j].revents & POLLHUP) {
+                    flags |= EVENT_HUP;
+                }
+                if (fds[j].revents & POLLERR) {
+                    flags |= EVENT_ERR;
+                }
+                events[i].callback(flags, events[i].data);
 
-	    }
-	    j++;
-	}
+            }
+            j++;
+        }
     }
     free(fds);
     return 0;
@@ -164,10 +164,10 @@ int event_del(const int fd)
 {
     int i;
     for (i = 0; i < event_count; i++) {
-	if (events[i].fd == fd) {
-	    events[i] = events[event_count - 1];
-	    break;
-	}
+        if (events[i].fd == fd) {
+            events[i] = events[event_count - 1];
+            break;
+        }
     }
     event_count--;
     events = realloc(events, sizeof(event_t) * event_count);
@@ -178,12 +178,12 @@ int event_modify(const int fd, const int read, const int write, const int active
 {
     int i;
     for (i = 0; i < event_count; i++) {
-	if (events[i].fd == fd) {
-	    events[i].read = read;
-	    events[i].write = write;
-	    events[i].active = active;
-	    break;
-	}
+        if (events[i].fd == fd) {
+            events[i].read = read;
+            events[i].write = write;
+            events[i].active = active;
+            break;
+        }
     }
     event_count--;
     events = realloc(events, sizeof(event_t) * event_count);
@@ -193,7 +193,7 @@ int event_modify(const int fd, const int read, const int write, const int active
 static void free_events(void)
 {
     if (events != NULL) {
-	free(events);
+        free(events);
     }
     event_count = 0;
     events = NULL;
@@ -213,7 +213,7 @@ void event_exit(void)
 
 //we rely on "=" working for copying these structs (no pointers except the callers)
 typedef struct {
-    void (*callback) (void *data);
+    void (*callback)(void *data);
     void *data;
 } event_callback_t;
 
@@ -227,27 +227,27 @@ typedef struct {
 static named_event_list_t *ev_names = NULL;
 static int ev_count = 0;
 
-int named_event_add(char *event, void (*callback) (void *data), void *data)
+int named_event_add(char *event, void (*callback)(void *data), void *data)
 {
-    if (event == NULL || strlen(event) == 0) {
-	return 1;
+    if(event == NULL || strlen(event) == 0) {
+        return 1;
     }
     if (callback == NULL) {
-	return 2;
+        return 2;
     }
     int i;
     for (i = 0; i < ev_count; i++) {
-	if (0 == strcmp(event, ev_names[i].name)) {
-	    break;
-	}
+        if (0 == strcmp(event, ev_names[i].name)) {
+            break;
+        }
     }
     if (i >= ev_count) {
-	//create the entry
-	ev_count++;
-	ev_names = realloc(ev_names, sizeof(named_event_list_t) * ev_count);
-	ev_names[i].name = strdup(event);
-	ev_names[i].callback_count = 0;
-	ev_names[i].c = NULL;
+        //create the entry
+        ev_count++;
+        ev_names = realloc(ev_names, sizeof(named_event_list_t) * ev_count);
+        ev_names[i].name = strdup(event);
+        ev_names[i].callback_count = 0;
+        ev_names[i].c = NULL;
     }
     int j = ev_names[i].callback_count;
     ev_names[i].callback_count++;
@@ -258,31 +258,31 @@ int named_event_add(char *event, void (*callback) (void *data), void *data)
     return 0;
 }
 
-int named_event_del(char *event, void (*callback) (void *data), void *data)
+int named_event_del(char *event, void (*callback)(void *data), void *data)
 {
     int i, j;
     for (i = 0; i < ev_count; i++) {
-	if (0 == strcmp(event, ev_names[i].name)) {
-	    break;
-	}
+        if (0 == strcmp(event, ev_names[i].name)) {
+            break;
+        }
     }
     if (i >= ev_count) {
-	return 1;		//nothing removed
+        return 1;               //nothing removed
     }
     for (j = 0; j < ev_names[i].callback_count; j++) {
-	if (ev_names[i].c[j].callback == callback && ev_names[i].c[j].data == data) {
-	    ev_names[i].callback_count--;
-	    ev_names[i].c[j] = ev_names[i].c[ev_names[i].callback_count];
-	    ev_names[i].c = realloc(ev_names[i].c, sizeof(event_callback_t) * ev_names[i].callback_count);
-	    if (ev_names[i].callback_count == 0) {
-		//drop this event
-		free(ev_names[i].name);
-		ev_count--;
-		ev_names[i] = ev_names[ev_count];
-		ev_names = realloc(ev_names, sizeof(named_event_list_t) * ev_count);
-	    }
-	    return 0;
-	}
+        if (ev_names[i].c[j].callback == callback && ev_names[i].c[j].data == data) {
+            ev_names[i].callback_count--;
+            ev_names[i].c[j] = ev_names[i].c[ev_names[i].callback_count];
+            ev_names[i].c = realloc(ev_names[i].c, sizeof(event_callback_t) * ev_names[i].callback_count);
+            if (ev_names[i].callback_count == 0) {
+                //drop this event
+                free(ev_names[i].name);
+                ev_count--;
+                ev_names[i] = ev_names[ev_count];
+                ev_names = realloc(ev_names, sizeof(named_event_list_t) * ev_count);
+            }
+            return 0;
+        }
     }
     return 2;
 }
@@ -291,12 +291,12 @@ int named_event_trigger(char *event)
 {
     int i, j;
     for (i = 0; i < ev_count; i++) {
-	if (0 == strcmp(event, ev_names[i].name)) {
-	    for (j = 0; j < ev_names[i].callback_count; j++) {
-		ev_names[i].c[j].callback(ev_names[i].c[j].data);
-	    }
-	    return 0;
-	}
+        if (0 == strcmp(event, ev_names[i].name)) {
+            for (j = 0; j < ev_names[i].callback_count; j++) {
+                ev_names[i].c[j].callback(ev_names[i].c[j].data);
+            }
+            return 0;
+        }
     }
     return 1;
 }

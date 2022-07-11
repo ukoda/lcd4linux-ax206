@@ -124,16 +124,16 @@
 
 /* #define RB_WITH_LEDS 1 */
 
-#ifdef RB_WITH_LEDS		/* Build without socket&led support */
+#ifdef RB_WITH_LEDS             /* Build without socket&led support */
 
 #include <arpa/inet.h>
 #include <sys/socket.h>
 #include <sys/poll.h>
 
-#define POLL_TIMEOUT	10	/* Socket poll timeout */
-#define MAXMSG_SIZE	100	/* Max messagge we can receive */
+#define POLL_TIMEOUT	10      /* Socket poll timeout */
+#define MAXMSG_SIZE	100     /* Max messagge we can receive */
 
-static int sock_c;		/* Socket handler */
+static int sock_c;              /* Socket handler */
 static struct sockaddr_in *sacl;
 char sock_msg[MAXMSG_SIZE];
 
@@ -162,12 +162,12 @@ static int Capabilities;
  * we use the worst-case values.
  */
 
-#define T_INIT1 4100		/* first init sequence:  4.1 msec */
-#define T_INIT2  100		/* second init sequence: 100 usec */
-#define T_EXEC    80		/* normal execution time */
-#define T_WRCG   120		/* CG RAM Write */
-#define T_CLEAR 1680		/* Clear Display */
-#define T_AS      60		/* Address setup time */
+#define T_INIT1 4100            /* first init sequence:  4.1 msec */
+#define T_INIT2  100            /* second init sequence: 100 usec */
+#define T_EXEC    80            /* normal execution time */
+#define T_WRCG   120            /* CG RAM Write */
+#define T_CLEAR 1680            /* Clear Display */
+#define T_AS      60            /* Address setup time */
 
 
 /* buffer holding the GPO state */
@@ -185,9 +185,9 @@ typedef struct {
 #define CAP_HD66712    (1<<0)
 
 static MODEL Models[] = {
-    {0x01, "HD44780", 0},
-    {0x02, "HD66712", CAP_HD66712},
-    {0xff, "Unknown", 0}
+    { 0x01, "HD44780", 0 },
+    { 0x02, "HD66712", CAP_HD66712 },
+    { 0xff, "Unknown", 0 }
 };
 
 
@@ -201,43 +201,43 @@ static int drv_RB_sock_init()
 {
 
     if ((sacl = (struct sockaddr_in *) malloc(sizeof(struct sockaddr_in))) == NULL) {
-	return -1;
+        return -1;
     }
 
     memset(sacl, 0, sizeof(struct sockaddr_in));
     sacl->sin_family = AF_INET;
-    sacl->sin_port = htons(3333);	/* Listen Port */
-    sacl->sin_addr.s_addr = inet_addr("127.0.0.1");	/* Listen Address */
+    sacl->sin_port = htons(3333);       /* Listen Port */
+    sacl->sin_addr.s_addr = inet_addr("127.0.0.1");     /* Listen Address */
 
     if ((sock_c = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
-	error("Socket open failed");
-	free(sacl);
-	return -1;
+        error("Socket open failed");
+        free(sacl);
+        return -1;
     }
 
     if (bind(sock_c, (struct sockaddr *) sacl, sizeof(struct sockaddr_in)) < 0) {
-	error("Socket bind open failed");
-	free(sacl);
-	return -1;
+        error("Socket bind open failed");
+        free(sacl);
+        return -1;
     }
     return 0;
 }
 
 
-static void drv_RB_poll_data(void __attribute__ ((unused)) * notused)
+static void drv_RB_poll_data(void __attribute__((unused)) * notused)
 {
     int len, size;
     struct pollfd usfd;
     usfd.fd = sock_c;
     usfd.events = POLLIN | POLLPRI;
     while (poll(&usfd, 1, POLL_TIMEOUT) > 0) {
-	len = sizeof(struct sockaddr_in);
-	if ((size = recvfrom(sock_c, sock_msg, MAXMSG_SIZE, 0, (struct sockaddr *) sacl, (socklen_t *) & len)) < 0);
-	else {
-	    RB_Leds &= 0x0fff;
-	    RB_Leds |= (sock_msg[0] & 0x0F) << 12;
-	    /* fprintf(stderr, "Received data %s\n",sock_msg); */
-	}
+        len = sizeof(struct sockaddr_in);
+        if ((size = recvfrom(sock_c, sock_msg, MAXMSG_SIZE, 0, (struct sockaddr *) sacl, (socklen_t *) & len)) < 0);
+        else {
+            RB_Leds &= 0x0fff;
+            RB_Leds |= (sock_msg[0] & 0x0F) << 12;
+            /* fprintf(stderr, "Received data %s\n",sock_msg); */
+        }
     }
 }
 
@@ -251,10 +251,10 @@ static void drv_RB_outw(const unsigned int data)
     /* IOCS0 port number can read from PCI Configuration Space Function 0 (F0) */
     /* at index 74h as 16 bit value (see [GEODE] 5.3.1 pg.151 and pg.176 Table 5-29 */
     if (port == 0) {
-	/* get IO permission, here you can't use ioperm command */
-	iopl(3);
-	outl(0x80009074, CAR);
-	port = inw(CDR);
+        /* get IO permission, here you can't use ioperm command */
+        iopl(3);
+        outl(0x80009074, CAR);
+        port = inw(CDR);
     }
 
     outw(data | RB_Leds, port);
@@ -265,17 +265,17 @@ static int drv_RB_backlight(int backlight)
 {
     /* -1 is used to query  the current Backlight */
     if (backlight == -1) {
-	return (RB_Leds & LCD_BACKLIGHT) ? 1 : 0;
+        return (RB_Leds & LCD_BACKLIGHT) ? 1 : 0;
     }
 
     if (backlight > 0) {
-	/* set bit */
-	RB_Leds |= LCD_BACKLIGHT;
-	backlight = 1;
+        /* set bit */
+        RB_Leds |= LCD_BACKLIGHT;
+        backlight = 1;
     } else {
-	backlight = 0;
-	/* clear bit */
-	RB_Leds &= ~LCD_BACKLIGHT;
+        backlight = 0;
+        /* clear bit */
+        RB_Leds &= ~LCD_BACKLIGHT;
     }
 
     /* Set backlight output */
@@ -307,18 +307,18 @@ static void drv_RB_data(const char *string, const int len, const int delay)
 
     /* sanity check */
     if (len <= 0)
-	return;
+        return;
 
     while (l--) {
 
-	ch = *(string++);
+        ch = *(string++);
 
-	drv_RB_outw(ch | LCD_AFDX | LCD_INITX);
-	ndelay(T_AS);
-	drv_RB_outw(ch | LCD_AFDX);
+        drv_RB_outw(ch | LCD_AFDX | LCD_INITX);
+        ndelay(T_AS);
+        drv_RB_outw(ch | LCD_AFDX);
 
-	/* wait for command completion */
-	udelay(delay);
+        /* wait for command completion */
+        udelay(delay);
 
     }
 }
@@ -336,20 +336,20 @@ static void drv_RB_goto(int row, int col)
 
     /* 16x1 Displays are organized as 8x2 :-( */
     if (DCOLS == 16 && DROWS == 1 && col > 7) {
-	row++;
-	col -= 8;
+        row++;
+        col -= 8;
     }
 
     if (Capabilities & CAP_HD66712) {
-	/* the HD66712 doesn't have a braindamadged RAM layout */
-	pos = row * 32 + col;
+        /* the HD66712 doesn't have a braindamadged RAM layout */
+        pos = row * 32 + col;
     } else {
-	/* 16x4 Displays use a slightly different layout */
-	if (DCOLS == 16 && DROWS == 4) {
-	    pos = (row % 2) * 64 + (row / 2) * 16 + col;
-	} else {
-	    pos = (row % 2) * 64 + (row / 2) * 20 + col;
-	}
+        /* 16x4 Displays use a slightly different layout */
+        if (DCOLS == 16 && DROWS == 4) {
+            pos = (row % 2) * 64 + (row / 2) * 16 + col;
+        } else {
+            pos = (row % 2) * 64 + (row / 2) * 20 + col;
+        }
     }
     drv_RB_command((0x80 | pos), T_EXEC);
 }
@@ -368,7 +368,7 @@ static void drv_RB_defchar(const int ascii, const unsigned char *matrix)
     char buffer[8];
 
     for (i = 0; i < 8; i++) {
-	buffer[i] = matrix[i] & 0x1f;
+        buffer[i] = matrix[i] & 0x1f;
     }
 
     drv_RB_command(0x40 | 8 * ascii, T_EXEC);
@@ -381,13 +381,13 @@ static int drv_RB_GPO(const int num, const int val)
     int v;
 
     if (val > 0) {
-	/* set bit */
-	v = 1;
-	GPO |= 1 << num;
+        /* set bit */
+        v = 1;
+        GPO |= 1 << num;
     } else {
-	/* clear bit */
-	v = 0;
-	GPO &= ~(1 << num);
+        /* clear bit */
+        v = 0;
+        GPO &= ~(1 << num);
     }
 
     RB_Leds &= 0x0fff;
@@ -407,85 +407,85 @@ static int drv_RB_start(const char *section, const int quiet)
 
     model = cfg_get(section, "Model", "HD44780");
     if (model != NULL && *model != '\0') {
-	int i;
-	for (i = 0; Models[i].type != 0xff; i++) {
-	    if (strcasecmp(Models[i].name, model) == 0)
-		break;
-	}
-	if (Models[i].type == 0xff) {
-	    error("%s: %s.Model '%s' is unknown from %s", Name, section, model, cfg_source());
-	    return -1;
-	}
-	Model = i;
-	Capabilities = Models[Model].capabilities;
-	info("%s: using model '%s'", Name, Models[Model].name);
+        int i;
+        for (i = 0; Models[i].type != 0xff; i++) {
+            if (strcasecmp(Models[i].name, model) == 0)
+                break;
+        }
+        if (Models[i].type == 0xff) {
+            error("%s: %s.Model '%s' is unknown from %s", Name, section, model, cfg_source());
+            return -1;
+        }
+        Model = i;
+        Capabilities = Models[Model].capabilities;
+        info("%s: using model '%s'", Name, Models[Model].name);
     } else {
-	error("%s: empty '%s.Model' entry from %s", Name, section, cfg_source());
-	return -1;
+        error("%s: empty '%s.Model' entry from %s", Name, section, cfg_source());
+        return -1;
     }
     free(model);
 
     strsize = cfg_get(section, "Size", NULL);
     if (strsize == NULL || *strsize == '\0') {
-	error("%s: no '%s.Size' entry from %s", Name, section, cfg_source());
-	free(strsize);
-	return -1;
+        error("%s: no '%s.Size' entry from %s", Name, section, cfg_source());
+        free(strsize);
+        return -1;
     }
     if (sscanf(strsize, "%dx%d", &cols, &rows) != 2 || rows < 1 || cols < 1) {
-	error("%s: bad %s.Size '%s' from %s", Name, section, strsize, cfg_source());
-	free(strsize);
-	return -1;
+        error("%s: bad %s.Size '%s' from %s", Name, section, strsize, cfg_source());
+        free(strsize);
+        return -1;
     }
     free(strsize);
 
     /*set backlight */
     if (cfg_number(section, "Backlight", 1, 0, 1, &l) > 0) {
-	drv_RB_backlight(l);
+        drv_RB_backlight(l);
     }
 
     if (cfg_number(section, "GPOs", 0, 0, 4, &gpos) < 0)
-	return -1;
+        return -1;
     GPOS = gpos;
     if (GPOS > 0) {
-	info("%s: using %d GPO's", Name, GPOS);
+        info("%s: using %d GPO's", Name, GPOS);
     }
 #ifdef RB_WITH_LEDS
 
     if (drv_RB_sock_init() < 0) {
-	error("Sock error");
-	return -1;
+        error("Sock error");
+        return -1;
     } else
-	timer_add(drv_RB_poll_data, NULL, 500, 0);
+        timer_add(drv_RB_poll_data, NULL, 500, 0);
 
 #endif
 
     DROWS = rows;
     DCOLS = cols;
 
-    drv_RB_command(0x30, T_INIT1);	/* 8 Bit mode, wait 4.1 ms */
-    drv_RB_command(0x30, T_INIT2);	/* 8 Bit mode, wait 100 us */
-    drv_RB_command(0x38, T_EXEC);	/* 8 Bit mode, 1/16 duty cycle, 5x8 font */
+    drv_RB_command(0x30, T_INIT1);      /* 8 Bit mode, wait 4.1 ms */
+    drv_RB_command(0x30, T_INIT2);      /* 8 Bit mode, wait 100 us */
+    drv_RB_command(0x38, T_EXEC);       /* 8 Bit mode, 1/16 duty cycle, 5x8 font */
 
-    drv_RB_command(0x08, T_EXEC);	/* Display off, cursor off, blink off */
-    drv_RB_command(0x0c, T_CLEAR);	/* Display on, cursor off, blink off, wait 1.64 ms */
-    drv_RB_command(0x06, T_EXEC);	/* curser moves to right, no shift */
+    drv_RB_command(0x08, T_EXEC);       /* Display off, cursor off, blink off */
+    drv_RB_command(0x0c, T_CLEAR);      /* Display on, cursor off, blink off, wait 1.64 ms */
+    drv_RB_command(0x06, T_EXEC);       /* curser moves to right, no shift */
 
     if ((Capabilities & CAP_HD66712) && DROWS > 2) {
-	drv_RB_command(0x3c, T_EXEC);	/* set extended register enable bit */
-	drv_RB_command(0x09, T_EXEC);	/* set 4-line mode */
-	drv_RB_command(0x38, T_EXEC);	/* clear extended register enable bit */
+        drv_RB_command(0x3c, T_EXEC);   /* set extended register enable bit */
+        drv_RB_command(0x09, T_EXEC);   /* set 4-line mode */
+        drv_RB_command(0x38, T_EXEC);   /* clear extended register enable bit */
     }
 
     drv_RB_clear();
-    drv_RB_command(0x03, T_CLEAR);	/* return home */
+    drv_RB_command(0x03, T_CLEAR);      /* return home */
 
     if (!quiet) {
-	char buffer[40];
-	qprintf(buffer, sizeof(buffer), "%s %dx%d", Name, DCOLS, DROWS);
-	if (drv_generic_text_greet(buffer, NULL)) {
-	    sleep(3);
-	    drv_RB_clear();
-	}
+        char buffer[40];
+        qprintf(buffer, sizeof(buffer), "%s %dx%d", Name, DCOLS, DROWS);
+        if (drv_generic_text_greet(buffer, NULL)) {
+            sleep(3);
+            drv_RB_clear();
+        }
     }
 
     return 0;
@@ -501,16 +501,16 @@ static void plugin_backlight(RESULT * result, const int argc, RESULT * argv[])
 
     switch (argc) {
     case 0:
-	backlight = drv_RB_backlight(-1);
-	SetResult(&result, R_NUMBER, &backlight);
-	break;
+        backlight = drv_RB_backlight(-1);
+        SetResult(&result, R_NUMBER, &backlight);
+        break;
     case 1:
-	backlight = drv_RB_backlight(R2N(argv[0]));
-	SetResult(&result, R_NUMBER, &backlight);
-	break;
+        backlight = drv_RB_backlight(R2N(argv[0]));
+        SetResult(&result, R_NUMBER, &backlight);
+        break;
     default:
-	error("%s::backlight(): wrong number of parameters", Name);
-	SetResult(&result, R_STRING, "");
+        error("%s::backlight(): wrong number of parameters", Name);
+        SetResult(&result, R_STRING, "");
     }
 }
 
@@ -538,7 +538,7 @@ int drv_RB_list(void)
     int i;
 
     for (i = 0; Models[i].type != 0xff; i++) {
-	printf("%s ", Models[i].name);
+        printf("%s ", Models[i].name);
     }
     return 0;
 }
@@ -553,11 +553,11 @@ int drv_RB_init(const char *section, const int quiet)
     info("%s: %s", Name, "$Rev$");
 
     /* display preferences */
-    XRES = 5;			/* pixel width of one char  */
-    YRES = 8;			/* pixel height of one char  */
-    CHARS = 8;			/* number of user-defineable characters */
-    CHAR0 = 0;			/* ASCII of first user-defineable char */
-    GOTO_COST = 2;		/* number of bytes a goto command requires */
+    XRES = 5;                   /* pixel width of one char  */
+    YRES = 8;                   /* pixel height of one char  */
+    CHARS = 8;                  /* number of user-defineable characters */
+    CHAR0 = 0;                  /* ASCII of first user-defineable char */
+    GOTO_COST = 2;              /* number of bytes a goto command requires */
 
     /* real worker functions */
     drv_generic_text_real_write = drv_RB_write;
@@ -567,32 +567,32 @@ int drv_RB_init(const char *section, const int quiet)
 
     /* start display */
     if ((ret = drv_RB_start(section, quiet)) != 0)
-	return ret;
+        return ret;
 
     /* initialize generic text driver */
     if ((ret = drv_generic_text_init(section, Name)) != 0)
-	return ret;
+        return ret;
 
     /* initialize generic icon driver */
     if ((ret = drv_generic_text_icon_init()) != 0)
-	return ret;
+        return ret;
 
     /* initialize generic bar driver */
     if ((ret = drv_generic_text_bar_init(0)) != 0)
-	return ret;
+        return ret;
 
     /* add fixed chars to the bar driver */
     /* most displays have a full block on ascii 255, but some have kind of  */
     /* an 'inverted P'. If you specify 'asc255bug 1 in the config, this */
     /* char will not be used, but rendered by the bar driver */
     cfg_number(section, "asc255bug", 0, 0, 1, &asc255bug);
-    drv_generic_text_bar_add_segment(0, 0, 255, 32);	/* ASCII  32 = blank */
+    drv_generic_text_bar_add_segment(0, 0, 255, 32);    /* ASCII  32 = blank */
     if (!asc255bug)
-	drv_generic_text_bar_add_segment(255, 255, 255, 255);	/* ASCII 255 = block */
+        drv_generic_text_bar_add_segment(255, 255, 255, 255);   /* ASCII 255 = block */
 
     /* initialize generic GPIO driver */
     if ((ret = drv_generic_gpio_init(section, Name)) != 0)
-	return ret;
+        return ret;
 
     /* register text widget */
     wc = Widget_Text;
@@ -630,11 +630,11 @@ int drv_RB_quit(const int quiet)
 
     /* say goodbye... */
     if (!quiet) {
-	drv_generic_text_greet("goodbye!", NULL);
+        drv_generic_text_greet("goodbye!", NULL);
     }
 #ifdef RB_WITH_LEDS
     close(sock_c);
-    free(sacl);			/*close network socket */
+    free(sacl);                 /*close network socket */
 #endif
 
     return (0);
@@ -665,23 +665,23 @@ int send_packet(unsigned char leds)
     msg[1] = 0;
 
     if ((sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0) {
-	fprintf(stderr, "Socket option failed.\n");
-	return -1;
+        fprintf(stderr, "Socket option failed.\n");
+        return -1;
     }
 
     if ((sas = (struct sockaddr_in *) malloc(sizeof(struct sockaddr_in))) == NULL)
-	return -1;
+        return -1;
     memset(sas, 0, sizeof(struct sockaddr_in));
     sas->sin_family = AF_INET;
     sas->sin_port = htons(3333);
     sas->sin_addr.s_addr = inet_addr("127.0.0.1");
     if (sendto(sock, msg, 6, 0, (struct sockaddr *) sas, sizeof(struct sockaddr_in)) > 0) {
-	free(sas);
-	return 1;
+        free(sas);
+        return 1;
     }
     /* sent ok to dest */
     free(sas);
-    return -1;			/* Send failed */
+    return -1;                  /* Send failed */
 }
 
 int main()

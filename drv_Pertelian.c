@@ -69,7 +69,7 @@ static unsigned char rowoffset[4] = { 0x80, 0x80 + 0x40, 0x80 + 0x14, 0x80 + 0x4
 static int drv_Pertelian_open(const char *section)
 {
     if (drv_generic_serial_open(section, Name, 0) < 0)
-	return -1;
+        return -1;
     return 0;
 }
 
@@ -89,8 +89,8 @@ static void drv_Pertelian_send(const char *data, const unsigned int len)
        so we have to slow things down a tad yes 1usec is enough  */
 
     for (i = 0; i < len; i++) {
-	drv_generic_serial_write(&data[i], 1);
-	usleep(100);
+        drv_generic_serial_write(&data[i], 1);
+        usleep(100);
     }
 }
 
@@ -124,7 +124,7 @@ static void drv_Pertelian_defchar(const int ascii, const unsigned char *matrix)
     cmd[0] = PERTELIAN_LCDCOMMAND;
     cmd[1] = (0x40 + (8 * ascii));
     for (i = 0; i < 8; i++) {
-	cmd[i + 2] = matrix[i] & 0x1f;
+        cmd[i + 2] = matrix[i] & 0x1f;
     }
     drv_Pertelian_send(cmd, 10);
 }
@@ -135,9 +135,9 @@ static int drv_Pertelian_backlight(int backlight)
     char cmd[2];
 
     if (backlight <= 0)
-	backlight = 2;
+        backlight = 2;
     else if (backlight >= 1)
-	backlight = 3;
+        backlight = 3;
 
     cmd[0] = PERTELIAN_LCDCOMMAND;
     cmd[1] = backlight;
@@ -157,13 +157,13 @@ static int drv_Pertelian_start(const char *section)
 
     s = cfg_get(section, "Size", NULL);
     if (s == NULL || *s == '\0') {
-	error("%s: no '%s.Size' entry from %s", Name, section, cfg_source());
-	return -1;
+        error("%s: no '%s.Size' entry from %s", Name, section, cfg_source());
+        return -1;
     }
     if (sscanf(s, "%dx%d", &cols, &rows) != 2 || rows < 1 || cols < 1) {
-	error("%s: bad %s.Size '%s' from %s", Name, section, s, cfg_source());
-	free(s);
-	return -1;
+        error("%s: bad %s.Size '%s' from %s", Name, section, s, cfg_source());
+        free(s);
+        return -1;
     }
 
     DROWS = rows;
@@ -171,7 +171,7 @@ static int drv_Pertelian_start(const char *section)
 
     /* open communication with the display */
     if (drv_Pertelian_open(section) < 0) {
-	return -1;
+        return -1;
     }
 
     /* reset & initialize display */
@@ -180,7 +180,7 @@ static int drv_Pertelian_start(const char *section)
     cmd[2] = PERTELIAN_LCDCOMMAND;
     cmd[3] = 0x06;
     cmd[4] = PERTELIAN_LCDCOMMAND;
-    cmd[5] = 0x10;		/* move cursor on data write */
+    cmd[5] = 0x10;              /* move cursor on data write */
     cmd[6] = PERTELIAN_LCDCOMMAND;
     cmd[7] = 0x0c;
     cmd[8] = 0x0c;
@@ -188,10 +188,10 @@ static int drv_Pertelian_start(const char *section)
     drv_Pertelian_send(cmd, 8);
 
     if (cfg_number(section, "Backlight", 0, 0, 1, &backlight) > 0) {
-	drv_Pertelian_backlight(backlight);
+        drv_Pertelian_backlight(backlight);
     }
 
-    drv_Pertelian_clear();	/* clear display */
+    drv_Pertelian_clear();      /* clear display */
     return 0;
 }
 
@@ -240,11 +240,11 @@ int drv_Pertelian_init(const char *section, const int quiet)
     info("%s: %s", Name, "$Rev$");
 
     /* display preferences */
-    XRES = 5;			/* pixel width of one char  */
-    YRES = 8;			/* pixel height of one char  */
-    CHARS = 8;			/* number of user-defineable characters */
-    CHAR0 = 0;			/* ASCII of first user-defineable char */
-    GOTO_COST = 2;		/* number of bytes a goto command requires */
+    XRES = 5;                   /* pixel width of one char  */
+    YRES = 8;                   /* pixel height of one char  */
+    CHARS = 8;                  /* number of user-defineable characters */
+    CHAR0 = 0;                  /* ASCII of first user-defineable char */
+    GOTO_COST = 2;              /* number of bytes a goto command requires */
 
     /* real worker functions */
     drv_generic_text_real_write = drv_Pertelian_write;
@@ -253,31 +253,31 @@ int drv_Pertelian_init(const char *section, const int quiet)
 
     /* start display */
     if ((ret = drv_Pertelian_start(section)) != 0)
-	return ret;
+        return ret;
 
     if (!quiet) {
-	char buffer[40];
-	qprintf(buffer, sizeof(buffer), "%s %dx%d", Name, DCOLS, DROWS);
-	if (drv_generic_text_greet(buffer, "LinITX.com")) {
-	    sleep(3);
-	    drv_Pertelian_clear();
-	}
+        char buffer[40];
+        qprintf(buffer, sizeof(buffer), "%s %dx%d", Name, DCOLS, DROWS);
+        if (drv_generic_text_greet(buffer, "LinITX.com")) {
+            sleep(3);
+            drv_Pertelian_clear();
+        }
     }
 
     /* initialize generic text driver */
     if ((ret = drv_generic_text_init(section, Name)) != 0)
-	return ret;
+        return ret;
 
     /* initialize generic icon driver */
     if ((ret = drv_generic_text_icon_init()) != 0)
-	return ret;
+        return ret;
 
     /* initialize generic bar driver */
     if ((ret = drv_generic_text_bar_init(0)) != 0)
-	return ret;
+        return ret;
 
     /* add fixed chars to the bar driver */
-    drv_generic_text_bar_add_segment(0, 0, 255, 32);	/* ASCII  32 = blank */
+    drv_generic_text_bar_add_segment(0, 0, 255, 32);    /* ASCII  32 = blank */
 
 
     /* register text widget */
@@ -312,7 +312,7 @@ int drv_Pertelian_quit(const int quiet)
 
     /* say goodbye... */
     if (!quiet) {
-	drv_generic_text_greet("goodbye!", NULL);
+        drv_generic_text_greet("goodbye!", NULL);
     }
 
     drv_Pertelian_backlight(0);

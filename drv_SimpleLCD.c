@@ -117,7 +117,7 @@ static void drv_SL_simple_clear(void)
     cmd[0] = '\r';
     cmd[1] = '\n';
     for (i = 0; i < DROWS; ++i) {
-	drv_generic_serial_write(cmd, 2);
+        drv_generic_serial_write(cmd, 2);
     }
     memset(backbuffer, ' ', backbuffer_size);
 }
@@ -149,13 +149,13 @@ static void drv_SL_commit(int full_commit)
     int row;
     char cmd[2] = { '\r', '\n' };
     if (full_commit) {
-	for (row = 0; row < DROWS; row++) {
-	    drv_generic_serial_write(cmd, 2);
-	    drv_generic_serial_write(backbuffer + (DCOLS * row), DCOLS);
-	}
+        for (row = 0; row < DROWS; row++) {
+            drv_generic_serial_write(cmd, 2);
+            drv_generic_serial_write(backbuffer + (DCOLS * row), DCOLS);
+        }
     } else {
-	drv_generic_serial_write(cmd, 1);	/* Go to the beginning of the line only */
-	drv_generic_serial_write(backbuffer + (DCOLS * (DROWS - 1)), DCOLS);
+        drv_generic_serial_write(cmd, 1);       /* Go to the beginning of the line only */
+        drv_generic_serial_write(backbuffer + (DCOLS * (DROWS - 1)), DCOLS);
     }
 }
 
@@ -163,9 +163,9 @@ static void drv_SL_simple_write(const int row, const int col, const char *data, 
 {
     memcpy(backbuffer + (row * DCOLS) + col, data, len);
     if (row == DROWS - 1)
-	drv_SL_commit(0);
+        drv_SL_commit(0);
     else
-	drv_SL_commit(1);
+        drv_SL_commit(1);
 }
 
 static void drv_SL_vt100_write(const int row, const int col, const char *data, int len)
@@ -194,8 +194,8 @@ static int drv_SL_start(const char *section, const int quiet)
     vt100_mode = 0;
     model = cfg_get(section, "Model", "generic");
     if (model != NULL && *model != '\0') {
-	if (strcasecmp("vt100", model) == 0)
-	    vt100_mode = 1;
+        if (strcasecmp("vt100", model) == 0)
+            vt100_mode = 1;
     }
 
     cfg_number(section, "BarCharValue", 0, 0, 255, &value);
@@ -203,47 +203,47 @@ static int drv_SL_start(const char *section, const int quiet)
     cfg_number(section, "Options", 0, 0, 0xffff, &value);
     flags = value;
     if (drv_generic_serial_open(section, Name, flags) < 0)
-	return -1;
+        return -1;
 
     s = cfg_get(section, "Size", NULL);
     if (s == NULL || *s == '\0') {
-	error("%s: no '%s.Size' entry from %s", Name, section, cfg_source());
-	return -1;
+        error("%s: no '%s.Size' entry from %s", Name, section, cfg_source());
+        return -1;
     }
     if (sscanf(s, "%dx%d", &cols, &rows) != 2 || rows < 1 || cols < 1) {
-	error("%s: bad %s.Size '%s' from %s", Name, section, s, cfg_source());
-	free(s);
-	return -1;
+        error("%s: bad %s.Size '%s' from %s", Name, section, s, cfg_source());
+        free(s);
+        return -1;
     }
 
     DROWS = rows;
     DCOLS = cols;
 
     if (!vt100_mode) {
-	backbuffer_size = DROWS * DCOLS;
-	backbuffer = malloc(backbuffer_size);
-	if (!backbuffer) {
-	    return -1;
-	}
+        backbuffer_size = DROWS * DCOLS;
+        backbuffer = malloc(backbuffer_size);
+        if (!backbuffer) {
+            return -1;
+        }
     }
 
     /* real worker functions */
     if (vt100_mode) {
-	drv_generic_text_real_write = drv_SL_vt100_write;
+        drv_generic_text_real_write = drv_SL_vt100_write;
     } else {
-	drv_generic_text_real_write = drv_SL_simple_write;
+        drv_generic_text_real_write = drv_SL_simple_write;
     }
 
-    drv_SL_clear();		/* clear */
+    drv_SL_clear();             /* clear */
 
 
     if (!quiet) {
-	char buffer[40];
-	qprintf(buffer, sizeof(buffer), "%s %dx%d", Name, DCOLS, DROWS);
-	if (drv_generic_text_greet(buffer, NULL)) {
-	    sleep(3);
-	    drv_SL_clear();
-	}
+        char buffer[40];
+        qprintf(buffer, sizeof(buffer), "%s %dx%d", Name, DCOLS, DROWS);
+        if (drv_generic_text_greet(buffer, NULL)) {
+            sleep(3);
+            drv_SL_clear();
+        }
     }
 
     return 0;
@@ -287,21 +287,21 @@ int drv_SL_init(const char *section, const int quiet)
     info("%s: %s", Name, "$Rev$");
 
     /* display preferences */
-    XRES = 5;			/* pixel width of one char  */
-    YRES = 8;			/* pixel height of one char  */
-    CHARS = 0;			/* number of user-defineable characters */
-    CHAR0 = 0;			/* ASCII of first user-defineable char */
+    XRES = 5;                   /* pixel width of one char  */
+    YRES = 8;                   /* pixel height of one char  */
+    CHARS = 0;                  /* number of user-defineable characters */
+    CHAR0 = 0;                  /* ASCII of first user-defineable char */
 
-    GOTO_COST = -1;		/* number of bytes a goto command requires */
+    GOTO_COST = -1;             /* number of bytes a goto command requires */
 
 
     /* start display */
     if ((ret = drv_SL_start(section, quiet)) != 0)
-	return ret;
+        return ret;
 
     /* initialize generic text driver */
     if ((ret = drv_generic_text_init(section, Name)) != 0)
-	return ret;
+        return ret;
 
     /* register text widget */
     wc = Widget_Text;
@@ -328,15 +328,15 @@ int drv_SL_quit(const int quiet)
 
     /* say goodbye... */
     if (!quiet) {
-	drv_generic_text_greet("goodbye!", NULL);
+        drv_generic_text_greet("goodbye!", NULL);
     }
 
     drv_generic_serial_close();
 
     if (backbuffer) {
-	free(backbuffer);
-	backbuffer = 0;
-	backbuffer_size = 0;
+        free(backbuffer);
+        backbuffer = 0;
+        backbuffer_size = 0;
     }
     return (0);
 }

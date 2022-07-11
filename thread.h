@@ -60,7 +60,7 @@ void mutex_destroy(const int semid);
 int shm_create(void **buffer, const int size);
 void shm_destroy(const int shmid, const void *buffer);
 
-int thread_create(const char *name, void (*thread) (void *data), void *data);
+int thread_create(const char *name, void (*thread)(void *data), void *data);
 int thread_destroy(const int pid);
 
 #endif

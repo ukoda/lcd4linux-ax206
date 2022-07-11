@@ -53,28 +53,28 @@ static void my_uname(RESULT * result, RESULT * arg1)
     key = R2S(arg1);
 
     if (uname(&utsbuf) != 0) {
-	error("uname() failed: %s", strerror(errno));
-	SetResult(&result, R_STRING, "");
-	return;
+        error("uname() failed: %s", strerror(errno));
+        SetResult(&result, R_STRING, "");
+        return;
     }
 
     if (strcasecmp(key, "sysname") == 0) {
-	value = utsbuf.sysname;
+        value = utsbuf.sysname;
     } else if (strcasecmp(key, "nodename") == 0) {
-	value = utsbuf.nodename;
+        value = utsbuf.nodename;
     } else if (strcasecmp(key, "release") == 0) {
-	value = utsbuf.release;
+        value = utsbuf.release;
     } else if (strcasecmp(key, "version") == 0) {
-	value = utsbuf.version;
+        value = utsbuf.version;
     } else if (strcasecmp(key, "machine") == 0) {
-	value = utsbuf.machine;
+        value = utsbuf.machine;
 #if defined(_GNU_SOURCE) && ! defined(__APPLE__) && ! defined(__CYGWIN__)
     } else if (strcasecmp(key, "domainname") == 0) {
-	value = utsbuf.domainname;
+        value = utsbuf.domainname;
 #endif
     } else {
-	error("uname: unknown field '%s'", key);
-	value = "";
+        error("uname: unknown field '%s'", key);
+        value = "";
     }
 
     SetResult(&result, R_STRING, value);

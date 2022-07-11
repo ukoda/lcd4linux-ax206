@@ -78,7 +78,7 @@
 
 #define DSP_MEM (80 * 32 * 2 / 8)
 
-#define DEFAULT_X_OFFSET   1	/* with a font width of 6 */
+#define DEFAULT_X_OFFSET   1    /* with a font width of 6 */
 
 static char Name[] = "LEDMatrix";
 static char *IPAddress = NULL;
@@ -99,20 +99,20 @@ static void drv_LEDMatrix_blit(const int row, const int col, const int height, c
     int timeout = 10;
 
     for (r = row; r < row + height; r++) {
-	for (c = col; c < col + width; c++) {
-	    /* LEDMATRIX supports three colors: 10b == green, 01b == red, 11b == amber */
+        for (c = col; c < col + width; c++) {
+            /* LEDMATRIX supports three colors: 10b == green, 01b == red, 11b == amber */
 
-	    unsigned char color = 0;
-	    RGBA p = drv_generic_graphic_rgb(r, c);
-	    if (p.G >= 128)
-		color |= 0x80;
-	    if (p.R >= 128)
-		color |= 0x40;
-	    /* ignore blue ... */
+            unsigned char color = 0;
+            RGBA p = drv_generic_graphic_rgb(r, c);
+            if (p.G >= 128)
+                color |= 0x80;
+            if (p.R >= 128)
+                color |= 0x40;
+            /* ignore blue ... */
 
-	    tx_buffer[1 + 20 * r + c / 4] &= ~(0xc0 >> (2 * (c & 3)));
-	    tx_buffer[1 + 20 * r + c / 4] |= color >> (2 * (c & 3));
-	}
+            tx_buffer[1 + 20 * r + c / 4] &= ~(0xc0 >> (2 * (c & 3)));
+            tx_buffer[1 + 20 * r + c / 4] |= color >> (2 * (c & 3));
+        }
     }
 
     /* scan entire display */
@@ -120,43 +120,43 @@ static void drv_LEDMatrix_blit(const int row, const int col, const int height, c
 
     do {
 
-	if ((sendto(sock, tx_buffer, DSP_MEM + 1, 0, (struct sockaddr *) &dsp_addr, sizeof(dsp_addr))) != DSP_MEM + 1)
-	    error("%s: sendto error on socket", Name);
+        if ((sendto(sock, tx_buffer, DSP_MEM + 1, 0, (struct sockaddr *) &dsp_addr, sizeof(dsp_addr))) != DSP_MEM + 1)
+            error("%s: sendto error on socket", Name);
 
-	/* now wait for reply */
+        /* now wait for reply */
 
-	FD_ZERO(&rfds);
-	FD_SET(sock, &rfds);
-	tv.tv_sec = 0;
-	tv.tv_usec = 100000;
+        FD_ZERO(&rfds);
+        FD_SET(sock, &rfds);
+        tv.tv_sec = 0;
+        tv.tv_usec = 100000;
 
-	/* wait 1 sec for ack */
-	if ((i = select(FD_SETSIZE, &rfds, NULL, NULL, &tv)) < 0) {
-	    info("%s: Select error: %s", Name, strerror(errno));
-	}
+        /* wait 1 sec for ack */
+        if ((i = select(FD_SETSIZE, &rfds, NULL, NULL, &tv)) < 0) {
+            info("%s: Select error: %s", Name, strerror(errno));
+        }
 
-	if (FD_ISSET(sock, &rfds)) {
-	    /* wait for ack */
-	    fromlen = sizeof(dsp_addr);
-	    i = recvfrom(sock, reply, sizeof(reply), 0, (struct sockaddr *) &cli_addr, &fromlen);
-	    if (i < 0) {
-		info("%s: Receive error: %s", Name, strerror(errno));
-	    } else {
-		if ((i == 2) && (reply[0] == DSP_CMD_ACK) && (reply[1] == DSP_CMD_IMAGE)) {
-		    ack = 1;
-		} else if ((i > 1) && (reply[0] == DSP_CMD_IR)) {
-		    /* maybe used later: */
-		    /* ir_receive(reply+1, i-1); */
-		} else {
-		    info("%s: Unexpected reply message", Name);
-		}
-	    }
-	}
-	timeout--;
+        if (FD_ISSET(sock, &rfds)) {
+            /* wait for ack */
+            fromlen = sizeof(dsp_addr);
+            i = recvfrom(sock, reply, sizeof(reply), 0, (struct sockaddr *) &cli_addr, &fromlen);
+            if (i < 0) {
+                info("%s: Receive error: %s", Name, strerror(errno));
+            } else {
+                if ((i == 2) && (reply[0] == DSP_CMD_ACK) && (reply[1] == DSP_CMD_IMAGE)) {
+                    ack = 1;
+                } else if ((i > 1) && (reply[0] == DSP_CMD_IR)) {
+                    /* maybe used later: */
+                    /* ir_receive(reply+1, i-1); */
+                } else {
+                    info("%s: Unexpected reply message", Name);
+                }
+            }
+        }
+        timeout--;
     } while ((!ack) && (timeout > 0));
 
     if (timeout == 0) {
-	error("%s: display reply timeout", Name);
+        error("%s: display reply timeout", Name);
     }
 }
 
@@ -169,15 +169,15 @@ static int drv_LEDMatrix_start(const char *section)
 
     IPAddress = cfg_get(section, "IPAddress", NULL);
     if (IPAddress == NULL || *IPAddress == '\0') {
-	error("%s: no '%s.IPAddress' entry from %s", Name, section, cfg_source());
-	return -1;
+        error("%s: no '%s.IPAddress' entry from %s", Name, section, cfg_source());
+        return -1;
     }
 
     if (cfg_number(section, "Port", 0, 0, 65535, &val) > 0) {
-	info("%s: port set to %d", Name, val);
-	port = val;
+        info("%s: port set to %d", Name, val);
+        port = val;
     } else {
-	info("%s: using default port %d", Name, port);
+        info("%s: using default port %d", Name, port);
     }
 
     /* display size is hard coded */
@@ -185,9 +185,9 @@ static int drv_LEDMatrix_start(const char *section)
     DROWS = 32;
 
     if (sscanf(s = cfg_get(section, "font", "6x8"), "%dx%d", &XRES, &YRES) != 2 || XRES < 1 || YRES < 1) {
-	error("%s: bad %s.Font '%s' from %s", Name, section, s, cfg_source());
-	free(s);
-	return -1;
+        error("%s: bad %s.Font '%s' from %s", Name, section, s, cfg_source());
+        free(s);
+        return -1;
     }
     free(s);
 
@@ -196,14 +196,14 @@ static int drv_LEDMatrix_start(const char *section)
 
     /* try to resolve as a hostname */
     if ((hp = gethostbyname(IPAddress)) == NULL) {
-	error("%s: unable to resolve hostname %s: %s", Name, IPAddress, strerror(errno));
-	return -1;
+        error("%s: unable to resolve hostname %s: %s", Name, IPAddress, strerror(errno));
+        return -1;
     }
 
     /* open datagram socket */
     if ((sock = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
-	error("%s: could not create socket: %s", Name, strerror(errno));
-	return -1;
+        error("%s: could not create socket: %s", Name, strerror(errno));
+        return -1;
     }
 
     memset((char *) &dsp_addr, 0, sizeof(dsp_addr));
@@ -216,8 +216,8 @@ static int drv_LEDMatrix_start(const char *section)
     cli_addr.sin_port = htons(port);
 
     if (bind(sock, (struct sockaddr *) &cli_addr, sizeof(cli_addr)) < 0) {
-	error("%s: can't bind local address: %s", Name, strerror(errno));
-	return -1;
+        error("%s: can't bind local address: %s", Name, strerror(errno));
+        return -1;
     }
 
     memset(tx_buffer, 0, sizeof(tx_buffer));
@@ -258,8 +258,8 @@ int drv_LEDMatrix_list(void)
 
 
 /* initialize driver & display */
-int drv_LEDMatrix_init(const char *section, const __attribute__ ((unused))
-		       int quiet)
+int drv_LEDMatrix_init(const char *section, const __attribute__((unused))
+                       int quiet)
 {
     WIDGET_CLASS wc;
     int ret;
@@ -269,11 +269,11 @@ int drv_LEDMatrix_init(const char *section, const __attribute__ ((unused))
 
     /* start display */
     if ((ret = drv_LEDMatrix_start(section)) != 0)
-	return ret;
+        return ret;
 
     /* initialize generic graphic driver */
     if ((ret = drv_generic_graphic_init(section, Name)) != 0)
-	return ret;
+        return ret;
 
     /* register text widget */
     wc = Widget_Text;
@@ -299,15 +299,15 @@ int drv_LEDMatrix_init(const char *section, const __attribute__ ((unused))
 
 
 /* close driver & display */
-int drv_LEDMatrix_quit(const __attribute__ ((unused))
-		       int quiet)
+int drv_LEDMatrix_quit(const __attribute__((unused))
+                       int quiet)
 {
 
     info("%s: shutting down.", Name);
     drv_generic_graphic_quit();
 
     if (sock != -1)
-	close(sock);
+        close(sock);
 
     return (0);
 }

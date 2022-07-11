@@ -29,9 +29,9 @@
 
 typedef struct DRIVER {
     char *name;
-    int (*list) (void);
-    int (*init) (const char *section, const int quiet);
-    int (*quit) (const int quiet);
+    int (*list)(void);
+    int (*init)(const char *section, const int quiet);
+    int (*quit)(const int quiet);
 } DRIVER;
 
 

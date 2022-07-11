@@ -28,7 +28,7 @@
 #include "widget.h"
 
 /* these functions must be implemented by the real driver */
-extern int (*drv_generic_keypad_real_press) (const int num);
+extern int (*drv_generic_keypad_real_press)(const int num);
 
 /* generic functions and widget callbacks */
 int drv_generic_keypad_init(const char *section, const char *driver);

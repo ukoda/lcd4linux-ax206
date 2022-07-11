@@ -28,25 +28,24 @@
 #include "widget.h"
 #include "rgb.h"
 
-typedef struct WIDGET_TTF
-{
-	void *gdImage;			/* raw gd image */
-	RGBA *bitmap;			/* image bitmap */
-	int width, height;		/* size of the image */
-	int oldheight;			/* height of the image before */
-	PROPERTY value;			/* text to render */
-	PROPERTY size;			/* fontsize */
-	PROPERTY font;			/* path to font */
-	PROPERTY fcolor;		/* font color */
-	PROPERTY update;		/* update interval */
-	PROPERTY reload;		/* reload image on update? */
-	PROPERTY visible;		/* image visible? */
-	PROPERTY inverted;		/* image inverted? */
-	PROPERTY center;		/* image centered? */
-	PROPERTY _width;		/* scale font to witdh */
-	PROPERTY _height;		/* scale font to height */
-	PROPERTY align;		/* align font to L/C/R */
-	PROPERTY debugborder;		/* outer line color */
+typedef struct WIDGET_TTF {
+    void *gdImage;              /* raw gd image */
+    RGBA *bitmap;               /* image bitmap */
+    int width, height;          /* size of the image */
+    int oldheight;              /* height of the image before */
+    PROPERTY value;             /* text to render */
+    PROPERTY size;              /* fontsize */
+    PROPERTY font;              /* path to font */
+    PROPERTY fcolor;            /* font color */
+    PROPERTY update;            /* update interval */
+    PROPERTY reload;            /* reload image on update? */
+    PROPERTY visible;           /* image visible? */
+    PROPERTY inverted;          /* image inverted? */
+    PROPERTY center;            /* image centered? */
+    PROPERTY _width;            /* scale font to witdh */
+    PROPERTY _height;           /* scale font to height */
+    PROPERTY align;             /* align font to L/C/R */
+    PROPERTY debugborder;       /* outer line color */
 } WIDGET_TTF;
 
 extern WIDGET_CLASS Widget_Truetype;

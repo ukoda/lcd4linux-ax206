@@ -47,8 +47,8 @@ typedef enum {
 } event_flags_t;
 
 
-int event_add(void (*callback) (event_flags_t flags, void *data), void *data, const int fd, const int read,
-	      const int write, const int active);
+int event_add(void (*callback)(event_flags_t flags, void *data), void *data, const int fd, const int read,
+              const int write, const int active);
 int event_del(const int fd);
 int event_modify(const int fd, const int read, const int write, const int active);
 int event_process(const struct timespec *timeout);
@@ -60,9 +60,9 @@ void event_exit(void);
  */
 
 //add an event to be triggered
-int named_event_add(char *event, void (*callback) (void *data), void *data);
+int named_event_add(char *event, void (*callback)(void *data), void *data);
 //remove an event from the list of events
-int named_event_del(char *event, void (*callback) (void *data), void *data);
-int named_event_trigger(char *event);	//call all calbacks for this event
+int named_event_del(char *event, void (*callback)(void *data), void *data);
+int named_event_trigger(char *event);   //call all calbacks for this event
 
 #endif

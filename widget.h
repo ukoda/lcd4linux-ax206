@@ -31,16 +31,16 @@
 #include "rgb.h"
 
 
-struct WIDGET;			/* forward declaration */
+struct WIDGET;                  /* forward declaration */
 
 
 typedef struct WIDGET_CLASS {
     char *name;
     int type;
-    int (*init) (struct WIDGET * Self);
-    int (*draw) (struct WIDGET * Self);
-    int (*find) (struct WIDGET * Self, void *needle);
-    int (*quit) (struct WIDGET * Self);
+    int (*init)(struct WIDGET * Self);
+    int (*draw)(struct WIDGET * Self);
+    int (*find)(struct WIDGET * Self, void *needle);
+    int (*quit)(struct WIDGET * Self);
 } WIDGET_CLASS;
 
 
@@ -56,8 +56,8 @@ typedef struct WIDGET {
     int row;
     int col;
     void *data;
-    int x2;			/* x of opposite corner, -1 for no display widget */
-    int y2;			/* y of opposite corner, -1 for no display widget */
+    int x2;                     /* x of opposite corner, -1 for no display widget */
+    int y2;                     /* y of opposite corner, -1 for no display widget */
 } WIDGET;
 
 

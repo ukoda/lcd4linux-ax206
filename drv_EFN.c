@@ -93,7 +93,7 @@ static void drv_EFN_clear(void);
 /***  hardware dependant functions    ***/
 /****************************************/
 
-static int drv_EFN_open(const char __attribute__ ((unused)) * section)
+static int drv_EFN_open(const char __attribute__((unused)) * section)
 {
     int sockfd_conf, portno_conf, n;
     struct sockaddr_in serv_addr;
@@ -107,14 +107,14 @@ static int drv_EFN_open(const char __attribute__ ((unused)) * section)
     portno_conf = Port + 1;
     sockfd_conf = socket(AF_INET, SOCK_STREAM, 0);
     if (sockfd_conf < 0) {
-	error("ERROR opening config socket");
-	return -1;
+        error("ERROR opening config socket");
+        return -1;
     }
     // resolve DNS name of EFN server (= EUG 100)
     server = gethostbyname(Host);
     if (server == NULL) {
-	error("ERROR, no such host\n");
-	return -1;
+        error("ERROR, no such host\n");
+        return -1;
     }
     // socket addr for config socket
     bzero((char *) &conf_addr, sizeof(struct sockaddr_in));
@@ -124,8 +124,8 @@ static int drv_EFN_open(const char __attribute__ ((unused)) * section)
 
     // open config socket
     if (connect(sockfd_conf, (struct sockaddr *) &conf_addr, sizeof(struct sockaddr_in)) < 0) {
-	error("ERROR connecting to config port");
-	return -1;
+        error("ERROR connecting to config port");
+        return -1;
     }
     // sent config message
 
@@ -137,9 +137,9 @@ static int drv_EFN_open(const char __attribute__ ((unused)) * section)
 
     n = write(sockfd_conf, buffer, 3);
     if (n < 0) {
-	error("ERROR writing to config socket");
-	close(sockfd_conf);
-	return -1;
+        error("ERROR writing to config socket");
+        close(sockfd_conf);
+        return -1;
     }
     close(sockfd_conf);
 
@@ -147,8 +147,8 @@ static int drv_EFN_open(const char __attribute__ ((unused)) * section)
 
     DataSocket = socket(AF_INET, SOCK_STREAM, 0);
     if (DataSocket < 0) {
-	error("ERROR opening data socket");
-	return -1;
+        error("ERROR opening data socket");
+        return -1;
     }
     // socket addr for data socket
     bzero((char *) &serv_addr, sizeof(struct sockaddr_in));
@@ -157,8 +157,8 @@ static int drv_EFN_open(const char __attribute__ ((unused)) * section)
     serv_addr.sin_port = htons(Port);
 
     if (connect(DataSocket, (struct sockaddr *) &serv_addr, sizeof(struct sockaddr_in)) < 0) {
-	error("ERROR connecting to data socket");
-	return -1;
+        error("ERROR connecting to data socket");
+        return -1;
     }
     return 0;
 }
@@ -182,7 +182,7 @@ static void drv_EFN_send(const char *data, const unsigned int len)
     n = write(DataSocket, data, len);
 
     if (n < 0) {
-	error("%s:drv_EFN_send: Failed to write to data socket\n", Name);
+        error("%s:drv_EFN_send: Failed to write to data socket\n", Name);
     }
 }
 
@@ -194,22 +194,22 @@ static void drv_EFN_clear(void)
     int max_char, max_cmd, k;
 
     max_char = DROWS * DCOLS;
-    max_cmd = 3 * max_char;	// each EFN module expects 3 bytes
+    max_cmd = 3 * max_char;     // each EFN module expects 3 bytes
 
     if ((cmd = malloc(max_cmd)) == NULL) {
-	error("%s : Failed to allocate memory in drv_Sample_write\n", Name);
-	// return -1;
+        error("%s : Failed to allocate memory in drv_Sample_write\n", Name);
+        // return -1;
     } else {
-	/* do whatever is necessary to clear the display */
-	for (k = 0; k < max_char; k++) {
-	    cmd[(3 * k) + 0] = 0xff;
-	    cmd[(3 * k) + 1] = k + 1;
-	    cmd[(3 * k) + 2] = ' ';
-	}
-	drv_EFN_send(cmd, max_cmd);
-	drv_EFN_send(cmd, max_cmd);
-	free(cmd);
-	//return 0;
+        /* do whatever is necessary to clear the display */
+        for (k = 0; k < max_char; k++) {
+            cmd[(3 * k) + 0] = 0xff;
+            cmd[(3 * k) + 1] = k + 1;
+            cmd[(3 * k) + 2] = ' ';
+        }
+        drv_EFN_send(cmd, max_cmd);
+        drv_EFN_send(cmd, max_cmd);
+        free(cmd);
+        //return 0;
     }
 }
 
@@ -221,35 +221,35 @@ static void drv_EFN_write(const int row, const int col, const char *data, int le
     int offset, i, k, max_char, max_cmd;
 
     max_char = DROWS * DCOLS;
-    max_cmd = 3 * max_char;	// each LED blocks expects a 3 byte sequence
+    max_cmd = 3 * max_char;     // each LED blocks expects a 3 byte sequence
 
 
     if ((cmd = (char *) malloc(max_cmd)) == NULL) {
-	error("%s : Failed to allocate memory in drv_Sample_write\n", Name);
-	//return -1;
+        error("%s : Failed to allocate memory in drv_Sample_write\n", Name);
+        //return -1;
     } else {
-	/* do the cursor positioning here */
+        /* do the cursor positioning here */
 
-	offset = ((row) * DCOLS) + col;
+        offset = ((row) * DCOLS) + col;
 
-	for (i = max_char - offset, k = 0; ((i > 0) && (k < len)); i--, k++) {
-	    cmd[(3 * k) + 0] = 0xff;
-	    cmd[(3 * k) + 1] = i;
-	    cmd[(3 * k) + 2] = data[k];
-	}
+        for (i = max_char - offset, k = 0; ((i > 0) && (k < len)); i--, k++) {
+            cmd[(3 * k) + 0] = 0xff;
+            cmd[(3 * k) + 1] = i;
+            cmd[(3 * k) + 2] = data[k];
+        }
 
-	/* send string to the display twice (to make transmission
-	 * reliable) */
-	drv_EFN_send(cmd, 3 * (k));
-	drv_EFN_send(cmd, 3 * (k));
+        /* send string to the display twice (to make transmission
+         * reliable) */
+        drv_EFN_send(cmd, 3 * (k));
+        drv_EFN_send(cmd, 3 * (k));
 
-	free(cmd);
-	// return 0;
+        free(cmd);
+        // return 0;
     }
 }
 
-static void drv_EFN_defchar(const int __attribute__ ((unused)) ascii, const unsigned char
-			    __attribute__ ((unused)) * matrix)
+static void drv_EFN_defchar(const int __attribute__((unused)) ascii, const unsigned char
+                            __attribute__((unused)) * matrix)
 {
     error("%s:drv_EFN_defchar: Function not supported by EFN modules\n", Name);
 }
@@ -263,23 +263,23 @@ static int drv_EFN_start(const char *section)
     Host = cfg_get(section, "Host", NULL);
 
     if (Host == NULL || *Host == '\0') {
-	error("%s: no '%s.Host'  entry from %s", Name, section, cfg_source());
-	return -1;
+        error("%s: no '%s.Host'  entry from %s", Name, section, cfg_source());
+        return -1;
     }
 
     if (cfg_number(section, "Port", 1000, 0, 65535, &Port) < 0)
-	return -1;
+        return -1;
 
 
     s = cfg_get(section, "Size", NULL);
     if (s == NULL || *s == '\0') {
-	error("%s: no '%s.Size' entry from %s", Name, section, cfg_source());
-	return -1;
+        error("%s: no '%s.Size' entry from %s", Name, section, cfg_source());
+        return -1;
     }
     if (sscanf(s, "%dx%d", &cols, &rows) != 2 || rows < 1 || cols < 1) {
-	error("%s: bad %s.Size '%s' from %s", Name, section, s, cfg_source());
-	free(s);
-	return -1;
+        error("%s: bad %s.Size '%s' from %s", Name, section, s, cfg_source());
+        free(s);
+        return -1;
     }
 
     DROWS = rows;
@@ -287,11 +287,11 @@ static int drv_EFN_start(const char *section)
 
     /* open communication with the display */
     if (drv_EFN_open(section) < 0) {
-	return -1;
+        return -1;
     }
 
     /*  initialize display */
-    drv_EFN_clear();		/* clear display */
+    drv_EFN_clear();            /* clear display */
 
     return 0;
 }
@@ -341,19 +341,19 @@ int drv_EFN_init(const char *section, const int quiet)
 
     /* start display */
     if ((ret = drv_EFN_start(section)) != 0)
-	return ret;
+        return ret;
 
     if (!quiet) {
-	char buffer[40];
-	qprintf(buffer, sizeof(buffer), "%s %dx%d", Name, DCOLS, DROWS);
-	sleep(3);
-	drv_EFN_clear();
+        char buffer[40];
+        qprintf(buffer, sizeof(buffer), "%s %dx%d", Name, DCOLS, DROWS);
+        sleep(3);
+        drv_EFN_clear();
 
     }
 
     /* initialize generic text driver */
     if ((ret = drv_generic_text_init(section, Name)) != 0)
-	return ret;
+        return ret;
 
 
     /* register text widget */
@@ -381,7 +381,7 @@ int drv_EFN_quit(const int quiet)
 
     /* say goodbye... */
     if (!quiet) {
-	drv_generic_text_greet("goodbye!", NULL);
+        drv_generic_text_greet("goodbye!", NULL);
     }
 
     debug("closing connection");

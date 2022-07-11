@@ -32,14 +32,14 @@
 #include "widget.h"
 
 typedef struct WIDGET_ICON {
-    PROPERTY speed;		/* update interval (msec) */
-    PROPERTY visible;		/* icon visible? */
-    PROPERTY frame;		/* evaluated expression of frame number (optional) */
-    int ascii;			/* ascii code of icon (depends on the driver) */
-    int curmap;			/* current bitmap sequence */
-    int prvmap;			/* previous bitmap sequence  */
-    int maxmap;			/* number of bitmap sequences */
-    unsigned char *bitmap;	/* bitmaps of (animated) icon */
+    PROPERTY speed;             /* update interval (msec) */
+    PROPERTY visible;           /* icon visible? */
+    PROPERTY frame;             /* evaluated expression of frame number (optional) */
+    int ascii;                  /* ascii code of icon (depends on the driver) */
+    int curmap;                 /* current bitmap sequence */
+    int prvmap;                 /* previous bitmap sequence  */
+    int maxmap;                 /* number of bitmap sequences */
+    unsigned char *bitmap;      /* bitmaps of (animated) icon */
 } WIDGET_ICON;
 
 

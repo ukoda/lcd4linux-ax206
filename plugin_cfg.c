@@ -61,27 +61,27 @@ static void load_variables(void)
     list = cfg_list(section);
     l = list;
     while (l != NULL) {
-	while (*l == '|')
-	    l++;
-	if ((p = strchr(l, '|')) != NULL)
-	    *p = '\0';
-	if (strchr(l, '.') != NULL || strchr(l, ':') != 0) {
-	    error("ignoring variable '%s' from %s: structures not allowed", l, cfg_source());
-	} else {
-	    expression = cfg_get_raw(section, l, "");
-	    if (expression != NULL && *expression != '\0') {
-		tree = NULL;
-		if (Compile(expression, &tree) == 0 && Eval(tree, &result) == 0) {
-		    SetVariable(l, &result);
-		    debug("Variable %s = '%s' (%g)", l, R2S(&result), R2N(&result));
-		    DelResult(&result);
-		} else {
-		    error("error evaluating variable '%s' from %s", list, cfg_source());
-		}
-		DelTree(tree);
-	    }
-	}
-	l = p ? p + 1 : NULL;
+        while (*l == '|')
+            l++;
+        if ((p = strchr(l, '|')) != NULL)
+            *p = '\0';
+        if (strchr(l, '.') != NULL || strchr(l, ':') != 0) {
+            error("ignoring variable '%s' from %s: structures not allowed", l, cfg_source());
+        } else {
+            expression = cfg_get_raw(section, l, "");
+            if (expression != NULL && *expression != '\0') {
+                tree = NULL;
+                if (Compile(expression, &tree) == 0 && Eval(tree, &result) == 0) {
+                    SetVariable(l, &result);
+                    debug("Variable %s = '%s' (%g)", l, R2S(&result), R2N(&result));
+                    DelResult(&result);
+                } else {
+                    error("error evaluating variable '%s' from %s", list, cfg_source());
+                }
+                DelTree(tree);
+            }
+        }
+        l = p ? p + 1 : NULL;
     }
     free(list);
 
@@ -97,7 +97,7 @@ static void my_cfg(RESULT * result, const int argc, RESULT * argv[])
     /* calculate key length */
     len = 0;
     for (i = 0; i < argc; i++) {
-	len += strlen(R2S(argv[i])) + 1;
+        len += strlen(R2S(argv[i])) + 1;
     }
 
     /* allocate key buffer */
@@ -106,8 +106,8 @@ static void my_cfg(RESULT * result, const int argc, RESULT * argv[])
     /* prepare key buffer */
     *buffer = '\0';
     for (i = 0; i < argc; i++) {
-	strcat(buffer, ".");
-	strcat(buffer, R2S(argv[i]));
+        strcat(buffer, ".");
+        strcat(buffer, R2S(argv[i]));
     }
 
     /* buffer starts with '.', so cut off first char */

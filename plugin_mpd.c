@@ -147,23 +147,23 @@ static char *char_conv_from;
 static void charset_close(void)
 {
     if (char_conv_to) {
-	iconv_close(char_conv_iconv);
-	free(char_conv_to);
-	free(char_conv_from);
-	char_conv_to = NULL;
-	char_conv_from = NULL;
+        iconv_close(char_conv_iconv);
+        free(char_conv_to);
+        free(char_conv_from);
+        char_conv_to = NULL;
+        char_conv_from = NULL;
     }
 }
 
 static int charset_set(const char *to, const char *from)
 {
     if (char_conv_to && strcmp(to, char_conv_to) == 0 && char_conv_from && strcmp(from, char_conv_from) == 0)
-	return 0;
+        return 0;
 
     charset_close();
 
     if ((char_conv_iconv = iconv_open(to, from)) == (iconv_t) (-1))
-	return -1;
+        return -1;
 
     char_conv_to = strdup(to);
     char_conv_from = strdup(from);
@@ -171,11 +171,11 @@ static int charset_set(const char *to, const char *from)
 }
 
 static inline size_t deconst_iconv(iconv_t cd,
-				   const char **inbuf, size_t * inbytesleft, char **outbuf, size_t * outbytesleft)
+                                   const char **inbuf, size_t *inbytesleft, char **outbuf, size_t *outbytesleft)
 {
     union {
-	const char **a;
-	char **b;
+        const char **a;
+        char **b;
     } deconst;
 
     deconst.a = inbuf;
@@ -194,23 +194,23 @@ static char *charset_conv_strdup(const char *string)
     char *bufferPtr;
 
     if (!char_conv_to)
-	return NULL;
+        return NULL;
 
     ret = strdup("");
 
     while (inleft) {
-	bufferPtr = buffer;
-	outleft = BUFFER_SIZE;
-	err = deconst_iconv(char_conv_iconv, &string, &inleft, &bufferPtr, &outleft);
-	if (outleft == BUFFER_SIZE || (err == (size_t) - 1 /* && errno != E2BIG */ )) {
-	    free(ret);
-	    return NULL;
-	}
+        bufferPtr = buffer;
+        outleft = BUFFER_SIZE;
+        err = deconst_iconv(char_conv_iconv, &string, &inleft, &bufferPtr, &outleft);
+        if (outleft == BUFFER_SIZE || (err == (size_t) -1 /* && errno != E2BIG */ )) {
+            free(ret);
+            return NULL;
+        }
 
-	ret = realloc(ret, retlen + BUFFER_SIZE - outleft + 1);
-	memcpy(ret + retlen, buffer, BUFFER_SIZE - outleft);
-	retlen += BUFFER_SIZE - outleft;
-	ret[retlen] = '\0';
+        ret = realloc(ret, retlen + BUFFER_SIZE - outleft + 1);
+        memcpy(ret + retlen, buffer, BUFFER_SIZE - outleft);
+        retlen += BUFFER_SIZE - outleft;
+        ret[retlen] = '\0';
     }
 
     return ret;
@@ -221,13 +221,13 @@ const char *charset_from_utf8(const char *from)
     static char *to = NULL;
 
     if (to)
-	free(to);
+        free(to);
 
     charset_set("ISO−8859−1", "UTF-8");
     to = charset_conv_strdup(from);
 
     if (to == NULL)
-	return from;
+        return from;
 
     return to;
 }
@@ -239,49 +239,49 @@ static int configure_mpd(void)
     char *s;
 
     if (configured != 0)
-	return configured;
+        return configured;
 
     /* read enabled */
     if (cfg_number(Section, "enabled", 0, 0, 1, &plugin_enabled) < 1) {
-	plugin_enabled = 0;
+        plugin_enabled = 0;
     }
 
     if (plugin_enabled != 1) {
-	info("[MPD] WARNING: Plugin is not enabled! (set 'enabled 1' to enable this plugin)");
-	configured = 1;
-	return configured;
+        info("[MPD] WARNING: Plugin is not enabled! (set 'enabled 1' to enable this plugin)");
+        configured = 1;
+        return configured;
     }
 
     /* read server */
     s = cfg_get(Section, "server", "localhost");
     if (!s || *s == '\0') {
-	info("[MPD] empty '%s.server' entry from %s, assuming 'localhost'", Section, cfg_source());
-	strcpy(host, "localhost");
+        info("[MPD] empty '%s.server' entry from %s, assuming 'localhost'", Section, cfg_source());
+        strcpy(host, "localhost");
     } else
-	strcpy(host, s);
+        strcpy(host, s);
     if (s)
-	free(s);
+        free(s);
 
     /* read port */
     if (cfg_number(Section, "port", 6600, 1, 65536, &iport) < 1) {
-	info("[MPD] no '%s.port' entry from %s using MPD's default", Section, cfg_source());
+        info("[MPD] no '%s.port' entry from %s using MPD's default", Section, cfg_source());
     }
 
     /* read minUpdateTime in ms */
     if (cfg_number(Section, "minUpdateTime", 500, 1, 10000, &waittime) < 1) {
-	info("[MPD] no '%s.minUpdateTime' entry from %s using MPD's default", Section, cfg_source());
+        info("[MPD] no '%s.minUpdateTime' entry from %s using MPD's default", Section, cfg_source());
     }
 
 
     /* read password */
     s = cfg_get(Section, "password", "");
     if (!s || *s == '\0') {
-	info("[MPD] empty '%s.password' entry in %s, assuming none", Section, cfg_source());
-	memset(pw, 0, sizeof(pw));
+        info("[MPD] empty '%s.password' entry in %s, assuming none", Section, cfg_source());
+        memset(pw, 0, sizeof(pw));
     } else
-	strcpy(pw, s);
+        strcpy(pw, s);
     if (s)
-	free(s);
+        free(s);
 
     debug("[MPD] connection detail: [%s:%d]", host, iport);
     configured = 1;
@@ -293,17 +293,17 @@ static void mpd_printerror(const char *cmd)
 {
     const char *s;
     if (conn) {
-	//assert(mpd_connection_get_error(conn) != MPD_ERROR_SUCCESS);
+        //assert(mpd_connection_get_error(conn) != MPD_ERROR_SUCCESS);
 
-	s = mpd_connection_get_error_message(conn);
-	if (mpd_connection_get_error(conn) == MPD_ERROR_SERVER)
-	    /* messages received from the server are UTF-8; the
-	       rest is either US-ASCII or locale */
-	    s = charset_from_utf8(s);
+        s = mpd_connection_get_error_message(conn);
+        if (mpd_connection_get_error(conn) == MPD_ERROR_SERVER)
+            /* messages received from the server are UTF-8; the
+               rest is either US-ASCII or locale */
+            s = charset_from_utf8(s);
 
-	error("[MPD] %s to [%s]:[%i] failed : [%s]", cmd, host, iport, s);
-	mpd_connection_free(conn);
-	conn = NULL;
+        error("[MPD] %s to [%s]:[%i] failed : [%s]", cmd, host, iport, s);
+        mpd_connection_free(conn);
+        conn = NULL;
     }
 }
 
@@ -314,41 +314,41 @@ void mpd_query_status(struct mpd_connection *conn)
     const struct mpd_audio_format *audio;
 
     if (!conn)
-	return;
+        return;
 
     if (!mpd_command_list_begin(conn, true) ||
-	!mpd_send_status(conn) || !mpd_send_current_song(conn) || !mpd_command_list_end(conn)) {
-	mpd_printerror("queue_commands");
-	return;
+        !mpd_send_status(conn) || !mpd_send_current_song(conn) || !mpd_command_list_end(conn)) {
+        mpd_printerror("queue_commands");
+        return;
     }
 
     status = mpd_recv_status(conn);
     if (status == NULL) {
-	mpd_printerror("recv_status");
-	return;
+        mpd_printerror("recv_status");
+        return;
     }
     if (currentSong != NULL) {
-	mpd_song_free(currentSong);
-	currentSong = NULL;
+        mpd_song_free(currentSong);
+        currentSong = NULL;
     }
 
     if (!mpd_response_next(conn)) {
-	mpd_printerror("response_next");
-	return;
+        mpd_printerror("response_next");
+        return;
     }
 
     song = mpd_recv_song(conn);
     if (song != NULL) {
-	currentSong = mpd_song_dup(song);
-	mpd_song_free(song);
+        currentSong = mpd_song_dup(song);
+        mpd_song_free(song);
 
-	l_elapsedTimeSec = mpd_status_get_elapsed_time(status);
-	l_totalTimeSec = mpd_status_get_total_time(status);
-	l_bitRate = mpd_status_get_kbit_rate(status);
+        l_elapsedTimeSec = mpd_status_get_elapsed_time(status);
+        l_totalTimeSec = mpd_status_get_total_time(status);
+        l_bitRate = mpd_status_get_kbit_rate(status);
     } else {
-	l_elapsedTimeSec = 0;
-	l_totalTimeSec = 0;
-	l_bitRate = 0;
+        l_elapsedTimeSec = 0;
+        l_totalTimeSec = 0;
+        l_bitRate = 0;
     }
     l_state = mpd_status_get_state(status);
 
@@ -365,21 +365,21 @@ void mpd_query_status(struct mpd_connection *conn)
 
     audio = mpd_status_get_audio_format(status);
     if (audio) {
-	l_sampleRate = audio->sample_rate;
-	l_channels = audio->channels;
+        l_sampleRate = audio->sample_rate;
+        l_channels = audio->channels;
     } else {
-	l_sampleRate = 0;
-	l_channels = 0;
+        l_sampleRate = 0;
+        l_channels = 0;
     }
 
     if (mpd_status_get_error(status) != NULL)
-	error("[MPD] query status : %s", charset_from_utf8(mpd_status_get_error(status)));
+        error("[MPD] query status : %s", charset_from_utf8(mpd_status_get_error(status)));
 
     mpd_status_free(status);
 
     if (!mpd_response_finish(conn)) {
-	mpd_printerror("response_finish");
-	return;
+        mpd_printerror("response_finish");
+        return;
     }
 }
 
@@ -388,17 +388,17 @@ void mpd_query_stats(struct mpd_connection *conn)
     struct mpd_stats *stats;
 
     if (!conn)
-	return;
+        return;
 
     if (!mpd_command_list_begin(conn, true) || !mpd_send_stats(conn) || !mpd_command_list_end(conn)) {
-	mpd_printerror("queue_commands");
-	return;
+        mpd_printerror("queue_commands");
+        return;
     }
 
     stats = mpd_recv_stats(conn);
     if (stats == NULL) {
-	mpd_printerror("recv_stats");
-	return;
+        mpd_printerror("recv_stats");
+        return;
     }
 
     l_numberOfSongs = mpd_stats_get_number_of_songs(stats);
@@ -409,8 +409,8 @@ void mpd_query_stats(struct mpd_connection *conn)
     mpd_stats_free(stats);
 
     if (!mpd_response_finish(conn)) {
-	mpd_printerror("response_finish");
-	return;
+        mpd_printerror("response_finish");
+        return;
     }
 }
 
@@ -423,44 +423,44 @@ static int mpd_update()
     int timedelta = (now.tv_sec - timestamp.tv_sec) * 1000 + (now.tv_usec - timestamp.tv_usec) / 1000;
 
     if (timedelta > 0 && timedelta < waittime) {
-	/* debug("[MPD] waittime not reached...\n"); */
-	return 1;
+        /* debug("[MPD] waittime not reached...\n"); */
+        return 1;
     }
 
     /* check if configured */
     if (configure_mpd() < 0) {
-	return -1;
+        return -1;
     }
 
     /* check if connected */
     if (conn == NULL || mpd_connection_get_error(conn) != MPD_ERROR_SUCCESS) {
-	if (conn) {
-	    if (errorcnt < ERROR_DISPLAY)
-		mpd_printerror("reconnect");
-	} else
-	    debug("[MPD] initialize connect to [%s]:[%i]", host, iport);
+        if (conn) {
+            if (errorcnt < ERROR_DISPLAY)
+                mpd_printerror("reconnect");
+        } else
+            debug("[MPD] initialize connect to [%s]:[%i]", host, iport);
     }
     if (!conn) {
-	conn = mpd_connection_new(host, iport, TIMEOUT_IN_S * 1000);
-	if (conn == NULL || mpd_connection_get_error(conn) != MPD_ERROR_SUCCESS) {
-	    if (conn) {
-		if (errorcnt < ERROR_DISPLAY)
-		    mpd_printerror("connect");
-	    }
-	    if (errorcnt == ERROR_DISPLAY)
-		error("[MPD] stop logging, until connection is fixed!");
-	    errorcnt++;
-	    gettimeofday(&timestamp, NULL);
-	    return -1;
-	}
+        conn = mpd_connection_new(host, iport, TIMEOUT_IN_S * 1000);
+        if (conn == NULL || mpd_connection_get_error(conn) != MPD_ERROR_SUCCESS) {
+            if (conn) {
+                if (errorcnt < ERROR_DISPLAY)
+                    mpd_printerror("connect");
+            }
+            if (errorcnt == ERROR_DISPLAY)
+                error("[MPD] stop logging, until connection is fixed!");
+            errorcnt++;
+            gettimeofday(&timestamp, NULL);
+            return -1;
+        }
 
-	if (*pw && !mpd_run_password(conn, pw)) {
-	    errorcnt++;
-	    mpd_printerror("run_password");
-	    return -1;
-	}
-	errorcnt = 0;
-	debug("[MPD] connection fixed...");
+        if (*pw && !mpd_run_password(conn, pw)) {
+            errorcnt++;
+            mpd_printerror("run_password");
+            return -1;
+        }
+        errorcnt = 0;
+        debug("[MPD] connection fixed...");
     }
 
     mpd_query_status(conn);
@@ -536,18 +536,18 @@ static void getArtist(RESULT * result)
     const char *value = NULL;
     mpd_update();
     if (currentSong != NULL) {
-	value = mpd_song_get_tag(currentSong, MPD_TAG_ARTIST, 0);
-	if (!value) {
-	    value = mpd_song_get_tag(currentSong, MPD_TAG_ALBUM_ARTIST, 0);
-	}
-	if (!value) {
-	    value = mpd_song_get_uri(currentSong);
-	}
+        value = mpd_song_get_tag(currentSong, MPD_TAG_ARTIST, 0);
+        if (!value) {
+            value = mpd_song_get_tag(currentSong, MPD_TAG_ALBUM_ARTIST, 0);
+        }
+        if (!value) {
+            value = mpd_song_get_uri(currentSong);
+        }
     }
     if (value)
-	SetResult(&result, R_STRING, charset_from_utf8(value));
+        SetResult(&result, R_STRING, charset_from_utf8(value));
     else
-	SetResult(&result, R_STRING, "");
+        SetResult(&result, R_STRING, "");
 }
 
 static void getTitle(RESULT * result)
@@ -555,12 +555,12 @@ static void getTitle(RESULT * result)
     const char *value = NULL;
     mpd_update();
     if (currentSong != NULL) {
-	value = mpd_song_get_tag(currentSong, MPD_TAG_TITLE, 0);
+        value = mpd_song_get_tag(currentSong, MPD_TAG_TITLE, 0);
     }
     if (value)
-	SetResult(&result, R_STRING, charset_from_utf8(value));
+        SetResult(&result, R_STRING, charset_from_utf8(value));
     else
-	SetResult(&result, R_STRING, "");
+        SetResult(&result, R_STRING, "");
 }
 
 static void getAlbum(RESULT * result)
@@ -568,12 +568,12 @@ static void getAlbum(RESULT * result)
     const char *value = NULL;
     mpd_update();
     if (currentSong != NULL) {
-	value = mpd_song_get_tag(currentSong, MPD_TAG_ALBUM, 0);
+        value = mpd_song_get_tag(currentSong, MPD_TAG_ALBUM, 0);
     }
     if (value)
-	SetResult(&result, R_STRING, charset_from_utf8(value));
+        SetResult(&result, R_STRING, charset_from_utf8(value));
     else
-	SetResult(&result, R_STRING, "");
+        SetResult(&result, R_STRING, "");
 }
 
 static void getFilename(RESULT * result)
@@ -581,12 +581,12 @@ static void getFilename(RESULT * result)
     const char *value = NULL;
     mpd_update();
     if (currentSong != NULL) {
-	value = mpd_song_get_uri(currentSong);
+        value = mpd_song_get_uri(currentSong);
     }
     if (value)
-	SetResult(&result, R_STRING, charset_from_utf8(value));
+        SetResult(&result, R_STRING, charset_from_utf8(value));
     else
-	SetResult(&result, R_STRING, "");
+        SetResult(&result, R_STRING, "");
 }
 
 /*  
@@ -604,17 +604,17 @@ static void getStateInt(RESULT * result)
 
     switch (l_state) {
     case MPD_STATE_PLAY:
-	ret = 1;
-	break;
+        ret = 1;
+        break;
     case MPD_STATE_PAUSE:
-	ret = 2;
-	break;
+        ret = 2;
+        break;
     case MPD_STATE_STOP:
-	ret = 3;
-	break;
+        ret = 3;
+        break;
     default:
-	ret = 0;
-	break;
+        ret = 0;
+        break;
     }
 
     SetResult(&result, R_NUMBER, &ret);
@@ -700,10 +700,10 @@ static void nextSong()
 {
     mpd_update();
     if (currentSong != NULL) {
-	if ((!mpd_run_next(conn))
-	    || (!mpd_response_finish(conn))) {
-	    mpd_printerror("run_next");
-	}
+        if ((!mpd_run_next(conn))
+            || (!mpd_response_finish(conn))) {
+            mpd_printerror("run_next");
+        }
     }
 }
 
@@ -711,10 +711,10 @@ static void prevSong()
 {
     mpd_update();
     if (currentSong != NULL) {
-	if ((!mpd_run_previous(conn))
-	    || (!mpd_response_finish(conn))) {
-	    mpd_printerror("run_previous");
-	}
+        if ((!mpd_run_previous(conn))
+            || (!mpd_response_finish(conn))) {
+            mpd_printerror("run_previous");
+        }
     }
 }
 
@@ -722,10 +722,10 @@ static void stopSong()
 {
     mpd_update();
     if (currentSong != NULL) {
-	if ((!mpd_run_stop(conn))
-	    || (!mpd_response_finish(conn))) {
-	    mpd_printerror("run_stop");
-	}
+        if ((!mpd_run_stop(conn))
+            || (!mpd_response_finish(conn))) {
+            mpd_printerror("run_stop");
+        }
     }
 }
 
@@ -733,10 +733,10 @@ static void pauseSong()
 {
     mpd_update();
     if (currentSong != NULL) {
-	if ((!mpd_send_pause(conn, l_state == MPD_STATE_PAUSE ? 0 : 1))
-	    || (!mpd_response_finish(conn))) {
-	    mpd_printerror("send_pause");
-	}
+        if ((!mpd_send_pause(conn, l_state == MPD_STATE_PAUSE ? 0 : 1))
+            || (!mpd_response_finish(conn))) {
+            mpd_printerror("send_pause");
+        }
     }
 }
 
@@ -744,14 +744,14 @@ static void volUp()
 {
     mpd_update();
     if (currentSong != NULL) {
-	l_volume += 5;
-	if (l_volume > 100)
-	    l_volume = 100;
+        l_volume += 5;
+        if (l_volume > 100)
+            l_volume = 100;
 
-	if ((!mpd_run_set_volume(conn, l_volume))
-	    || (!mpd_response_finish(conn))) {
-	    mpd_printerror("set_volume");
-	}
+        if ((!mpd_run_set_volume(conn, l_volume))
+            || (!mpd_response_finish(conn))) {
+            mpd_printerror("set_volume");
+        }
     }
 }
 
@@ -759,15 +759,15 @@ static void volDown()
 {
     mpd_update();
     if (currentSong != NULL) {
-	if (l_volume > 5)
-	    l_volume -= 5;
-	else
-	    l_volume = 0;
+        if (l_volume > 5)
+            l_volume -= 5;
+        else
+            l_volume = 0;
 
-	if ((!mpd_run_set_volume(conn, l_volume))
-	    || (!mpd_response_finish(conn))) {
-	    mpd_printerror("set_volume");
-	}
+        if ((!mpd_run_set_volume(conn, l_volume))
+            || (!mpd_response_finish(conn))) {
+            mpd_printerror("set_volume");
+        }
     }
 }
 
@@ -775,11 +775,11 @@ static void toggleRepeat()
 {
     mpd_update();
     if (currentSong != NULL) {
-	l_repeatEnabled = !l_repeatEnabled;
-	if ((!mpd_run_repeat(conn, l_repeatEnabled))
-	    || (!mpd_response_finish(conn))) {
-	    mpd_printerror("run_repeat");
-	}
+        l_repeatEnabled = !l_repeatEnabled;
+        if ((!mpd_run_repeat(conn, l_repeatEnabled))
+            || (!mpd_response_finish(conn))) {
+            mpd_printerror("run_repeat");
+        }
     }
 }
 
@@ -787,11 +787,11 @@ static void toggleRandom()
 {
     mpd_update();
     if (currentSong != NULL) {
-	l_randomEnabled = !l_randomEnabled;
-	if ((!mpd_run_random(conn, l_randomEnabled))
-	    || (!mpd_response_finish(conn))) {
-	    mpd_printerror("run_random");
-	}
+        l_randomEnabled = !l_randomEnabled;
+        if ((!mpd_run_random(conn, l_randomEnabled))
+            || (!mpd_response_finish(conn))) {
+            mpd_printerror("run_random");
+        }
     }
 }
 
@@ -799,11 +799,11 @@ static void toggleSingle()
 {
     mpd_update();
     if (currentSong != NULL) {
-	l_singleEnabled = !l_singleEnabled;
-	if ((!mpd_run_single(conn, l_singleEnabled))
-	    || (!mpd_response_finish(conn))) {
-	    mpd_printerror("run_single");
-	}
+        l_singleEnabled = !l_singleEnabled;
+        if ((!mpd_run_single(conn, l_singleEnabled))
+            || (!mpd_response_finish(conn))) {
+            mpd_printerror("run_single");
+        }
     }
 }
 
@@ -811,11 +811,11 @@ static void toggleConsume()
 {
     mpd_update();
     if (currentSong != NULL) {
-	l_consumeEnabled = !l_consumeEnabled;
-	if ((!mpd_run_consume(conn, l_consumeEnabled))
-	    || (!mpd_response_finish(conn))) {
-	    mpd_printerror("run_consume");
-	}
+        l_consumeEnabled = !l_consumeEnabled;
+        if ((!mpd_run_consume(conn, l_consumeEnabled))
+            || (!mpd_response_finish(conn))) {
+            mpd_printerror("run_consume");
+        }
     }
 }
 
@@ -827,13 +827,13 @@ static void formatTimeMMSS(RESULT * result, RESULT * param)
     sec = R2N(param);
 
     if ((sec >= 0) && (sec < 6000)) {
-	const int minutes = (int) (sec / 60);
-	const int seconds = (int) (sec % 60);
-	sprintf(myTime, "%02d:%02d", minutes, seconds);
+        const int minutes = (int) (sec / 60);
+        const int seconds = (int) (sec % 60);
+        sprintf(myTime, "%02d:%02d", minutes, seconds);
     } else if (sec >= 6000) {
-	strcpy(myTime, "LONG");
+        strcpy(myTime, "LONG");
     } else
-	strcpy(myTime, "ERROR");
+        strcpy(myTime, "ERROR");
 
     /* store result */
     SetResult(&result, R_STRING, myTime);
@@ -847,12 +847,12 @@ static void formatTimeDDHHMM(RESULT * result, RESULT * param)
     sec = R2N(param);
 
     if (sec >= 0) {
-	int days = sec / 86400;
-	int hours = (sec % 86400) / 3600;
-	int minutes = (sec % 3600) / 60;
-	sprintf(myTime, "%dd%02dh%02dm", days, hours, minutes);	/* 3d 12:33h */
+        int days = sec / 86400;
+        int hours = (sec % 86400) / 3600;
+        int minutes = (sec % 3600) / 60;
+        sprintf(myTime, "%dd%02dh%02dm", days, hours, minutes); /* 3d 12:33h */
     } else
-	strcpy(myTime, "ERROR");
+        strcpy(myTime, "ERROR");
 
     /* store result */
     SetResult(&result, R_STRING, myTime);
@@ -867,12 +867,12 @@ int plugin_init_mpd(void)
 
     check = configure_mpd();
     if (plugin_enabled != 1)
-	return 0;
+        return 0;
 
     if (check)
-	debug("[MPD] configured!");
+        debug("[MPD] configured!");
     else
-	debug("[MPD] error, NOT configured!");
+        debug("[MPD] error, NOT configured!");
 
     /* when mpd dies, do NOT exit application, ignore it! */
     signal(SIGPIPE, SIG_IGN);
@@ -921,11 +921,11 @@ int plugin_init_mpd(void)
 void plugin_exit_mpd(void)
 {
     if (plugin_enabled == 1) {
-	debug("[MPD] disconnect from mpd");
-	if (currentSong != NULL)
-	    mpd_song_free(currentSong);
+        debug("[MPD] disconnect from mpd");
+        if (currentSong != NULL)
+            mpd_song_free(currentSong);
     }
     if (conn != NULL)
-	mpd_connection_free(conn);
+        mpd_connection_free(conn);
     charset_close();
 }

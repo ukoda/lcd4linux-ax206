@@ -83,13 +83,13 @@ unsigned long timing(const char *driver, const char *section, const char *name, 
     val = val * fuzz / 100;
 
     if (val != defval) {
-	if (fuzz != 100) {
-	    info("%s: timing: %6s = %5d %s (default %d %s, fuzz %d)", driver, name, val, unit, defval, unit, fuzz);
-	} else {
-	    info("%s: timing: %6s = %5d %s (default %d %s)", driver, name, val, unit, defval, unit);
-	}
+        if (fuzz != 100) {
+            info("%s: timing: %6s = %5d %s (default %d %s, fuzz %d)", driver, name, val, unit, defval, unit, fuzz);
+        } else {
+            info("%s: timing: %6s = %5d %s (default %d %s)", driver, name, val, unit, defval, unit);
+        }
     } else {
-	info("%s: timing: %6s = %5d %s (default)", driver, name, defval, unit);
+        info("%s: timing: %6s = %5d %s (default)", driver, name, defval, unit);
     }
     return val;
 }
@@ -103,12 +103,12 @@ void ndelay(const unsigned long nsec)
     gettimeofday(&end, NULL);
     end.tv_usec += (nsec + 999) / 1000;
     while (end.tv_usec > 1000000) {
-	end.tv_usec -= 1000000;
-	end.tv_sec++;
+        end.tv_usec -= 1000000;
+        end.tv_sec++;
     }
 
     do {
-	rep_nop();
-	gettimeofday(&now, NULL);
+        rep_nop();
+        gettimeofday(&now, NULL);
     } while (now.tv_sec == end.tv_sec ? now.tv_usec < end.tv_usec : now.tv_sec < end.tv_sec);
 }

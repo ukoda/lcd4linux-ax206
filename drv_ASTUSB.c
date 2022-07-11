@@ -111,10 +111,10 @@ static int drv_AST_HW_open(char *bus_id, char *device_id)
     info("%s: scanning USB for ASTUSB interface ...", Name);
 
     if (bus_id != NULL)
-	info("%s: scanning for bus id: %s", Name, bus_id);
+        info("%s: scanning for bus id: %s", Name, bus_id);
 
     if (device_id != NULL)
-	info("%s: scanning for device id: %s", Name, device_id);
+        info("%s: scanning for device id: %s", Name, device_id);
 
     usb_set_debug(0);
 
@@ -124,25 +124,25 @@ static int drv_AST_HW_open(char *bus_id, char *device_id)
     busses = usb_get_busses();
 
     for (bus = busses; bus; bus = bus->next) {
-	/* search this bus if no bus id was given or if this is the given bus id */
-	if (!bus_id || (bus_id && !strcasecmp(bus->dirname, bus_id))) {
+        /* search this bus if no bus id was given or if this is the given bus id */
+        if (!bus_id || (bus_id && !strcasecmp(bus->dirname, bus_id))) {
 
-	    for (dev = bus->devices; dev; dev = dev->next) {
-		/* search this device if no device id was given or if this is the given device id */
-		if (!device_id || (device_id && !strcasecmp(dev->filename, device_id))) {
+            for (dev = bus->devices; dev; dev = dev->next) {
+                /* search this device if no device id was given or if this is the given device id */
+                if (!device_id || (device_id && !strcasecmp(dev->filename, device_id))) {
 
-		    if ((dev->descriptor.idVendor == LCD_USB_VENDOR) && (dev->descriptor.idProduct == LCD_USB_DEVICE)) {
-			info("%s: found ASTUSB interface on bus %s device %s", Name, bus->dirname, dev->filename);
-			lcd = usb_open(dev);
-			if (usb_claim_interface(lcd, 0) < 0) {
-			    error("%s: usb_claim_interface() failed!", Name);
-			    return -1;
-			}
-			return 0;
-		    }
-		}
-	    }
-	}
+                    if ((dev->descriptor.idVendor == LCD_USB_VENDOR) && (dev->descriptor.idProduct == LCD_USB_DEVICE)) {
+                        info("%s: found ASTUSB interface on bus %s device %s", Name, bus->dirname, dev->filename);
+                        lcd = usb_open(dev);
+                        if (usb_claim_interface(lcd, 0) < 0) {
+                            error("%s: usb_claim_interface() failed!", Name);
+                            return -1;
+                        }
+                        return 0;
+                    }
+                }
+            }
+        }
     }
     return -1;
 }
@@ -155,34 +155,34 @@ static int drv_AST_HW_close(void)
     return 0;
 }
 
-static int drv_AST_HW_data(unsigned char *buffer, short length, int __attribute__ ((unused)) index)
+static int drv_AST_HW_data(unsigned char *buffer, short length, int __attribute__((unused)) index)
 {
     int request = CMD_LCD_DATA;
     int value = 0;
 
     if (usb_control_msg
-	(lcd, USB_TYPE_VENDOR | USB_RECIP_DEVICE, request, value, 0 /*index */ , (char *) buffer, length, 1000) < 0) {
-	error("%s: USB request failed! Trying to reconnect device.", Name);
+        (lcd, USB_TYPE_VENDOR | USB_RECIP_DEVICE, request, value, 0 /*index */ , (char *) buffer, length, 1000) < 0) {
+        error("%s: USB request failed! Trying to reconnect device.", Name);
 
-	usb_release_interface(lcd, 0);
-	usb_close(lcd);
+        usb_release_interface(lcd, 0);
+        usb_close(lcd);
 
-	/* try to close and reopen connection */
-	if (drv_AST_HW_open(bus_id, device_id) < 0) {
-	    error("%s: could not re-detect ASTUSB USB LCD", Name);
-	    got_signal = -1;
-	    return -1;
-	}
-	/* and try to re-send command */
-	if (usb_control_msg
-	    (lcd, USB_TYPE_VENDOR | USB_RECIP_DEVICE, request, value, 0 /*index */ , (char *) buffer, length,
-	     1000) < 0) {
-	    error("%s: retried USB request failed, aborting!", Name);
-	    got_signal = -1;
-	    return -1;
-	}
+        /* try to close and reopen connection */
+        if (drv_AST_HW_open(bus_id, device_id) < 0) {
+            error("%s: could not re-detect ASTUSB USB LCD", Name);
+            got_signal = -1;
+            return -1;
+        }
+        /* and try to re-send command */
+        if (usb_control_msg
+            (lcd, USB_TYPE_VENDOR | USB_RECIP_DEVICE, request, value, 0 /*index */ , (char *) buffer, length,
+             1000) < 0) {
+            error("%s: retried USB request failed, aborting!", Name);
+            got_signal = -1;
+            return -1;
+        }
 
-	info("%s: Device successfully reconnected.", Name);
+        info("%s: Device successfully reconnected.", Name);
     }
 
     return 0;
@@ -195,19 +195,19 @@ static int drv_AST_HW_data(unsigned char *buffer, short length, int __attribute_
 #define ECHO_NUM 10
 
 
-static int drv_AST_HW_cmd(unsigned char cmd, short value, int __attribute__ ((unused)) index)
+static int drv_AST_HW_cmd(unsigned char cmd, short value, int __attribute__((unused)) index)
 {
     unsigned char buffer[2];
     int nBytes;
 
     /* send control request and accept return value */
     nBytes = usb_control_msg(lcd,
-			     USB_TYPE_VENDOR | USB_RECIP_DEVICE | USB_ENDPOINT_IN,
-			     cmd, value, 0 /*index */ , (char *) buffer, sizeof(buffer), 1000);
+                             USB_TYPE_VENDOR | USB_RECIP_DEVICE | USB_ENDPOINT_IN,
+                             cmd, value, 0 /*index */ , (char *) buffer, sizeof(buffer), 1000);
 
     if (nBytes < 0) {
-	error("%s: USB request failed!", Name);
-	return -1;
+        error("%s: USB request failed!", Name);
+        return -1;
     }
 
     return buffer[0] + 256 * buffer[1];
@@ -220,24 +220,24 @@ int drv_AST_HW_echo(void)
     char buffer[2];
 
     for (i = 0; i < ECHO_NUM; i++) {
-	val = rand() & 0xff;	//8 bit number
+        val = rand() & 0xff;    //8 bit number
 
-	if (usb_control_msg(lcd,
-			    USB_TYPE_VENDOR | USB_RECIP_DEVICE | USB_ENDPOINT_IN,
-			    CMD_LCD_ECHO, val, 0, buffer, sizeof(buffer), 1000) < 0) {
-	    error("%s: USB request failed!", Name);
-	    return -1;
-	}
+        if (usb_control_msg(lcd,
+                            USB_TYPE_VENDOR | USB_RECIP_DEVICE | USB_ENDPOINT_IN,
+                            CMD_LCD_ECHO, val, 0, buffer, sizeof(buffer), 1000) < 0) {
+            error("%s: USB request failed!", Name);
+            return -1;
+        }
 
-	if (val != buffer[1])
-	    errors++;
+        if (val != buffer[1])
+            errors++;
     }
 
     if (errors) {
-	error("%s: ERROR, %d out of %d echo transfers failed!", Name, errors, ECHO_NUM);
-	return -1;
+        error("%s: ERROR, %d out of %d echo transfers failed!", Name, errors, ECHO_NUM);
+        return -1;
     } else
-	info("%s: echo test successful", Name);
+        info("%s: echo test successful", Name);
 
 
     return 0;
@@ -257,9 +257,9 @@ short drv_AST_LCD_BL(int backlight)
 {
 
     if (backlight < 0)
-	backlight = 0;
+        backlight = 0;
     else if (backlight > 1)
-	backlight = 1;
+        backlight = 1;
 
     drv_AST_HW_cmd(CMD_LCD_BLIGHT, backlight, 0);
 
@@ -269,8 +269,8 @@ short drv_AST_LCD_BL(int backlight)
 
 static void drv_AST_clear(void)
 {
-    drv_AST_HW_cmd(CMD_LCD_COMMAND, 0x01, LCD_BOTH & controllers);	/* clear display */
-    drv_AST_HW_cmd(CMD_LCD_COMMAND, 0x03, LCD_BOTH & controllers);	/* return home */
+    drv_AST_HW_cmd(CMD_LCD_COMMAND, 0x01, LCD_BOTH & controllers);      /* clear display */
+    drv_AST_HW_cmd(CMD_LCD_COMMAND, 0x03, LCD_BOTH & controllers);      /* return home */
 }
 
 static void drv_AST_write(const int row, const int col, const char *data, int len)
@@ -281,16 +281,16 @@ static void drv_AST_write(const int row, const int col, const char *data, int le
     /* displays with more two rows and 20 columns have a logical width */
     /* of 40 chars and use more than one controller */
     if ((DROWS > 2) && (DCOLS > 20) && (row > 1)) {
-	/* use second controller */
-	tmpRow -= 2;
-	ctrl = LCD_CTRL_1;
+        /* use second controller */
+        tmpRow -= 2;
+        ctrl = LCD_CTRL_1;
     }
 
     /* 16x4 Displays use a slightly different layout */
     if (DCOLS == 16 && DROWS == 4) {
-	pos = (tmpRow % 2) * 64 + (tmpRow / 2) * 16 + col;
+        pos = (tmpRow % 2) * 64 + (tmpRow / 2) * 16 + col;
     } else {
-	pos = (tmpRow % 2) * 64 + (tmpRow / 2) * 20 + col;
+        pos = (tmpRow % 2) * 64 + (tmpRow / 2) * 20 + col;
     }
 
     drv_AST_HW_cmd(CMD_LCD_COMMAND, 0x80 | pos, (ctrl & controllers));
@@ -305,7 +305,7 @@ static void drv_AST_defchar(const int ascii, const unsigned char *matrix)
 
     //build buffer
     for (i = 0; i < 8; i++) {
-	buffer[i] = *matrix++ & 0x1f;
+        buffer[i] = *matrix++ & 0x1f;
     }
 
     //send to HW
@@ -322,13 +322,13 @@ static int drv_AST_start(const char *section, const int quiet)
 
     s = cfg_get(section, "Size", NULL);
     if (s == NULL || *s == '\0') {
-	error("%s: no '%s.Size' entry from %s", Name, section, cfg_source());
-	return -1;
+        error("%s: no '%s.Size' entry from %s", Name, section, cfg_source());
+        return -1;
     }
     if (sscanf(s, "%dx%d", &cols, &rows) != 2 || rows < 1 || cols < 1) {
-	error("%s: bad %s.Size '%s' from %s", Name, section, s, cfg_source());
-	free(s);
-	return -1;
+        error("%s: bad %s.Size '%s' from %s", Name, section, s, cfg_source());
+        free(s);
+        return -1;
     }
 
     DROWS = rows;
@@ -341,8 +341,8 @@ static int drv_AST_start(const char *section, const int quiet)
     device_id = cfg_get(section, "Device", NULL);
 
     if (drv_AST_HW_open(bus_id, device_id) < 0) {
-	error("%s: could not find a ASTUSB USB LCD", Name);
-	return -1;
+        error("%s: could not find a ASTUSB USB LCD", Name);
+        return -1;
     }
 
     /* test interface reliability */
@@ -350,24 +350,24 @@ static int drv_AST_start(const char *section, const int quiet)
 
     /*low level init of init LCD */
     if (drv_AST_HW_cmd(CMD_LCD_INIT, LCD_INIT_INCREASE | (DROWS > 1 ? LCD_INIT_2LINES : 1), LCD_BOTH & controllers) < 0) {
-	error("%s: could not init LCD", Name);
-	return -1;
+        error("%s: could not init LCD", Name);
+        return -1;
     }
 
     if (cfg_number(section, "Backlight", 0, 0, 1, &backlight) > 0) {
-	info("%s: backlight %s", Name, backlight ? "enabled" : "disabled");
-	drv_AST_LCD_BL(backlight);
+        info("%s: backlight %s", Name, backlight ? "enabled" : "disabled");
+        drv_AST_LCD_BL(backlight);
     }
 
-    drv_AST_clear();		/* clear display */
+    drv_AST_clear();            /* clear display */
 
     if (!quiet) {
-	char buffer[40];
-	qprintf(buffer, sizeof(buffer), "%s %dx%d", Name, DCOLS, DROWS);
-	if (drv_generic_text_greet(buffer, "AST USB-LCD")) {
-	    sleep(3);
-	    drv_AST_clear();
-	}
+        char buffer[40];
+        qprintf(buffer, sizeof(buffer), "%s %dx%d", Name, DCOLS, DROWS);
+        if (drv_generic_text_greet(buffer, "AST USB-LCD")) {
+            sleep(3);
+            drv_AST_clear();
+        }
     }
 
     return 0;
@@ -419,11 +419,11 @@ int drv_AST_init(const char *section, const int quiet)
     info("%s: %s", Name, "$Rev: 975 $");
 
     /* display preferences */
-    XRES = 5;			/* pixel width of one char  */
-    YRES = 8;			/* pixel height of one char  */
-    CHARS = 8;			/* number of user-defineable characters */
-    CHAR0 = 0;			/* ASCII of first user-defineable char */
-    GOTO_COST = 2;		/* number of bytes a goto command requires */
+    XRES = 5;                   /* pixel width of one char  */
+    YRES = 8;                   /* pixel height of one char  */
+    CHARS = 8;                  /* number of user-defineable characters */
+    CHAR0 = 0;                  /* ASCII of first user-defineable char */
+    GOTO_COST = 2;              /* number of bytes a goto command requires */
 
     /* real worker functions */
     drv_generic_text_real_write = drv_AST_write;
@@ -431,28 +431,28 @@ int drv_AST_init(const char *section, const int quiet)
 
     /* start display */
     if ((ret = drv_AST_start(section, quiet)) != 0)
-	return ret;
+        return ret;
 
     /* initialize generic text driver */
     if ((ret = drv_generic_text_init(section, Name)) != 0)
-	return ret;
+        return ret;
 
     /* initialize generic icon driver */
     if ((ret = drv_generic_text_icon_init()) != 0)
-	return ret;
+        return ret;
 
     /* initialize generic bar driver */
     if ((ret = drv_generic_text_bar_init(0)) != 0)
-	return ret;
+        return ret;
 
     /* add fixed chars to the bar driver */
     /* most displays have a full block on ascii 255, but some have kind of  */
     /* an 'inverted P'. If you specify 'asc255bug 1 in the config, this */
     /* char will not be used, but rendered by the bar driver */
     cfg_number(section, "asc255bug", 0, 0, 1, &asc255bug);
-    drv_generic_text_bar_add_segment(0, 0, 255, 32);	/* ASCII  32 = blank */
+    drv_generic_text_bar_add_segment(0, 0, 255, 32);    /* ASCII  32 = blank */
     if (!asc255bug)
-	drv_generic_text_bar_add_segment(255, 255, 255, 255);	/* ASCII 255 = block */
+        drv_generic_text_bar_add_segment(255, 255, 255, 255);   /* ASCII 255 = block */
 
 
     /* register text widget */
@@ -492,7 +492,7 @@ int drv_AST_quit(const int quiet)
 
     /* say goodbye... */
     if (!quiet) {
-	drv_generic_text_greet("That's all, folks!", NULL);
+        drv_generic_text_greet("That's all, folks!", NULL);
     }
 
     drv_AST_LCD_BL(0);

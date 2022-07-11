@@ -32,8 +32,8 @@
 #include "widget.h"
 
 typedef struct WIDGET_GPO {
-    PROPERTY expression;	/* main GPO expression */
-    PROPERTY update;		/* update interval (msec) */
+    PROPERTY expression;        /* main GPO expression */
+    PROPERTY update;            /* update interval (msec) */
 } WIDGET_GPO;
 
 

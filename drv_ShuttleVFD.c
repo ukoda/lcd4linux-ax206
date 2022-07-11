@@ -67,7 +67,7 @@
 #include "plugin.h"
 #include "widget.h"
 #include "widget_text.h"
-#include "widget_bar.h"		// for DIRECTION
+#include "widget_bar.h"         // for DIRECTION
 #include "drv.h"
 #include "drv_generic_text.h"
 #include "drv_generic_gpio.h"
@@ -79,7 +79,7 @@
 // VFD USB properties
 #define SHUTTLE_VFD_VENDOR_ID   0x051C
 #define SHUTTLE_VFD_PRODUCT_ID1 0x0003
-#define SHUTTLE_VFD_PRODUCT_ID2 0x0005	// IR-receiver included
+#define SHUTTLE_VFD_PRODUCT_ID2 0x0005  // IR-receiver included
 #define SHUTTLE_VFD_INTERFACE_NUM    1
 
 // VFD physical dimensions
@@ -126,30 +126,30 @@ static int drv_ShuttleVFD_open(void)
     usb_find_devices();
 
     for (bus = usb_get_busses(); bus != NULL; bus = bus->next) {
-	for (dev = bus->devices; dev != NULL; dev = dev->next) {
-	    if (dev->descriptor.idVendor == vendor_id && ((dev->descriptor.idProduct == SHUTTLE_VFD_PRODUCT_ID1) ||
-							  (dev->descriptor.idProduct == SHUTTLE_VFD_PRODUCT_ID2))) {
+        for (dev = bus->devices; dev != NULL; dev = dev->next) {
+            if (dev->descriptor.idVendor == vendor_id && ((dev->descriptor.idProduct == SHUTTLE_VFD_PRODUCT_ID1) ||
+                                                          (dev->descriptor.idProduct == SHUTTLE_VFD_PRODUCT_ID2))) {
 
-		unsigned int v = dev->descriptor.bcdDevice;
+                unsigned int v = dev->descriptor.bcdDevice;
 
-		info("%s: found ShuttleVFD V%1d%1d.%1d%1d on bus %s device %s", Name,
-		     (v & 0xF000) >> 12, (v & 0xF00) >> 8, (v & 0xF0) >> 4, (v & 0xF), bus->dirname, dev->filename);
+                info("%s: found ShuttleVFD V%1d%1d.%1d%1d on bus %s device %s", Name,
+                     (v & 0xF000) >> 12, (v & 0xF00) >> 8, (v & 0xF0) >> 4, (v & 0xF), bus->dirname, dev->filename);
 
-		lcd = usb_open(dev);
-	    }
-	}
+                lcd = usb_open(dev);
+            }
+        }
     }
 
     if (lcd != NULL) {
-	if (usb_claim_interface(lcd, interface) < 0) {
-	    usb_close(lcd);
-	    error("%s: usb_claim_interface() failed!", Name);
-	    error("%s: root permissions maybe required?", Name);
-	    return -1;
-	}
+        if (usb_claim_interface(lcd, interface) < 0) {
+            usb_close(lcd);
+            error("%s: usb_claim_interface() failed!", Name);
+            error("%s: root permissions maybe required?", Name);
+            return -1;
+        }
     } else {
-	error("%s: could not find ShuttleVFD", Name);
-	return -1;
+        error("%s: could not find ShuttleVFD", Name);
+        return -1;
     }
 
     return 0;
@@ -168,15 +168,15 @@ static int drv_ShuttleVFD_close(void)
 
 static void drv_ShuttleVFD_send(unsigned char packet[SHUTTLE_VFD_PACKET_SIZE])
 {
-    if (usb_control_msg(lcd, 0x21,	// requesttype
-			0x09,	// request
-			0x0200,	// value
-			0x0001,	// index
-			(char *) packet, SHUTTLE_VFD_PACKET_SIZE, 100) == SHUTTLE_VFD_PACKET_SIZE) {
+    if (usb_control_msg(lcd, 0x21,      // requesttype
+                        0x09,   // request
+                        0x0200, // value
+                        0x0001, // index
+                        (char *) packet, SHUTTLE_VFD_PACKET_SIZE, 100) == SHUTTLE_VFD_PACKET_SIZE) {
 
-	udelay(SHUTTLE_VFD_SUCCESS_SLEEP_USEC);
+        udelay(SHUTTLE_VFD_SUCCESS_SLEEP_USEC);
     } else {
-	debug("usb_control_msg failed");
+        debug("usb_control_msg failed");
     }
 }
 
@@ -216,16 +216,16 @@ static void drv_ShuttleVFD_write(const int row, const int col, const char *data,
     drv_ShuttleVFD_reset_cursor();
 
     while (len > 0) {
-	if (len > 7)
-	    buffer[0] = (9 << 4) + 7;
-	else
-	    buffer[0] = (9 << 4) + len;
+        if (len > 7)
+            buffer[0] = (9 << 4) + 7;
+        else
+            buffer[0] = (9 << 4) + len;
 
-	for (i = 0; i < 7 && len--; i++) {
-	    buffer[i + 1] = *p++;
-	}
+        for (i = 0; i < 7 && len--; i++) {
+            buffer[i + 1] = *p++;
+        }
 
-	drv_ShuttleVFD_send(buffer);
+        drv_ShuttleVFD_send(buffer);
     }
 }
 
@@ -244,14 +244,14 @@ static int drv_ShuttleVFD_start(const char *section)
     port = cfg_get(section, "Port", NULL);
 
     if (port == NULL || *port == '\0') {
-	error("%s: no '%s.Port' entry from %s", Name, section, cfg_source());
-	return -1;
+        error("%s: no '%s.Port' entry from %s", Name, section, cfg_source());
+        return -1;
     }
 
     if (strcasecmp(port, "libusb") != 0) {
-	error("%s: libusb expected", Name);
-	error("%s: compile lcd4linux with libusb support!", Name);
-	return -1;
+        error("%s: libusb expected", Name);
+        error("%s: compile lcd4linux with libusb support!", Name);
+        return -1;
     }
 
     DROWS = SHUTTLE_VFD_HEIGHT;
@@ -259,10 +259,10 @@ static int drv_ShuttleVFD_start(const char *section)
 
     /* open communication with the display */
     if (drv_ShuttleVFD_open() < 0) {
-	return -1;
+        return -1;
     }
 
-    drv_ShuttleVFD_clear();	/* clear display */
+    drv_ShuttleVFD_clear();     /* clear display */
     return 0;
 }
 
@@ -294,25 +294,25 @@ static int drv_ShuttleVFD_icons_set(const int num, const int val)
     unsigned long value;
 
     if (num < 0 || num >= 27) {
-	info("%s: num %d out of range (1..27)", Name, num);
-	return -1;
+        info("%s: num %d out of range (1..27)", Name, num);
+        return -1;
     }
     // Special case for volume (icon n°16)
     if (num >= 15)
-	value = (num - 15 + 1) << 15;
+        value = (num - 15 + 1) << 15;
     else
-	value = 1 << num;
+        value = 1 << num;
 
     if (val > 0)
-	icons |= value;
+        icons |= value;
     else
-	icons &= ~value;
+        icons &= ~value;
 
     buffer[0] = (7 << 4) + 4;
     buffer[1] = (value >> 15) & 0x1F;
     buffer[2] = (value >> 10) & 0x1F;
     buffer[3] = (value >> 5) & 0x1F;
-    buffer[4] = value & 0x1F;	// each data byte is stored on 5 bits
+    buffer[4] = value & 0x1F;   // each data byte is stored on 5 bits
     drv_ShuttleVFD_send(buffer);
 
     return 0;
@@ -356,12 +356,12 @@ int drv_ShuttleVFD_init(const char *section, const int quiet)
     info("%s: %s", Name, "$Rev: 975 $");
 
     /* display preferences */
-    XRES = 5;			/* pixel width of one char  */
-    YRES = 8;			/* pixel height of one char  */
-    CHARS = 0;			/* number of user-defineable characters */
-    CHAR0 = 0;			/* ASCII of first user-defineable char */
-    GOTO_COST = 2;		/* number of bytes a goto command requires */
-    GPOS = 15 + 12;		/* Fancy icons on top of display */
+    XRES = 5;                   /* pixel width of one char  */
+    YRES = 8;                   /* pixel height of one char  */
+    CHARS = 0;                  /* number of user-defineable characters */
+    CHAR0 = 0;                  /* ASCII of first user-defineable char */
+    GOTO_COST = 2;              /* number of bytes a goto command requires */
+    GPOS = 15 + 12;             /* Fancy icons on top of display */
 
     /* real worker functions */
     drv_generic_text_real_write = drv_ShuttleVFD_write;
@@ -370,24 +370,24 @@ int drv_ShuttleVFD_init(const char *section, const int quiet)
 
     /* start display */
     if ((ret = drv_ShuttleVFD_start(section)) != 0)
-	return ret;
+        return ret;
 
     if (!quiet) {
-	char buffer[40];
-	qprintf(buffer, sizeof(buffer), "%s %dx%d", Name, DCOLS, DROWS);
-	if (drv_generic_text_greet(buffer, "Shuttle")) {
-	    sleep(3);
-	    drv_ShuttleVFD_clear();
-	}
+        char buffer[40];
+        qprintf(buffer, sizeof(buffer), "%s %dx%d", Name, DCOLS, DROWS);
+        if (drv_generic_text_greet(buffer, "Shuttle")) {
+            sleep(3);
+            drv_ShuttleVFD_clear();
+        }
     }
 
     /* initialize generic text driver */
     if ((ret = drv_generic_text_init(section, Name)) != 0)
-	return ret;
+        return ret;
 
     /* initialize generic GPIO driver */
     if ((ret = drv_generic_gpio_init(section, Name)) != 0)
-	return ret;
+        return ret;
 
     /* register text widget */
     wc = Widget_Text;
@@ -408,7 +408,7 @@ int drv_ShuttleVFD_quit(const int quiet)
 
     /* say goodbye... */
     if (!quiet) {
-	drv_generic_text_greet("goodbye!", NULL);
+        drv_generic_text_greet("goodbye!", NULL);
     }
 
     drv_generic_text_quit();

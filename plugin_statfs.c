@@ -55,34 +55,34 @@ static void my_statfs(RESULT * result, RESULT * arg1, RESULT * arg2)
     key = R2S(arg2);
 
     if (statfs(path, &buf) != 0) {
-	error("statfs(%s) failed: %s", path, strerror(errno));
-	SetResult(&result, R_STRING, "");
-	return;
+        error("statfs(%s) failed: %s", path, strerror(errno));
+        SetResult(&result, R_STRING, "");
+        return;
     }
 
     if (strcasecmp(key, "type") == 0) {
-	value = buf.f_type;
+        value = buf.f_type;
     } else if (strcasecmp(key, "bsize") == 0) {
-	value = buf.f_bsize;
+        value = buf.f_bsize;
     } else if (strcasecmp(key, "blocks") == 0) {
-	value = buf.f_blocks;
+        value = buf.f_blocks;
     } else if (strcasecmp(key, "bfree") == 0) {
-	value = buf.f_bfree;
+        value = buf.f_bfree;
     } else if (strcasecmp(key, "bavail") == 0) {
-	value = buf.f_bavail;
+        value = buf.f_bavail;
     } else if (strcasecmp(key, "files") == 0) {
-	value = buf.f_files;
+        value = buf.f_files;
     } else if (strcasecmp(key, "ffree") == 0) {
-	value = buf.f_ffree;
+        value = buf.f_ffree;
 #if 0
     } else if (strcasecmp(key, "fsid") == 0) {
-	value = buf.f_fsid;
+        value = buf.f_fsid;
 #endif
     } else if (strcasecmp(key, "namelen") == 0) {
-	value = buf.f_namelen;
+        value = buf.f_namelen;
     } else {
-	error("statfs: unknown field '%s'", key);
-	value = -1;
+        error("statfs: unknown field '%s'", key);
+        value = -1;
     }
 
     SetResult(&result, R_NUMBER, &value);

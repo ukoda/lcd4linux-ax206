@@ -120,8 +120,8 @@ static void drv_L7_page(int page)
     static int cp = -1;
 
     if (page != cp) {
-	cp = page;
-	drv_L7_write_ctrl(0xb0 | cp);
+        cp = page;
+        drv_L7_write_ctrl(0xb0 | cp);
     }
 
 }
@@ -135,9 +135,9 @@ static void drv_L7_put(int col, int val)
     drv_L7_page(8);
 
     if (col != cc) {
-	cc = col;
-	drv_L7_write_ctrl(0x00 | (cc & 0x0f));
-	drv_L7_write_ctrl(0x10 | (cc >> 4));
+        cc = col;
+        drv_L7_write_ctrl(0x00 | (cc & 0x0f));
+        drv_L7_write_ctrl(0x10 | (cc >> 4));
     }
     drv_L7_write_data(val);
     cc++;
@@ -149,14 +149,14 @@ static void drv_L7_clear(void)
     int p, c;
 
     for (p = 0; p < PAGES; p++) {
-	/* select page */
-	drv_L7_page(p);
-	/* select column address */
-	drv_L7_write_ctrl(0x00);
-	drv_L7_write_ctrl(0x10);
-	for (c = 0; c < SCOLS; c++) {
-	    drv_L7_write_data(0);
-	}
+        /* select page */
+        drv_L7_page(p);
+        /* select column address */
+        drv_L7_write_ctrl(0x00);
+        drv_L7_write_ctrl(0x10);
+        for (c = 0; c < SCOLS; c++) {
+            drv_L7_write_data(0);
+        }
     }
 }
 
@@ -168,61 +168,61 @@ static void drv_L7_blit(const int row, const int col, const int height, const in
 
     /* transfer layout to display framebuffer */
     for (r = row; r < row + height; r++) {
-	/* do not process extra row for symbols */
-	if (r >= SROWS - 1)
-	    break;
-	/* page */
-	p = r / 8;
-	for (c = col; c < col + width; c++) {
-	    if (c >= SCOLS)
-		break;
-	    /* RAM address */
-	    a = p * SCOLS + c;
-	    /* bit mask */
-	    m = 1 << (r % 8);
-	    if (drv_generic_graphic_black(r, c)) {
-		/* set bit */
-		Buffer1[a] |= m;
-	    } else {
-		/* clear bit */
-		Buffer1[a] &= ~m;
-	    }
-	}
+        /* do not process extra row for symbols */
+        if (r >= SROWS - 1)
+            break;
+        /* page */
+        p = r / 8;
+        for (c = col; c < col + width; c++) {
+            if (c >= SCOLS)
+                break;
+            /* RAM address */
+            a = p * SCOLS + c;
+            /* bit mask */
+            m = 1 << (r % 8);
+            if (drv_generic_graphic_black(r, c)) {
+                /* set bit */
+                Buffer1[a] |= m;
+            } else {
+                /* clear bit */
+                Buffer1[a] &= ~m;
+            }
+        }
     }
 
     /* process display framebuffer */
     for (p = row / 8; p <= (row + height) / 8; p++) {
-	int i, j, a, e;
-	if (p >= PAGES)
-	    break;
-	for (i = col; i < col + width; i++) {
-	    if (i >= SCOLS)
-		break;
-	    a = p * SCOLS + i;
-	    if (Buffer1[a] == Buffer2[a])
-		continue;
-	    for (j = i, e = 0; i < col + width; i++) {
-		a = p * SCOLS + i;
-		if (Buffer1[a] == Buffer2[a]) {
-		    if (++e > 2)
-			break;
-		} else {
-		    e = 0;
-		}
-	    }
-	    /* select page */
-	    drv_L7_page(p);
-	    /* column address */
-	    /* first column address = 32 */
-	    drv_L7_write_ctrl(0x00 | ((j + 32) & 0x0f));
-	    drv_L7_write_ctrl(0x10 | ((j + 32) >> 4));
-	    /* data */
-	    for (j = j; j <= i - e; j++) {
-		a = p * SCOLS + j;
-		drv_L7_write_data(Buffer1[a]);
-		Buffer2[a] = Buffer1[a];
-	    }
-	}
+        int i, j, a, e;
+        if (p >= PAGES)
+            break;
+        for (i = col; i < col + width; i++) {
+            if (i >= SCOLS)
+                break;
+            a = p * SCOLS + i;
+            if (Buffer1[a] == Buffer2[a])
+                continue;
+            for (j = i, e = 0; i < col + width; i++) {
+                a = p * SCOLS + i;
+                if (Buffer1[a] == Buffer2[a]) {
+                    if (++e > 2)
+                        break;
+                } else {
+                    e = 0;
+                }
+            }
+            /* select page */
+            drv_L7_page(p);
+            /* column address */
+            /* first column address = 32 */
+            drv_L7_write_ctrl(0x00 | ((j + 32) & 0x0f));
+            drv_L7_write_ctrl(0x10 | ((j + 32) >> 4));
+            /* data */
+            for (j = j; j <= i - e; j++) {
+                a = p * SCOLS + j;
+                drv_L7_write_data(Buffer1[a]);
+                Buffer2[a] = Buffer1[a];
+            }
+        }
     }
 }
 
@@ -233,71 +233,71 @@ static int drv_L7_GPO(const int num, const int val)
 
     switch (num) {
     case 0:
-	/* battery symbol */
-	v = (val > 0) ? 1 : 0;
-	drv_L7_put(32, v);
-	break;
+        /* battery symbol */
+        v = (val > 0) ? 1 : 0;
+        drv_L7_put(32, v);
+        break;
     case 1:
-	/* battery level */
-	if (val < 0) {
-	    v = 0;
-	    drv_L7_put(46, v);
-	    drv_L7_put(47, v);
-	    drv_L7_put(48, v);
-	    drv_L7_put(49, v);
-	} else {
-	    v = val & 0x0f;
-	    drv_L7_put(46, (v & 1) ? 1 : 0);
-	    drv_L7_put(47, (v & 2) ? 1 : 0);
-	    drv_L7_put(48, (v & 4) ? 1 : 0);
-	    drv_L7_put(49, (v & 8) ? 1 : 0);
-	}
-	break;
+        /* battery level */
+        if (val < 0) {
+            v = 0;
+            drv_L7_put(46, v);
+            drv_L7_put(47, v);
+            drv_L7_put(48, v);
+            drv_L7_put(49, v);
+        } else {
+            v = val & 0x0f;
+            drv_L7_put(46, (v & 1) ? 1 : 0);
+            drv_L7_put(47, (v & 2) ? 1 : 0);
+            drv_L7_put(48, (v & 4) ? 1 : 0);
+            drv_L7_put(49, (v & 8) ? 1 : 0);
+        }
+        break;
     case 2:
-	/* earpiece */
-	v = (val > 0) ? 1 : 0;
-	drv_L7_put(59, v);
-	break;
+        /* earpiece */
+        v = (val > 0) ? 1 : 0;
+        drv_L7_put(59, v);
+        break;
     case 3:
-	/* triangle */
-	v = (val > 0) ? 1 : 0;
-	drv_L7_put(69, v);
-	Buffer1[8 * SCOLS + 69 - 32] = (val > 0);
-	break;
+        /* triangle */
+        v = (val > 0) ? 1 : 0;
+        drv_L7_put(69, v);
+        Buffer1[8 * SCOLS + 69 - 32] = (val > 0);
+        break;
     case 4:
-	/* head */
-	v = (val > 0) ? 1 : 0;
-	drv_L7_put(83, v);
-	Buffer1[8 * SCOLS + 83 - 32] = (val > 0);
-	break;
+        /* head */
+        v = (val > 0) ? 1 : 0;
+        drv_L7_put(83, v);
+        Buffer1[8 * SCOLS + 83 - 32] = (val > 0);
+        break;
     case 5:
-	/* message */
-	v = (val > 0) ? 1 : 0;
-	drv_L7_put(98, v);
-	Buffer1[8 * SCOLS + 98 - 32] = (val > 0);
-	break;
+        /* message */
+        v = (val > 0) ? 1 : 0;
+        drv_L7_put(98, v);
+        Buffer1[8 * SCOLS + 98 - 32] = (val > 0);
+        break;
     case 6:
-	/* antenna */
-	v = (val > 0) ? 1 : 0;
-	drv_L7_put(117, v);
-	Buffer1[8 * SCOLS + 117 - 32] = (val > 0);
-	break;
+        /* antenna */
+        v = (val > 0) ? 1 : 0;
+        drv_L7_put(117, v);
+        Buffer1[8 * SCOLS + 117 - 32] = (val > 0);
+        break;
     case 7:
-	/* signal level */
-	if (val < 0) {
-	    v = 0;
-	    drv_L7_put(112, v);
-	    drv_L7_put(113, v);
-	    drv_L7_put(114, v);
-	    drv_L7_put(115, v);
-	} else {
-	    v = val & 0x0f;
-	    drv_L7_put(112, (v & 1) ? 1 : 0);
-	    drv_L7_put(113, (v & 2) ? 1 : 0);
-	    drv_L7_put(114, (v & 4) ? 1 : 0);
-	    drv_L7_put(115, (v & 8) ? 1 : 0);
-	}
-	break;
+        /* signal level */
+        if (val < 0) {
+            v = 0;
+            drv_L7_put(112, v);
+            drv_L7_put(113, v);
+            drv_L7_put(114, v);
+            drv_L7_put(115, v);
+        } else {
+            v = val & 0x0f;
+            drv_L7_put(112, (v & 1) ? 1 : 0);
+            drv_L7_put(113, (v & 2) ? 1 : 0);
+            drv_L7_put(114, (v & 4) ? 1 : 0);
+            drv_L7_put(115, (v & 8) ? 1 : 0);
+        }
+        break;
     }
 
     return v;
@@ -307,9 +307,9 @@ static int drv_L7_GPO(const int num, const int val)
 static int drv_L7_contrast(int contrast)
 {
     if (contrast < 0)
-	contrast = 0;
+        contrast = 0;
     if (contrast > 31)
-	contrast = 31;
+        contrast = 31;
 
     drv_L7_write_ctrl(0x80 | contrast);
 
@@ -334,56 +334,56 @@ static int drv_L7_start(const char *section)
 
     s = cfg_get(section, "Font", "6x8");
     if (s == NULL || *s == '\0') {
-	error("%s: no '%s.Font' entry from %s", Name, section, cfg_source());
-	return -1;
+        error("%s: no '%s.Font' entry from %s", Name, section, cfg_source());
+        return -1;
     }
 
     XRES = -1;
     YRES = -1;
     if (sscanf(s, "%dx%d", &XRES, &YRES) != 2 || XRES < 1 || YRES < 1) {
-	error("%s: bad Font '%s' from %s", Name, s, cfg_source());
-	return -1;
+        error("%s: bad Font '%s' from %s", Name, s, cfg_source());
+        return -1;
     }
 
     /* Fixme: provider other fonts someday... */
     if (XRES != 6 && YRES != 8) {
-	error("%s: bad Font '%s' from %s (only 6x8 at the moment)", Name, s, cfg_source());
-	return -1;
+        error("%s: bad Font '%s' from %s (only 6x8 at the moment)", Name, s, cfg_source());
+        return -1;
     }
 
     /* provide room for page 8 (symbols) */
     Buffer1 = malloc(PAGES * SCOLS);
     if (Buffer1 == NULL) {
-	error("%s: framebuffer #1 could not be allocated: malloc() failed", Name);
-	return -1;
+        error("%s: framebuffer #1 could not be allocated: malloc() failed", Name);
+        return -1;
     }
 
     Buffer2 = malloc(PAGES * SCOLS);
     if (Buffer2 == NULL) {
-	error("%s: framebuffer #2 could not be allocated: malloc() failed", Name);
-	return -1;
+        error("%s: framebuffer #2 could not be allocated: malloc() failed", Name);
+        return -1;
     }
 
     memset(Buffer1, 0, PAGES * SCOLS * sizeof(*Buffer1));
     memset(Buffer2, 0, PAGES * SCOLS * sizeof(*Buffer2));
 
     if (drv_generic_parport_open(section, Name) != 0) {
-	error("%s: could not initialize parallel port!", Name);
-	return -1;
+        error("%s: could not initialize parallel port!", Name);
+        return -1;
     }
 
     if ((SIGNAL_RES = drv_generic_parport_hardwire_ctrl("RES", "INIT")) == 0xff)
-	return -1;
+        return -1;
     if ((SIGNAL_CS1 = drv_generic_parport_hardwire_ctrl("CS1", "STROBE")) == 0xff)
-	return -1;
+        return -1;
     if ((SIGNAL_RW = drv_generic_parport_hardwire_ctrl("RW", "SLCTIN")) == 0xff)
-	return -1;
+        return -1;
     if ((SIGNAL_A0 = drv_generic_parport_hardwire_ctrl("A0", "AUTOFD")) == 0xff)
-	return -1;
+        return -1;
 
     /* rise RES, CS1, RW and A0 */
     drv_generic_parport_control(SIGNAL_RES | SIGNAL_CS1 | SIGNAL_RW | SIGNAL_A0,
-				SIGNAL_RES | SIGNAL_CS1 | SIGNAL_RW | SIGNAL_A0);
+                                SIGNAL_RES | SIGNAL_CS1 | SIGNAL_RW | SIGNAL_A0);
 
     /* set direction: write */
     drv_generic_parport_direction(0);
@@ -398,26 +398,26 @@ static int drv_L7_start(const char *section)
     drv_L7_write_ctrl(0xe2);
     udelay(20000);
 
-    drv_L7_write_ctrl(0xAE);	/* Display off */
-    drv_L7_write_ctrl(0x40);	/* Start Display Line = 0 */
-    drv_L7_write_ctrl(0x20);	/* reverse line driving off */
-    drv_L7_write_ctrl(0xCC);	/* OutputStatus = $0C, 102x64 */
-    drv_L7_write_ctrl(0xA0);	/* ADC = normal */
-    drv_L7_write_ctrl(0xA9);	/* LCD-Duty = 1/64 */
-    drv_L7_write_ctrl(0xAB);	/* LCD-Duty +1 (1/65, symbols) */
-    drv_L7_write_ctrl(0x25);	/* power supply on */
-    udelay(100 * 1000);		/* wait 100 msec */
-    drv_L7_write_ctrl(0xED);	/* power supply on completion */
-    drv_L7_write_ctrl(0x8F);	/* Contrast medium */
-    drv_L7_write_ctrl(0xA4);	/* Display Test off */
-    drv_L7_write_ctrl(0xAF);	/* Display on */
-    drv_L7_write_ctrl(0xA6);	/* Display on */
+    drv_L7_write_ctrl(0xAE);    /* Display off */
+    drv_L7_write_ctrl(0x40);    /* Start Display Line = 0 */
+    drv_L7_write_ctrl(0x20);    /* reverse line driving off */
+    drv_L7_write_ctrl(0xCC);    /* OutputStatus = $0C, 102x64 */
+    drv_L7_write_ctrl(0xA0);    /* ADC = normal */
+    drv_L7_write_ctrl(0xA9);    /* LCD-Duty = 1/64 */
+    drv_L7_write_ctrl(0xAB);    /* LCD-Duty +1 (1/65, symbols) */
+    drv_L7_write_ctrl(0x25);    /* power supply on */
+    udelay(100 * 1000);         /* wait 100 msec */
+    drv_L7_write_ctrl(0xED);    /* power supply on completion */
+    drv_L7_write_ctrl(0x8F);    /* Contrast medium */
+    drv_L7_write_ctrl(0xA4);    /* Display Test off */
+    drv_L7_write_ctrl(0xAF);    /* Display on */
+    drv_L7_write_ctrl(0xA6);    /* Display on */
 
     /* clear display */
     drv_L7_clear();
 
     if (cfg_number(section, "Contrast", 15, 0, 31, &contrast) > 0) {
-	drv_L7_contrast(contrast);
+        drv_L7_contrast(contrast);
     }
 
     return 0;
@@ -462,23 +462,23 @@ int drv_L7_init(const char *section, const int quiet)
 
     /* start display */
     if ((ret = drv_L7_start(section)) != 0)
-	return ret;
+        return ret;
 
     /* initialize generic graphic driver */
     if ((ret = drv_generic_graphic_init(section, Name)) != 0)
-	return ret;
+        return ret;
 
     /* initialize generic GPIO driver */
     if ((ret = drv_generic_gpio_init(section, Name)) != 0)
-	return ret;
+        return ret;
 
     if (!quiet) {
-	char buffer[40];
-	qprintf(buffer, sizeof(buffer), "%s %dx%d", Name, DCOLS, DROWS);
-	if (drv_generic_graphic_greet(buffer, NULL)) {
-	    sleep(3);
-	    drv_generic_graphic_clear();
-	}
+        char buffer[40];
+        qprintf(buffer, sizeof(buffer), "%s %dx%d", Name, DCOLS, DROWS);
+        if (drv_generic_graphic_greet(buffer, NULL)) {
+            sleep(3);
+            drv_generic_graphic_clear();
+        }
     }
 
 
@@ -499,7 +499,7 @@ int drv_L7_quit(const int quiet)
     drv_generic_graphic_clear();
 
     if (!quiet) {
-	drv_generic_graphic_greet("goodbye!", NULL);
+        drv_generic_graphic_greet("goodbye!", NULL);
     }
 
     drv_generic_graphic_quit();
@@ -507,13 +507,13 @@ int drv_L7_quit(const int quiet)
     drv_generic_parport_close();
 
     if (Buffer1) {
-	free(Buffer1);
-	Buffer1 = NULL;
+        free(Buffer1);
+        Buffer1 = NULL;
     }
 
     if (Buffer2) {
-	free(Buffer2);
-	Buffer2 = NULL;
+        free(Buffer2);
+        Buffer2 = NULL;
     }
 
     return (0);

@@ -73,40 +73,40 @@ static void my_readkey(RESULT * result, RESULT * arg1, RESULT * arg2)
     fp = fopen(R2S(arg1), "r");
 
     if (!fp) {
-	error("w1retap couldn't open file '%s'", R2S(arg1));
-	value[0] = '\0';
+        error("w1retap couldn't open file '%s'", R2S(arg1));
+        value[0] = '\0';
     } else {
-	size = strlen(reqkey);
-	while (!feof(fp) && pval == value) {
-	    fgets(val2, sizeof(val2), fp);
-	    if (*(val2 + size) == '=') {
-		if (strncmp(val2, reqkey, size) == 0) {
-		    char *p;
-		    p = index(val2, ' ');
-		    if (p == NULL) {
-			p = index(val2, '\n');
-		    }
+        size = strlen(reqkey);
+        while (!feof(fp) && pval == value) {
+            fgets(val2, sizeof(val2), fp);
+            if (*(val2 + size) == '=') {
+                if (strncmp(val2, reqkey, size) == 0) {
+                    char *p;
+                    p = index(val2, ' ');
+                    if (p == NULL) {
+                        p = index(val2, '\n');
+                    }
 
-		    if (p) {
-			*p = 0;
-			pval = val2 + size + 1;
-			{
-			    double d;
-			    char *ep;
-			    d = strtod(pval, &ep);
-			    if (ep != pval && (*ep == 0 || isspace(*ep))) {
-				if (d > 500)
-				    sprintf(val2, "%.0f", d);
-				else
-				    sprintf(val2, "%.1f", d);
-				pval = val2;
-			    }
-			}
-		    }
-		}
-	    }
-	}
-	fclose(fp);
+                    if (p) {
+                        *p = 0;
+                        pval = val2 + size + 1;
+                        {
+                            double d;
+                            char *ep;
+                            d = strtod(pval, &ep);
+                            if (ep != pval && (*ep == 0 || isspace(*ep))) {
+                                if (d > 500)
+                                    sprintf(val2, "%.0f", d);
+                                else
+                                    sprintf(val2, "%.1f", d);
+                                pval = val2;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        fclose(fp);
     }
 
     /* store result */

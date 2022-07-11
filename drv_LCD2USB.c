@@ -114,10 +114,10 @@ static int drv_L2U_open(char *bus_id, char *device_id)
     info("%s: scanning USB for LCD2USB interface ...", Name);
 
     if (bus_id != NULL)
-	info("%s: scanning for bus id: %s", Name, bus_id);
+        info("%s: scanning for bus id: %s", Name, bus_id);
 
     if (device_id != NULL)
-	info("%s: scanning for device id: %s", Name, device_id);
+        info("%s: scanning for device id: %s", Name, device_id);
 
     usb_set_debug(0);
 
@@ -127,25 +127,25 @@ static int drv_L2U_open(char *bus_id, char *device_id)
     busses = usb_get_busses();
 
     for (bus = busses; bus; bus = bus->next) {
-	/* search this bus if no bus id was given or if this is the given bus id */
-	if (!bus_id || (bus_id && !strcasecmp(bus->dirname, bus_id))) {
+        /* search this bus if no bus id was given or if this is the given bus id */
+        if (!bus_id || (bus_id && !strcasecmp(bus->dirname, bus_id))) {
 
-	    for (dev = bus->devices; dev; dev = dev->next) {
-		/* search this device if no device id was given or if this is the given device id */
-		if (!device_id || (device_id && !strcasecmp(dev->filename, device_id))) {
+            for (dev = bus->devices; dev; dev = dev->next) {
+                /* search this device if no device id was given or if this is the given device id */
+                if (!device_id || (device_id && !strcasecmp(dev->filename, device_id))) {
 
-		    if ((dev->descriptor.idVendor == LCD_USB_VENDOR) && (dev->descriptor.idProduct == LCD_USB_DEVICE)) {
-			info("%s: found LCD2USB interface on bus %s device %s", Name, bus->dirname, dev->filename);
-			lcd = usb_open(dev);
-			if (usb_claim_interface(lcd, 0) < 0) {
-			    error("%s: usb_claim_interface() failed!", Name);
-			    return -1;
-			}
-			return 0;
-		    }
-		}
-	    }
-	}
+                    if ((dev->descriptor.idVendor == LCD_USB_VENDOR) && (dev->descriptor.idProduct == LCD_USB_DEVICE)) {
+                        info("%s: found LCD2USB interface on bus %s device %s", Name, bus->dirname, dev->filename);
+                        lcd = usb_open(dev);
+                        if (usb_claim_interface(lcd, 0) < 0) {
+                            error("%s: usb_claim_interface() failed!", Name);
+                            return -1;
+                        }
+                        return 0;
+                    }
+                }
+            }
+        }
     }
     return -1;
 }
@@ -163,25 +163,25 @@ static int drv_L2U_close(void)
 static int drv_L2U_send(int request, int value, int index)
 {
     if (usb_control_msg(lcd, USB_TYPE_VENDOR, request, value, index, NULL, 0, 1000) < 0) {
-	error("%s: USB request failed! Trying to reconnect device.", Name);
+        error("%s: USB request failed! Trying to reconnect device.", Name);
 
-	usb_release_interface(lcd, 0);
-	usb_close(lcd);
+        usb_release_interface(lcd, 0);
+        usb_close(lcd);
 
-	/* try to close and reopen connection */
-	if (drv_L2U_open(bus_id, device_id) < 0) {
-	    error("%s: could not re-detect LCD2USB USB LCD", Name);
-	    got_signal = -1;
-	    return -1;
-	}
-	/* and try to re-send command */
-	if (usb_control_msg(lcd, USB_TYPE_VENDOR, request, value, index, NULL, 0, 1000) < 0) {
-	    error("%s: retried USB request failed, aborting!", Name);
-	    got_signal = -1;
-	    return -1;
-	}
+        /* try to close and reopen connection */
+        if (drv_L2U_open(bus_id, device_id) < 0) {
+            error("%s: could not re-detect LCD2USB USB LCD", Name);
+            got_signal = -1;
+            return -1;
+        }
+        /* and try to re-send command */
+        if (usb_control_msg(lcd, USB_TYPE_VENDOR, request, value, index, NULL, 0, 1000) < 0) {
+            error("%s: retried USB request failed, aborting!", Name);
+            got_signal = -1;
+            return -1;
+        }
 
-	info("%s: Device successfully reconnected.", Name);
+        info("%s: Device successfully reconnected.", Name);
     }
 
     return 0;
@@ -199,26 +199,26 @@ int drv_L2U_echo(void)
     unsigned short val, ret;
 
     for (i = 0; i < ECHO_NUM; i++) {
-	val = rand() & 0xffff;
+        val = rand() & 0xffff;
 
-	nBytes = usb_control_msg(lcd,
-				 USB_TYPE_VENDOR | USB_RECIP_DEVICE | USB_ENDPOINT_IN,
-				 LCD_ECHO, val, 0, (char *) &ret, sizeof(ret), 1000);
+        nBytes = usb_control_msg(lcd,
+                                 USB_TYPE_VENDOR | USB_RECIP_DEVICE | USB_ENDPOINT_IN,
+                                 LCD_ECHO, val, 0, (char *) &ret, sizeof(ret), 1000);
 
-	if (nBytes < 0) {
-	    error("%s: USB request failed!", Name);
-	    return -1;
-	}
+        if (nBytes < 0) {
+            error("%s: USB request failed!", Name);
+            return -1;
+        }
 
-	if (val != ret)
-	    errors++;
+        if (val != ret)
+            errors++;
     }
 
     if (errors) {
-	error("%s: ERROR, %d out of %d echo transfers failed!", Name, errors, ECHO_NUM);
-	return -1;
+        error("%s: ERROR, %d out of %d echo transfers failed!", Name, errors, ECHO_NUM);
+        return -1;
     } else
-	info("%s: echo test successful", Name);
+        info("%s: echo test successful", Name);
 
     return 0;
 }
@@ -231,12 +231,12 @@ static int drv_L2U_get(unsigned char cmd)
 
     /* send control request and accept return value */
     nBytes = usb_control_msg(lcd,
-			     USB_TYPE_VENDOR | USB_RECIP_DEVICE | USB_ENDPOINT_IN,
-			     cmd, 0, 0, (char *) buffer, sizeof(buffer), 1000);
+                             USB_TYPE_VENDOR | USB_RECIP_DEVICE | USB_ENDPOINT_IN,
+                             cmd, 0, 0, (char *) buffer, sizeof(buffer), 1000);
 
     if (nBytes < 0) {
-	error("%s: USB request failed!", Name);
-	return -1;
+        error("%s: USB request failed!", Name);
+        return -1;
     }
 
     return buffer[0] + 256 * buffer[1];
@@ -248,9 +248,9 @@ static void drv_L2U_get_version(void)
     int ver = drv_L2U_get(LCD_GET_FWVER);
 
     if (ver != -1)
-	info("%s: firmware version %d.%02d", Name, ver & 0xff, ver >> 8);
+        info("%s: firmware version %d.%02d", Name, ver & 0xff, ver >> 8);
     else
-	error("%s: unable to read firmware version", Name);
+        error("%s: unable to read firmware version", Name);
 }
 
 /* get the bit mask of installed LCD controllers (0 = no */
@@ -261,14 +261,14 @@ static void drv_L2U_get_controllers(void)
     controllers = drv_L2U_get(LCD_GET_CTRL);
 
     if (controllers != -1) {
-	if (controllers)
-	    info("%s: installed controllers: %s%s", Name,
-		 (controllers & 1) ? "CTRL0" : "", (controllers & 2) ? " CTRL1" : "");
-	else
-	    error("%s: no controllers found", Name);
+        if (controllers)
+            info("%s: installed controllers: %s%s", Name,
+                 (controllers & 1) ? "CTRL0" : "", (controllers & 2) ? " CTRL1" : "");
+        else
+            error("%s: no controllers found", Name);
     } else {
-	error("%s: unable to read installed controllers", Name);
-	controllers = 0;	/* don't access any controllers */
+        error("%s: unable to read installed controllers", Name);
+        controllers = 0;        /* don't access any controllers */
     }
 
     /* convert into controller map matching our protocol */
@@ -281,8 +281,8 @@ static unsigned long drv_L2U_get_buttons(void)
     int buttons = drv_L2U_get(LCD_GET_BUTTONS);
 
     if (buttons == -1) {
-	error("%s: unable to read button state", Name);
-	buttons = 0;
+        error("%s: unable to read button state", Name);
+        buttons = 0;
     }
 
     return buttons;
@@ -291,9 +291,9 @@ static unsigned long drv_L2U_get_buttons(void)
 
 /* to increase performance, a little buffer is being used to */
 /* collect command bytes of the same type before transmitting them */
-#define BUFFER_MAX_CMD 4	/* current protocol supports up to 4 bytes */
-int buffer_current_type = -1;	/* nothing in buffer yet */
-int buffer_current_fill = 0;	/* -"- */
+#define BUFFER_MAX_CMD 4        /* current protocol supports up to 4 bytes */
+int buffer_current_type = -1;   /* nothing in buffer yet */
+int buffer_current_fill = 0;    /* -"- */
 unsigned char buffer[BUFFER_MAX_CMD];
 
 /* command format: 
@@ -313,7 +313,7 @@ static void drv_L2U_flush(void)
 
     /* anything to flush? ignore request if not */
     if (buffer_current_type == -1)
-	return;
+        return;
 
     /* build request byte */
     request = buffer_current_type | (buffer_current_fill - 1);
@@ -324,8 +324,8 @@ static void drv_L2U_flush(void)
     index = buffer[2] | (buffer[3] << 8);
 
     if (controllers) {
-	/* send current buffer contents */
-	drv_L2U_send(request, value, index);
+        /* send current buffer contents */
+        drv_L2U_send(request, value, index);
     }
 
     /* buffer is now free again */
@@ -337,7 +337,7 @@ static void drv_L2U_flush(void)
 static void drv_L2U_enqueue(int command_type, int value)
 {
     if ((buffer_current_type >= 0) && (buffer_current_type != command_type))
-	drv_L2U_flush();
+        drv_L2U_flush();
 
     /* add new item to buffer */
     buffer_current_type = command_type;
@@ -345,7 +345,7 @@ static void drv_L2U_enqueue(int command_type, int value)
 
     /* flush buffer if it's full */
     if (buffer_current_fill == BUFFER_MAX_CMD)
-	drv_L2U_flush();
+        drv_L2U_flush();
 }
 
 static void drv_L2U_command(const unsigned char ctrl, const unsigned char cmd)
@@ -356,8 +356,8 @@ static void drv_L2U_command(const unsigned char ctrl, const unsigned char cmd)
 
 static void drv_L2U_clear(void)
 {
-    drv_L2U_command(LCD_BOTH, 0x01);	/* clear display */
-    drv_L2U_command(LCD_BOTH, 0x03);	/* return home */
+    drv_L2U_command(LCD_BOTH, 0x01);    /* clear display */
+    drv_L2U_command(LCD_BOTH, 0x03);    /* return home */
 }
 
 static void drv_L2U_write(int row, const int col, const char *data, int len)
@@ -367,22 +367,22 @@ static void drv_L2U_write(int row, const int col, const char *data, int len)
     /* displays with more two rows and 20 columns have a logical width */
     /* of 40 chars and use more than one controller */
     if ((DROWS > 2) && (DCOLS > 20) && (row > 1)) {
-	/* use second controller */
-	row -= 2;
-	ctrl = LCD_CTRL_1;
+        /* use second controller */
+        row -= 2;
+        ctrl = LCD_CTRL_1;
     }
 
     /* 16x4 Displays use a slightly different layout */
     if (DCOLS == 16 && DROWS == 4) {
-	pos = (row % 2) * 64 + (row / 2) * 16 + col;
+        pos = (row % 2) * 64 + (row / 2) * 16 + col;
     } else {
-	pos = (row % 2) * 64 + (row / 2) * 20 + col;
+        pos = (row % 2) * 64 + (row / 2) * 20 + col;
     }
 
     drv_L2U_command(ctrl, 0x80 | pos);
 
     while (len--) {
-	drv_L2U_enqueue(LCD_DATA | (ctrl & controllers), *data++);
+        drv_L2U_enqueue(LCD_DATA | (ctrl & controllers), *data++);
     }
 
     drv_L2U_flush();
@@ -395,7 +395,7 @@ static void drv_L2U_defchar(const int ascii, const unsigned char *matrix)
     drv_L2U_command(LCD_BOTH, 0x40 | 8 * ascii);
 
     for (i = 0; i < 8; i++) {
-	drv_L2U_enqueue(LCD_DATA | (LCD_BOTH & controllers), *matrix++ & 0x1f);
+        drv_L2U_enqueue(LCD_DATA | (LCD_BOTH & controllers), *matrix++ & 0x1f);
     }
 
     drv_L2U_flush();
@@ -404,9 +404,9 @@ static void drv_L2U_defchar(const int ascii, const unsigned char *matrix)
 static int drv_L2U_contrast(int contrast)
 {
     if (contrast < 0)
-	contrast = 0;
+        contrast = 0;
     if (contrast > 255)
-	contrast = 255;
+        contrast = 255;
 
     drv_L2U_send(LCD_SET_CONTRAST, contrast, 0);
 
@@ -416,16 +416,16 @@ static int drv_L2U_contrast(int contrast)
 static int drv_L2U_brightness(int brightness)
 {
     if (brightness < 0)
-	brightness = 0;
+        brightness = 0;
     if (brightness > 255)
-	brightness = 255;
+        brightness = 255;
 
     drv_L2U_send(LCD_SET_BRIGHTNESS, brightness, 0);
 
     return brightness;
 }
 
-static void drv_L2U_timer(void __attribute__ ((unused)) * notused)
+static void drv_L2U_timer(void __attribute__((unused)) * notused)
 {
     static unsigned long last_but = 0;
     unsigned long new_but = drv_L2U_get_buttons();
@@ -434,10 +434,10 @@ static void drv_L2U_timer(void __attribute__ ((unused)) * notused)
     /* check if button state changed */
     if (new_but ^ last_but) {
 
-	/* send single keypad events for all changed buttons */
-	for (i = 0; i < L2U_BUTTONS; i++)
-	    if ((new_but & (1 << i)) ^ (last_but & (1 << i)))
-		drv_generic_keypad_press(((new_but & (1 << i)) ? 0x80 : 0) | i);
+        /* send single keypad events for all changed buttons */
+        for (i = 0; i < L2U_BUTTONS; i++)
+            if ((new_but & (1 << i)) ^ (last_but & (1 << i)))
+                drv_generic_keypad_press(((new_but & (1 << i)) ? 0x80 : 0) | i);
     }
 
     last_but = new_but;
@@ -449,15 +449,15 @@ static int drv_L2U_keypad(const int num)
 
     /* check for key press event */
     if (num & 0x80)
-	val = WIDGET_KEY_PRESSED;
+        val = WIDGET_KEY_PRESSED;
     else
-	val = WIDGET_KEY_RELEASED;
+        val = WIDGET_KEY_RELEASED;
 
     if ((num & 0x7f) == 0)
-	val += WIDGET_KEY_UP;
+        val += WIDGET_KEY_UP;
 
     if ((num & 0x7f) == 1)
-	val += WIDGET_KEY_DOWN;
+        val += WIDGET_KEY_DOWN;
 
     return val;
 }
@@ -470,13 +470,13 @@ static int drv_L2U_start(const char *section, const int quiet)
 
     s = cfg_get(section, "Size", NULL);
     if (s == NULL || *s == '\0') {
-	error("%s: no '%s.Size' entry from %s", Name, section, cfg_source());
-	return -1;
+        error("%s: no '%s.Size' entry from %s", Name, section, cfg_source());
+        return -1;
     }
     if (sscanf(s, "%dx%d", &cols, &rows) != 2 || rows < 1 || cols < 1) {
-	error("%s: bad %s.Size '%s' from %s", Name, section, s, cfg_source());
-	free(s);
-	return -1;
+        error("%s: bad %s.Size '%s' from %s", Name, section, s, cfg_source());
+        free(s);
+        return -1;
     }
 
     DROWS = rows;
@@ -489,8 +489,8 @@ static int drv_L2U_start(const char *section, const int quiet)
     device_id = cfg_get(section, "Device", NULL);
 
     if (drv_L2U_open(bus_id, device_id) < 0) {
-	error("%s: could not find a LCD2USB USB LCD", Name);
-	return -1;
+        error("%s: could not find a LCD2USB USB LCD", Name);
+        return -1;
     }
 
     /* test interface reliability */
@@ -500,29 +500,29 @@ static int drv_L2U_start(const char *section, const int quiet)
     drv_L2U_get_version();
     drv_L2U_get_controllers();
     if (!controllers)
-	return -1;
+        return -1;
 
     /* regularly request key state */
     /* Fixme: make 100msec configurable */
     timer_add(drv_L2U_timer, NULL, 100, 0);
 
     if (cfg_number(section, "Contrast", 0, 0, 255, &contrast) > 0) {
-	drv_L2U_contrast(contrast);
+        drv_L2U_contrast(contrast);
     }
 
     if (cfg_number(section, "Brightness", 0, 0, 255, &brightness) > 0) {
-	drv_L2U_brightness(brightness);
+        drv_L2U_brightness(brightness);
     }
 
-    drv_L2U_clear();		/* clear display */
+    drv_L2U_clear();            /* clear display */
 
     if (!quiet) {
-	char buffer[40];
-	qprintf(buffer, sizeof(buffer), "%s %dx%d", Name, DCOLS, DROWS);
-	if (drv_generic_text_greet(buffer, "www.harbaum.org/till")) {
-	    sleep(3);
-	    drv_L2U_clear();
-	}
+        char buffer[40];
+        qprintf(buffer, sizeof(buffer), "%s %dx%d", Name, DCOLS, DROWS);
+        if (drv_generic_text_greet(buffer, "www.harbaum.org/till")) {
+            sleep(3);
+            drv_L2U_clear();
+        }
     }
 
     return 0;
@@ -584,11 +584,11 @@ int drv_L2U_init(const char *section, const int quiet)
     info("%s: %s", Name, "$Rev$");
 
     /* display preferences */
-    XRES = 5;			/* pixel width of one char  */
-    YRES = 8;			/* pixel height of one char  */
-    CHARS = 8;			/* number of user-defineable characters */
-    CHAR0 = 0;			/* ASCII of first user-defineable char */
-    GOTO_COST = 2;		/* number of bytes a goto command requires */
+    XRES = 5;                   /* pixel width of one char  */
+    YRES = 8;                   /* pixel height of one char  */
+    CHARS = 8;                  /* number of user-defineable characters */
+    CHAR0 = 0;                  /* ASCII of first user-defineable char */
+    GOTO_COST = 2;              /* number of bytes a goto command requires */
 
     /* real worker functions */
     drv_generic_text_real_write = drv_L2U_write;
@@ -597,32 +597,32 @@ int drv_L2U_init(const char *section, const int quiet)
 
     /* start display */
     if ((ret = drv_L2U_start(section, quiet)) != 0)
-	return ret;
+        return ret;
 
     /* initialize generic text driver */
     if ((ret = drv_generic_text_init(section, Name)) != 0)
-	return ret;
+        return ret;
 
     /* initialize generic icon driver */
     if ((ret = drv_generic_text_icon_init()) != 0)
-	return ret;
+        return ret;
 
     /* initialize generic bar driver */
     if ((ret = drv_generic_text_bar_init(0)) != 0)
-	return ret;
+        return ret;
 
     /* add fixed chars to the bar driver */
     /* most displays have a full block on ascii 255, but some have kind of  */
     /* an 'inverted P'. If you specify 'asc255bug 1 in the config, this */
     /* char will not be used, but rendered by the bar driver */
     cfg_number(section, "asc255bug", 0, 0, 1, &asc255bug);
-    drv_generic_text_bar_add_segment(0, 0, 255, 32);	/* ASCII  32 = blank */
+    drv_generic_text_bar_add_segment(0, 0, 255, 32);    /* ASCII  32 = blank */
     if (!asc255bug)
-	drv_generic_text_bar_add_segment(255, 255, 255, 255);	/* ASCII 255 = block */
+        drv_generic_text_bar_add_segment(255, 255, 255, 255);   /* ASCII 255 = block */
 
     /* initialize generic key pad driver */
     if ((ret = drv_generic_keypad_init(section, Name)) != 0)
-	return ret;
+        return ret;
 
     /* register text widget */
     wc = Widget_Text;
@@ -661,7 +661,7 @@ int drv_L2U_quit(const int quiet)
 
     /* say goodbye... */
     if (!quiet) {
-	drv_generic_text_greet("That's all, folks!", NULL);
+        drv_generic_text_greet("That's all, folks!", NULL);
     }
 
     debug("closing USB connection");

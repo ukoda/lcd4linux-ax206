@@ -102,16 +102,16 @@ static struct ftdi_context *Ftdi = NULL;
 #define ULA200_CH_DC3  		0x13
 
 /* commands used for the communication (names are German) */
-#define ULA200_CMD_POSITION	'p'	/* 'position' */
-#define ULA200_CMD_STRING	's'	/* 'string' */
-#define ULA200_CMD_CLEAR	'l'	/* 'loeschen' */
-#define ULA200_CMD_BACKLIGHT	'h'	/* 'hintergrund' */
-#define ULA200_CMD_CHAR     	'c'	/* 'character' */
+#define ULA200_CMD_POSITION	'p'     /* 'position' */
+#define ULA200_CMD_STRING	's'     /* 'string' */
+#define ULA200_CMD_CLEAR	'l'     /* 'loeschen' */
+#define ULA200_CMD_BACKLIGHT	'h'     /* 'hintergrund' */
+#define ULA200_CMD_CHAR     	'c'     /* 'character' */
 
 /* raw register access */
-#define ULA200_RS_DATA     	0x00	/* data */
-#define ULA200_RS_INSTR    	0x01	/* instruction */
-#define ULA200_SETCHAR		0x40	/* set user-defined character */
+#define ULA200_RS_DATA     	0x00    /* data */
+#define ULA200_RS_INSTR    	0x01    /* instruction */
+#define ULA200_SETCHAR		0x40    /* set user-defined character */
 
 /* character sizes */
 #define ULA200_CELLWIDTH 	5
@@ -182,34 +182,34 @@ static int drv_ula200_ftdi_write_command(const unsigned char *data, int length)
 
     /* check for the maximum length */
     if (length > ULA200_MAXLEN) {
-	return -EINVAL;
+        return -EINVAL;
     }
 
     /* fill the array */
     buffer[pos++] = ULA200_CH_STX;
     for (i = 0; i < length; i++) {
-	if (data[i] == ULA200_CH_STX) {
-	    buffer[pos++] = ULA200_CH_ENQ;
-	    buffer[pos++] = ULA200_CH_DC2;
-	} else if (data[i] == ULA200_CH_ETX) {
-	    buffer[pos++] = ULA200_CH_ENQ;
-	    buffer[pos++] = ULA200_CH_DC3;
-	} else if (data[i] == ULA200_CH_ENQ) {
-	    buffer[pos++] = ULA200_CH_ENQ;
-	    buffer[pos++] = ULA200_CH_NAK;
-	} else {
-	    buffer[pos++] = data[i];
-	}
+        if (data[i] == ULA200_CH_STX) {
+            buffer[pos++] = ULA200_CH_ENQ;
+            buffer[pos++] = ULA200_CH_DC2;
+        } else if (data[i] == ULA200_CH_ETX) {
+            buffer[pos++] = ULA200_CH_ENQ;
+            buffer[pos++] = ULA200_CH_DC3;
+        } else if (data[i] == ULA200_CH_ENQ) {
+            buffer[pos++] = ULA200_CH_ENQ;
+            buffer[pos++] = ULA200_CH_NAK;
+        } else {
+            buffer[pos++] = data[i];
+        }
     }
     buffer[pos++] = ULA200_CH_ETX;
 
     do {
-	/* ULA200_DEBUG("ftdi_write_data(%p, %d)", buffer, pos); */
-	err = ftdi_write_data(Ftdi, buffer, pos);
-	if (err < 0) {
-	    ULA200_ERROR("ftdi_write_data() failed");
-	    return -1;
-	}
+        /* ULA200_DEBUG("ftdi_write_data(%p, %d)", buffer, pos); */
+        err = ftdi_write_data(Ftdi, buffer, pos);
+        if (err < 0) {
+            ULA200_ERROR("ftdi_write_data() failed");
+            return -1;
+        }
     }
     while (!drv_ula200_ftdi_read_response() && (repeat_count++ < ULA200_MAX_REPEATS));
 
@@ -246,51 +246,51 @@ static int drv_ula200_ftdi_read_response(void)
     int ch;
 
     while (!answer_read) {
-	/* wait until STX */
-	do {
-	    ret = drv_ula200_ftdi_usb_read();
-	    /* ULA200_DEBUG("STX drv_ula200_ftdi_usb_read = %d", ret); */
-	} while ((ret != ULA200_CH_STX) && (ret > 0));
+        /* wait until STX */
+        do {
+            ret = drv_ula200_ftdi_usb_read();
+            /* ULA200_DEBUG("STX drv_ula200_ftdi_usb_read = %d", ret); */
+        } while ((ret != ULA200_CH_STX) && (ret > 0));
 
-	if (ret < 0) {
-	    return FALSE;
-	}
+        if (ret < 0) {
+            return FALSE;
+        }
 
-	/* read next char */
-	ch = drv_ula200_ftdi_usb_read();
-	/* ULA200_DEBUG("drv_ula200_ftdi_usb_read = %d", ch); */
+        /* read next char */
+        ch = drv_ula200_ftdi_usb_read();
+        /* ULA200_DEBUG("drv_ula200_ftdi_usb_read = %d", ch); */
 
-	switch (ch) {
-	case 't':
-	    ch = drv_ula200_ftdi_usb_read();
-	    /* ULA200_DEBUG("drv_ula200_ftdi_usb_read = %d", ch); */
-	    /* ignore currently */
-	    break;
+        switch (ch) {
+        case 't':
+            ch = drv_ula200_ftdi_usb_read();
+            /* ULA200_DEBUG("drv_ula200_ftdi_usb_read = %d", ch); */
+            /* ignore currently */
+            break;
 
-	case ULA200_CH_ACK:
-	    answer_read = TRUE;
-	    result = TRUE;
-	    break;
+        case ULA200_CH_ACK:
+            answer_read = TRUE;
+            result = TRUE;
+            break;
 
-	case ULA200_CH_NAK:
-	    answer_read = TRUE;
-	    result = FALSE;
-	    break;
+        case ULA200_CH_NAK:
+            answer_read = TRUE;
+            result = FALSE;
+            break;
 
-	default:
-	    answer_read = TRUE;
-	    ULA200_ERROR("Read invalid answer");
-	}
+        default:
+            answer_read = TRUE;
+            ULA200_ERROR("Read invalid answer");
+        }
 
-	/* wait until ETX */
-	do {
-	    ret = drv_ula200_ftdi_usb_read();
-	    /* ULA200_DEBUG("ETX drv_ula200_ftdi_usb_read = %d", ret); */
-	} while ((ret != ULA200_CH_ETX) && (ret > 0));
+        /* wait until ETX */
+        do {
+            ret = drv_ula200_ftdi_usb_read();
+            /* ULA200_DEBUG("ETX drv_ula200_ftdi_usb_read = %d", ret); */
+        } while ((ret != ULA200_CH_ETX) && (ret > 0));
 
-	if (ret < 0) {
-	    return FALSE;
-	}
+        if (ret < 0) {
+            return FALSE;
+        }
     }
 
     return result;
@@ -324,8 +324,8 @@ static int drv_ula200_ftdi_rawdata(unsigned char flags, unsigned char ch)
     command[2] = ch;
     err = drv_ula200_ftdi_write_command(command, 3);
     if (err < 0) {
-	ULA200_ERROR("ula200_ftdi_write_command() failed");
-	return -1;
+        ULA200_ERROR("ula200_ftdi_write_command() failed");
+        return -1;
     }
 
     return 0;
@@ -344,8 +344,8 @@ static int drv_ula200_set_position(int x, int y)
     int err;
 
     if (y >= 2) {
-	y -= 2;
-	x += DCOLS;		/* XXX: multiply by 2? */
+        y -= 2;
+        x += DCOLS;             /* XXX: multiply by 2? */
     }
 
     command[0] = ULA200_CMD_POSITION;
@@ -353,7 +353,7 @@ static int drv_ula200_set_position(int x, int y)
     command[2] = y;
     err = drv_ula200_ftdi_write_command(command, 3);
     if (err < 0) {
-	ULA200_ERROR("ula200_ftdi_write_command() failed");
+        ULA200_ERROR("ula200_ftdi_write_command() failed");
     }
 
     return err;
@@ -372,20 +372,20 @@ static int drv_ula200_send_text(const unsigned char *data, int len)
     int err;
 
     if (len > ULA200_MAXLEN) {
-	return -EINVAL;
+        return -EINVAL;
     }
 
     buffer[0] = ULA200_CMD_STRING;
     buffer[1] = len;
     memcpy(buffer + 2, data, len);
-    buffer[2 + len] = 0;	/* only necessary for the debug message */
+    buffer[2 + len] = 0;        /* only necessary for the debug message */
 
     /* ULA200_DEBUG("Text: =%s= (%d)", buffer+2, len); */
 
     err = drv_ula200_ftdi_write_command(buffer, len + 2);
     if (err < 0) {
-	ULA200_ERROR("ula200_ftdi_write_command() failed");
-	return -1;
+        ULA200_ERROR("ula200_ftdi_write_command() failed");
+        return -1;
     }
 
     return 0;
@@ -407,8 +407,8 @@ static int drv_ula200_send_char(char ch)
 
     err = drv_ula200_ftdi_write_command(buffer, 2);
     if (err < 0) {
-	ULA200_ERROR("ula200_ftdi_write_command() failed");
-	return -1;
+        ULA200_ERROR("ula200_ftdi_write_command() failed");
+        return -1;
     }
 
     return 0;
@@ -426,15 +426,15 @@ static int drv_ula200_open(void)
 
     /* check if the device was already open */
     if (Ftdi != NULL) {
-	ULA200_ERROR("open called although device was already open");
-	drv_ula200_close();
+        ULA200_ERROR("open called although device was already open");
+        drv_ula200_close();
     }
 
     /* get memory for the device descriptor */
     Ftdi = malloc(sizeof(struct ftdi_context));
     if (Ftdi == NULL) {
-	ULA200_ERROR("Memory allocation failed");
-	return -1;
+        ULA200_ERROR("Memory allocation failed");
+        return -1;
     }
 
     /* open the ftdi library */
@@ -445,29 +445,29 @@ static int drv_ula200_open(void)
     /* open the device */
     err = ftdi_usb_open(Ftdi, ULA200_VENDOR_ID, ULA200_PRODUCT_ID);
     if (err < 0) {
-	ULA200_ERROR("ftdi_usb_open() failed");
-	free(Ftdi);
-	Ftdi = NULL;
-	return -1;
+        ULA200_ERROR("ftdi_usb_open() failed");
+        free(Ftdi);
+        Ftdi = NULL;
+        return -1;
     }
 
     /* set the baudrate */
     err = ftdi_set_baudrate(Ftdi, ULA200_BAUDRATE);
     if (err < 0) {
-	ULA200_ERROR("ftdi_set_baudrate() failed");
-	ftdi_usb_close(Ftdi);
-	free(Ftdi);
-	Ftdi = NULL;
-	return -1;
+        ULA200_ERROR("ftdi_set_baudrate() failed");
+        ftdi_usb_close(Ftdi);
+        free(Ftdi);
+        Ftdi = NULL;
+        return -1;
     }
     /* set communication parameters */
     err = ftdi_set_line_property(Ftdi, ULA200_DATABITS, ULA200_STOPBITS, ULA200_PARITY);
     if (err < 0) {
-	ULA200_ERROR("ftdi_set_line_property() failed");
-	ftdi_usb_close(Ftdi);
-	free(Ftdi);
-	Ftdi = NULL;
-	return -1;
+        ULA200_ERROR("ftdi_set_line_property() failed");
+        ftdi_usb_close(Ftdi);
+        free(Ftdi);
+        Ftdi = NULL;
+        return -1;
     }
 
     return 0;
@@ -506,7 +506,7 @@ static void drv_ula200_clear(void)
 
     err = drv_ula200_ftdi_write_command(command, 1);
     if (err < 0) {
-	ULA200_ERROR("ula200_ftdi_write_command() failed");
+        ULA200_ERROR("ula200_ftdi_write_command() failed");
     }
 }
 
@@ -525,19 +525,19 @@ static void drv_ula200_write(const int row, const int col, const char *data, int
     /* do the cursor positioning here */
     ret = drv_ula200_set_position(col, row);
     if (ret < 0) {
-	ULA200_ERROR("drv_ula200_set_position() failed");
-	return;
+        ULA200_ERROR("drv_ula200_set_position() failed");
+        return;
     }
 
     /* send string to the display */
     if (len == 1) {
-	ret = drv_ula200_send_char(data[0]);
+        ret = drv_ula200_send_char(data[0]);
     } else {
-	ret = drv_ula200_send_text((unsigned char *) data, len);
+        ret = drv_ula200_send_text((unsigned char *) data, len);
     }
     if (ret < 0) {
-	ULA200_ERROR("drv_ula200_send_text() failed");
-	return;
+        ULA200_ERROR("drv_ula200_send_text() failed");
+        return;
     }
 }
 
@@ -547,24 +547,24 @@ static void drv_ula200_defchar(const int ascii, const unsigned char *matrix)
     int err, i;
 
     if (ascii >= 8) {
-	ULA200_ERROR("Invalid value in drv_ula200_defchar");
-	return;
+        ULA200_ERROR("Invalid value in drv_ula200_defchar");
+        return;
     }
 
     /* Tell the HD44780 we will redefine char number 'ascii' */
     err = drv_ula200_ftdi_rawdata(ULA200_RS_INSTR, ULA200_SETCHAR | (ascii * 8));
     if (err < 0) {
-	ULA200_ERROR("drv_ula200_ftdi_rawdata() failed");
-	return;
+        ULA200_ERROR("drv_ula200_ftdi_rawdata() failed");
+        return;
     }
 
     /* Send the subsequent rows */
     for (i = 0; i < YRES; i++) {
-	err = drv_ula200_ftdi_rawdata(ULA200_RS_DATA, *matrix++ & 0x1f);
-	if (err < 0) {
-	    ULA200_ERROR("ula200_ftdi_rawdata() failed");
-	    return;
-	}
+        err = drv_ula200_ftdi_rawdata(ULA200_RS_DATA, *matrix++ & 0x1f);
+        if (err < 0) {
+            ULA200_ERROR("ula200_ftdi_rawdata() failed");
+            return;
+        }
     }
 }
 
@@ -581,15 +581,15 @@ static int drv_ula200_backlight(int backlight)
     int ret;
 
     if (backlight <= 0) {
-	backlight = '0';
+        backlight = '0';
     } else {
-	backlight = '1';
+        backlight = '1';
     }
 
     cmd[1] = backlight;
     ret = drv_ula200_ftdi_write_command(cmd, 2);
     if (ret < 0) {
-	ULA200_ERROR("ula200_ftdi_write_command() failed");
+        ULA200_ERROR("ula200_ftdi_write_command() failed");
     }
 
     return backlight == '1';
@@ -610,13 +610,13 @@ static int drv_ula200_start(const char *section)
 
     s = cfg_get(section, "Size", NULL);
     if (s == NULL || *s == '\0') {
-	ULA200_ERROR("No '%s.Size' entry from %s", section, cfg_source());
-	return -1;
+        ULA200_ERROR("No '%s.Size' entry from %s", section, cfg_source());
+        return -1;
     }
     if (sscanf(s, "%dx%d", &cols, &rows) != 2 || rows < 1 || cols < 1) {
-	ULA200_ERROR("Bad %s.Size '%s' from %s", section, s, cfg_source());
-	free(s);
-	return -1;
+        ULA200_ERROR("Bad %s.Size '%s' from %s", section, s, cfg_source());
+        free(s);
+        return -1;
     }
 
     DROWS = rows;
@@ -625,14 +625,14 @@ static int drv_ula200_start(const char *section)
     /* open communication with the display */
     err = drv_ula200_open();
     if (err < 0) {
-	return -1;
+        return -1;
     }
 
     cfg_number(section, "Backlight", 0, 0, 1, &backlight);
     err = drv_ula200_backlight(backlight);
     if (err < 0) {
-	ULA200_ERROR("drv_ula200_backlight() failed");
-	return -1;
+        ULA200_ERROR("drv_ula200_backlight() failed");
+        return -1;
     }
 
     /* clear display */
@@ -690,11 +690,11 @@ int drv_ula200_init(const char *section, const int quiet)
     ULA200_INFO("%s", "$Rev$");
 
     /* display preferences */
-    XRES = ULA200_CELLWIDTH;	/* pixel width of one char  */
-    YRES = ULA200_CELLHEIGHT;	/* pixel height of one char  */
-    CHARS = 7;			/* number of user-defineable characters */
-    CHAR0 = 1;			/* ASCII of first user-defineable char */
-    GOTO_COST = 4;		/* number of bytes a goto command requires */
+    XRES = ULA200_CELLWIDTH;    /* pixel width of one char  */
+    YRES = ULA200_CELLHEIGHT;   /* pixel height of one char  */
+    CHARS = 7;                  /* number of user-defineable characters */
+    CHAR0 = 1;                  /* ASCII of first user-defineable char */
+    GOTO_COST = 4;              /* number of bytes a goto command requires */
 
     /* real worker functions */
     drv_generic_text_real_write = drv_ula200_write;
@@ -702,32 +702,32 @@ int drv_ula200_init(const char *section, const int quiet)
 
     /* start display */
     if ((ret = drv_ula200_start(section)) != 0) {
-	return ret;
+        return ret;
     }
 
     if (!quiet) {
-	char buffer[40];
-	qprintf(buffer, sizeof(buffer), "%s %dx%d", Name, DCOLS, DROWS);
-	if (drv_generic_text_greet(buffer, "ULA 200")) {
-	    sleep(3);
-	    drv_ula200_clear();
-	}
+        char buffer[40];
+        qprintf(buffer, sizeof(buffer), "%s %dx%d", Name, DCOLS, DROWS);
+        if (drv_generic_text_greet(buffer, "ULA 200")) {
+            sleep(3);
+            drv_ula200_clear();
+        }
     }
 
     /* initialize generic text driver */
     if ((ret = drv_generic_text_init(section, Name)) != 0)
-	return ret;
+        return ret;
 
     /* initialize generic icon driver */
     if ((ret = drv_generic_text_icon_init()) != 0)
-	return ret;
+        return ret;
 
     /* initialize generic bar driver */
     if ((ret = drv_generic_text_bar_init(0)) != 0)
-	return ret;
+        return ret;
 
     /* add fixed chars to the bar driver */
-    drv_generic_text_bar_add_segment(0, 0, 255, 32);	/* ASCII  32 = blank */
+    drv_generic_text_bar_add_segment(0, 0, 255, 32);    /* ASCII  32 = blank */
 
     /* register text widget */
     wc = Widget_Text;
@@ -771,7 +771,7 @@ int drv_ula200_quit(int quiet)
 
     /* say goodbye... */
     if (!quiet) {
-	drv_generic_text_greet("goodbye!", NULL);
+        drv_generic_text_greet("goodbye!", NULL);
     }
 
     debug("closing connection");

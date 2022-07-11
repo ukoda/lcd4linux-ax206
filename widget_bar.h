@@ -36,20 +36,20 @@ typedef enum { DIR_EAST = 1, DIR_WEST = 2, DIR_NORTH = 4, DIR_SOUTH = 8 } DIRECT
 typedef enum { STYLE_HOLLOW = 1, STYLE_FIRST = 2, STYLE_LAST = 4 } STYLE;
 
 typedef struct WIDGET_BAR {
-    PROPERTY expression1;	/* value (length) of upper half */
-    PROPERTY expression2;	/* value (length) of lower half */
-    PROPERTY expr_min;		/* explicit minimum value */
-    PROPERTY expr_max;		/* explicit maximum value */
-    DIRECTION direction;	/* bar direction */
-    STYLE style;		/* bar style (hollow) */
-    int length;			/* bar length */
-    int update;			/* update interval (msec) */
-    double val1;		/* bar value, 0.0 ... 1.0 */
-    double val2;		/* bar value, 0.0 ... 1.0 */
-    double min;			/* minimum value */
-    double max;			/* maximum value */
-    RGBA color[2];		/* bar colors */
-    int color_valid[2];		/* bar color is valid */
+    PROPERTY expression1;       /* value (length) of upper half */
+    PROPERTY expression2;       /* value (length) of lower half */
+    PROPERTY expr_min;          /* explicit minimum value */
+    PROPERTY expr_max;          /* explicit maximum value */
+    DIRECTION direction;        /* bar direction */
+    STYLE style;                /* bar style (hollow) */
+    int length;                 /* bar length */
+    int update;                 /* update interval (msec) */
+    double val1;                /* bar value, 0.0 ... 1.0 */
+    double val2;                /* bar value, 0.0 ... 1.0 */
+    double min;                 /* minimum value */
+    double max;                 /* maximum value */
+    RGBA color[2];              /* bar colors */
+    int color_valid[2];         /* bar color is valid */
 } WIDGET_BAR;
 
 

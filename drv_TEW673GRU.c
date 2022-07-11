@@ -62,15 +62,15 @@
 
 #define TEW673GRU_NUM_COLS	220
 #define TEW673GRU_NUM_ROWS	176
-#define TEW673GRU_BPP		2	/* bytes per pixel */
+#define TEW673GRU_BPP		2       /* bytes per pixel */
 
 #define TEW673GRU_CMD_SIZE	9
 #define TEW673GRU_NUM_ROW_BYTES (TEW673GRU_NUM_COLS * TEW673GRU_BPP)
 
 enum {
-	CMD_SHOW_STRING		= 49,
-	CMD_SHOW_IMAGE_DIR	= 52,
-	CMD_SCREEN_COLOR	= 54,
+    CMD_SHOW_STRING = 49,
+    CMD_SHOW_IMAGE_DIR = 52,
+    CMD_SCREEN_COLOR = 54,
 };
 
 static char Name[] = "TEW673GRU";
@@ -121,7 +121,7 @@ static void drv_TEW673GRU_hw_send_row(const int row, const int col, const char *
     memset(tr, '\0', sizeof(tr));
     memset(cmd, '\0', sizeof(cmd));
 
-    datasize =  width * TEW673GRU_BPP;
+    datasize = width * TEW673GRU_BPP;
 
     cmd[0] = CMD_SHOW_IMAGE_DIR;
     cmd[1] = col;
@@ -181,22 +181,22 @@ static void drv_TEW673GRU_blit(const int row, const int col, const int height, c
     debug("%s: update area r:%d c:%d w:%d h:%d", Name, row, col, height, width);
 
     for (r = row; r < row + height; r++) {
-	for (c = col; c < col + width; c++) {
-	    unsigned int color;
-	    RGBA rgb;
+        for (c = col; c < col + width; c++) {
+            unsigned int color;
+            RGBA rgb;
 
-	    rgb = drv_generic_graphic_rgb(r, c);
-	    color = RGBAto16(rgb);
+            rgb = drv_generic_graphic_rgb(r, c);
+            color = RGBAto16(rgb);
             drv_TEW673GRU_FB_set_pixel(c, color);
-	}
+        }
 
-	if (width) {
-	    char *data;
+        if (width) {
+            char *data;
 
-	    data = &drv_TEW673GRU_FB[col * TEW673GRU_BPP];
-	    drv_TEW673GRU_hw_send_row(r, col, data, width);
-	    udelay(100 + width * 50);
-	}
+            data = &drv_TEW673GRU_FB[col * TEW673GRU_BPP];
+            drv_TEW673GRU_hw_send_row(r, col, data, width);
+            udelay(100 + width * 50);
+        }
     }
 }
 
@@ -213,12 +213,12 @@ static void drv_TEW673GRU_write(const int row, const int col, const char *data, 
     int i;
 
     for (i = 0; i < len; i++) {
-	drv_TEW673GRU_hw_write_string(row * YRES, (col + i) * XRES, " ", 1);
-	udelay(10000);
-	drv_TEW673GRU_hw_write_string(row * YRES, 2 + (col + i) * XRES, " ", 1);
-	udelay(10000);
-	drv_TEW673GRU_hw_write_string(row * YRES, (col + i) * XRES, &data[i], 1);
-	udelay(10000);
+        drv_TEW673GRU_hw_write_string(row * YRES, (col + i) * XRES, " ", 1);
+        udelay(10000);
+        drv_TEW673GRU_hw_write_string(row * YRES, 2 + (col + i) * XRES, " ", 1);
+        udelay(10000);
+        drv_TEW673GRU_hw_write_string(row * YRES, (col + i) * XRES, &data[i], 1);
+        udelay(10000);
     }
 }
 
@@ -228,7 +228,7 @@ static int drv_TEW673GRU_open(const char *section)
 
     err = drv_generic_spidev_open(section, Name);
     if (err < 0)
-	return err;
+        return err;
 
     return 0;
 }
@@ -242,10 +242,10 @@ static int drv_TEW673GRU_close(void)
 static void drv_TEW673GRU_clear_screen(void)
 {
     if (MODE) {
-	drv_generic_graphic_clear();
+        drv_generic_graphic_clear();
     } else {
-	memset(drv_TEW673GRU_FB, ' ', FB_SIZE);
-	drv_TEW673GRU_hw_clear(0x0000);
+        memset(drv_TEW673GRU_FB, ' ', FB_SIZE);
+        drv_TEW673GRU_hw_clear(0x0000);
     }
 }
 
@@ -256,37 +256,34 @@ static int drv_TEW673GRU_init_font(const char *section)
 
     font = cfg_get(section, "Font", "6x8");
     if (font == NULL) {
-	error("%s: no '%s.Font' entry from %s", Name, section, cfg_source());
-	goto out;
+        error("%s: no '%s.Font' entry from %s", Name, section, cfg_source());
+        goto out;
     }
 
     if (*font == '\0') {
-	error("%s: invalid '%s.Font' entry in %s", Name, section, cfg_source());
-	goto out_free;
+        error("%s: invalid '%s.Font' entry in %s", Name, section, cfg_source());
+        goto out_free;
     }
 
     XRES = -1;
     YRES = -1;
-    if (sscanf(font, "%dx%d", &XRES, &YRES) != 2 ||
-	XRES < 1 ||
-	YRES < 1) {
-	error("%s: bad Font '%s' from %s", Name, font, cfg_source());
-	goto out_free;
+    if (sscanf(font, "%dx%d", &XRES, &YRES) != 2 || XRES < 1 || YRES < 1) {
+        error("%s: bad Font '%s' from %s", Name, font, cfg_source());
+        goto out_free;
     }
 
     if (XRES != 6 && YRES != 8) {
-	error("%s: bad Font '%s' from %s (only 6x8 at the moment)",
-	      Name, font, cfg_source());
-	goto out_free;
+        error("%s: bad Font '%s' from %s (only 6x8 at the moment)", Name, font, cfg_source());
+        goto out_free;
     }
 
     error("%s: font '%s' selected", Name, font);
 
     ret = 0;
 
-out_free:
+  out_free:
     free(font);
-out:
+  out:
     return ret;
 }
 
@@ -298,26 +295,26 @@ static int drv_TEW673GRU_start(const char *section)
     DROWS = TEW673GRU_NUM_ROWS;
 
     if (MODE) {
-	ret = drv_TEW673GRU_init_font(section);
-	if (ret)
-	    goto err;
+        ret = drv_TEW673GRU_init_font(section);
+        if (ret)
+            goto err;
 
-	FB_SIZE = DCOLS * TEW673GRU_BPP;
+        FB_SIZE = DCOLS * TEW673GRU_BPP;
     } else {
-	XRES = 10;
-	YRES = 16;
-	DCOLS = DCOLS / XRES;
-	DROWS = DROWS / YRES;
+        XRES = 10;
+        YRES = 16;
+        DCOLS = DCOLS / XRES;
+        DROWS = DROWS / YRES;
 
-	FB_SIZE = DCOLS * DROWS;
+        FB_SIZE = DCOLS * DROWS;
     }
 
     if (FB_SIZE) {
-	drv_TEW673GRU_FB = malloc(FB_SIZE);
-	if (drv_TEW673GRU_FB == NULL) {
-	    error("%s: framebuffer could not be allocated", Name);
-	    goto err;
-	}
+        drv_TEW673GRU_FB = malloc(FB_SIZE);
+        if (drv_TEW673GRU_FB == NULL) {
+            error("%s: framebuffer could not be allocated", Name);
+            goto err;
+        }
     }
 
     ret = drv_TEW673GRU_open(section);
@@ -325,21 +322,21 @@ static int drv_TEW673GRU_start(const char *section)
         goto err_free;
 
     if (MODE == 0)
-    	drv_TEW673GRU_clear_screen();
+        drv_TEW673GRU_clear_screen();
 
     return 0;
 
- err_free:
+  err_free:
     if (drv_TEW673GRU_FB)
-	free(drv_TEW673GRU_FB);
- err:
+        free(drv_TEW673GRU_FB);
+  err:
     return -1;
 }
 
 static int drv_TEW673GRU_greet(const char *msg1, const char *msg2)
 {
     if (MODE)
-	return drv_generic_graphic_greet(msg1, msg2);
+        return drv_generic_graphic_greet(msg1, msg2);
 
     return drv_generic_text_greet(msg1, msg2);
 }
@@ -374,55 +371,55 @@ int drv_TEW673GRU_init(const char *section, const int quiet)
     cfg_number(section, "Mode", 0, 0, 1, &MODE);
 
     if (MODE) {
-	drv_generic_graphic_real_blit = drv_TEW673GRU_blit;
-	drv_generic_graphic_real_clear = drv_TEW673GRU_clear;
+        drv_generic_graphic_real_blit = drv_TEW673GRU_blit;
+        drv_generic_graphic_real_clear = drv_TEW673GRU_clear;
     } else {
-	drv_generic_text_real_write = drv_TEW673GRU_write;
+        drv_generic_text_real_write = drv_TEW673GRU_write;
     }
 
     ret = drv_TEW673GRU_start(section);
     if (ret)
-	return ret;
+        return ret;
 
     if (MODE) {
-	ret = drv_generic_graphic_init(section, Name);
-	if (ret)
-	    return ret;
+        ret = drv_generic_graphic_init(section, Name);
+        if (ret)
+            return ret;
     } else {
-	ret = drv_generic_text_init(section, Name);
-	if (ret)
-	    return ret;
+        ret = drv_generic_text_init(section, Name);
+        if (ret)
+            return ret;
 
-	ret = drv_generic_text_icon_init();
-	if (ret != 0)
-	    return ret;
+        ret = drv_generic_text_icon_init();
+        if (ret != 0)
+            return ret;
 
-	ret = drv_generic_text_bar_init(1);
-	if (ret != 0)
-	    return ret;
+        ret = drv_generic_text_bar_init(1);
+        if (ret != 0)
+            return ret;
 
-	drv_generic_text_bar_add_segment(0, 0, 255, ' ');
-	drv_generic_text_bar_add_segment(255, 255, 255, '#');
+        drv_generic_text_bar_add_segment(0, 0, 255, ' ');
+        drv_generic_text_bar_add_segment(255, 255, 255, '#');
 
-	wc = Widget_Text;
-	wc.draw = drv_generic_text_draw;
-	widget_register(&wc);
+        wc = Widget_Text;
+        wc.draw = drv_generic_text_draw;
+        widget_register(&wc);
 
-	wc = Widget_Icon;
-	wc.draw = drv_generic_text_icon_draw;
-	widget_register(&wc);
+        wc = Widget_Icon;
+        wc.draw = drv_generic_text_icon_draw;
+        widget_register(&wc);
 
-	wc = Widget_Bar;
-	wc.draw = drv_generic_text_bar_draw;
-	widget_register(&wc);
+        wc = Widget_Bar;
+        wc.draw = drv_generic_text_bar_draw;
+        widget_register(&wc);
     }
 
     if (!quiet) {
-	char buffer[40];
-	qprintf(buffer, sizeof(buffer), "%s %dx%d", Name, DCOLS, DROWS);
-	drv_TEW673GRU_greet(buffer, "www.openwrt.org");
-	sleep(3);
-	drv_TEW673GRU_clear_screen();
+        char buffer[40];
+        qprintf(buffer, sizeof(buffer), "%s %dx%d", Name, DCOLS, DROWS);
+        drv_TEW673GRU_greet(buffer, "www.openwrt.org");
+        sleep(3);
+        drv_TEW673GRU_clear_screen();
     }
 
     return 0;
@@ -436,12 +433,12 @@ int drv_TEW673GRU_quit(const int quiet)
     drv_TEW673GRU_clear_screen();
 
     if (!quiet)
-	drv_TEW673GRU_greet("goodbye!", NULL);
+        drv_TEW673GRU_greet("goodbye!", NULL);
 
     if (MODE)
-	drv_generic_graphic_quit();
+        drv_generic_graphic_quit();
     else
-	drv_generic_text_quit();
+        drv_generic_text_quit();
 
     debug("closing connection");
     drv_TEW673GRU_close();

@@ -144,27 +144,27 @@ static char *split(const char *val, const int column, const char *delimiter)
     const char *beg, *end;
 
     if (column < 0)
-	return (char *) val;
+        return (char *) val;
     if (val == NULL)
-	return NULL;
+        return NULL;
 
     num = 0;
     len = 0;
     beg = val;
     end = beg;
     while (beg && *beg) {
-	while (strchr(delimiter, *beg))
-	    beg++;
-	end = strpbrk(beg, delimiter);
-	if (num++ == column)
-	    break;
-	beg = end ? end + 1 : NULL;
+        while (strchr(delimiter, *beg))
+            beg++;
+        end = strpbrk(beg, delimiter);
+        if (num++ == column)
+            break;
+        beg = end ? end + 1 : NULL;
     }
     if (beg != NULL) {
-	len = end ? (size_t) (end - beg) : strlen(beg);
-	if (len >= sizeof(buffer))
-	    len = sizeof(buffer) - 1;
-	strncpy(buffer, beg, len);
+        len = end ? (size_t) (end - beg) : strlen(beg);
+        if (len >= sizeof(buffer))
+            len = sizeof(buffer) - 1;
+        strncpy(buffer, beg, len);
     }
 
     buffer[len] = '\0';
@@ -182,28 +182,28 @@ static HASH_ITEM *hash_lookup(HASH * Hash, const char *key, const int do_sort)
 
     /* maybe sort the array */
     if (do_sort && !Hash->sorted) {
-	qsort(Hash->Items, Hash->nItems, sizeof(HASH_ITEM), hash_sort_item);
-	Hash->sorted = 1;
+        qsort(Hash->Items, Hash->nItems, sizeof(HASH_ITEM), hash_sort_item);
+        Hash->sorted = 1;
     }
 
     /* no key was passed */
     if (key == NULL)
-	return NULL;
+        return NULL;
 
     /* lookup using bsearch */
     if (Hash->sorted) {
-	Item = bsearch(key, Hash->Items, Hash->nItems, sizeof(HASH_ITEM), hash_lookup_item);
+        Item = bsearch(key, Hash->Items, Hash->nItems, sizeof(HASH_ITEM), hash_lookup_item);
     }
 
     /* linear search */
     if (Item == NULL) {
-	int i;
-	for (i = 0; i < Hash->nItems; i++) {
-	    if (strcmp(key, Hash->Items[i].key) == 0) {
-		Item = &(Hash->Items[i]);
-		break;
-	    }
-	}
+        int i;
+        for (i = 0; i < Hash->nItems; i++) {
+            if (strcmp(key, Hash->Items[i].key) == 0) {
+                Item = &(Hash->Items[i]);
+                break;
+            }
+        }
     }
 
     return Item;
@@ -220,12 +220,12 @@ int hash_age(HASH * Hash, const char *key)
     struct timeval now, *timestamp;
 
     if (key == NULL) {
-	timestamp = &(Hash->timestamp);
+        timestamp = &(Hash->timestamp);
     } else {
-	Item = hash_lookup(Hash, key, 1);
-	if (Item == NULL)
-	    return -1;
-	timestamp = &(Item->Slot[Item->index].timestamp);
+        Item = hash_lookup(Hash, key, 1);
+        if (Item == NULL)
+            return -1;
+        timestamp = &(Item->Slot[Item->index].timestamp);
     }
 
     gettimeofday(&now, NULL);
@@ -238,7 +238,7 @@ int hash_age(HASH * Hash, const char *key)
 void hash_set_column(HASH * Hash, const int number, const char *column)
 {
     if (Hash == NULL)
-	return;
+        return;
 
     Hash->nColumns++;
     Hash->Columns = realloc(Hash->Columns, Hash->nColumns * sizeof(HASH_COLUMN));
@@ -256,11 +256,11 @@ static int hash_get_column(HASH * Hash, const char *key)
     HASH_COLUMN *Column;
 
     if (key == NULL || *key == '\0')
-	return -1;
+        return -1;
 
     Column = bsearch(key, Hash->Columns, Hash->nColumns, sizeof(HASH_COLUMN), hash_lookup_column);
     if (Column == NULL)
-	return -1;
+        return -1;
 
     return Column->val;
 }
@@ -270,7 +270,7 @@ static int hash_get_column(HASH * Hash, const char *key)
 void hash_set_delimiter(HASH * Hash, const char *delimiter)
 {
     if (Hash->delimiter != NULL)
-	free(Hash->delimiter);
+        free(Hash->delimiter);
     Hash->delimiter = strdup(delimiter);
 }
 
@@ -283,7 +283,7 @@ char *hash_get(HASH * Hash, const char *key, const char *column)
 
     Item = hash_lookup(Hash, key, 1);
     if (Item == NULL)
-	return NULL;
+        return NULL;
 
     c = hash_get_column(Hash, column);
     return split(Item->Slot[Item->index].value, c, Hash->delimiter);
@@ -303,7 +303,7 @@ double hash_get_delta(HASH * Hash, const char *key, const char *column, const in
     /* lookup item */
     Item = hash_lookup(Hash, key, 1);
     if (Item == NULL)
-	return 0.0;
+        return 0.0;
 
     /* this is the "current" Slot */
     Slot1 = &(Item->Slot[Item->index]);
@@ -313,46 +313,46 @@ double hash_get_delta(HASH * Hash, const char *key, const char *column, const in
 
     /* if delay is zero, return absolute value */
     if (delay == 0)
-	return atof(split(Slot1->value, c, Hash->delimiter));
+        return atof(split(Slot1->value, c, Hash->delimiter));
 
     /* prepare timing values */
     now = Slot1->timestamp;
     end.tv_sec = now.tv_sec;
     end.tv_usec = now.tv_usec - 1000 * delay;
     while (end.tv_usec < 0) {
-	end.tv_sec--;
-	end.tv_usec += 1000000;
+        end.tv_sec--;
+        end.tv_usec += 1000000;
     }
 
     /* search delta slot */
     Slot2 = &(Item->Slot[Item->index]);
     for (i = 1; i < Item->nSlot; i++) {
-	Slot2 = &(Item->Slot[(Item->index + i) % Item->nSlot]);
-	if (Slot2->timestamp.tv_sec == 0)
-	    break;
-	if (timercmp(&(Slot2->timestamp), &end, <))
-	    break;
+        Slot2 = &(Item->Slot[(Item->index + i) % Item->nSlot]);
+        if (Slot2->timestamp.tv_sec == 0)
+            break;
+        if (timercmp(&(Slot2->timestamp), &end, <))
+            break;
     }
 
     /* empty slot => try the one before */
     if (Slot2->timestamp.tv_sec == 0) {
-	i--;
-	Slot2 = &(Item->Slot[(Item->index + i) % Item->nSlot]);
+        i--;
+        Slot2 = &(Item->Slot[(Item->index + i) % Item->nSlot]);
     }
 
     /* not enough slots available... */
     if (i == 0)
-	return 0.0;
+        return 0.0;
 
     /* delta value, delta time */
     v1 = atof(split(Slot1->value, c, Hash->delimiter));
     v2 = atof(split(Slot2->value, c, Hash->delimiter));
     dv = v1 - v2;
     dt = (Slot1->timestamp.tv_sec - Slot2->timestamp.tv_sec)
-	+ (Slot1->timestamp.tv_usec - Slot2->timestamp.tv_usec) / 1000000.0;
+        + (Slot1->timestamp.tv_usec - Slot2->timestamp.tv_usec) / 1000000.0;
 
     if (dt > 0.0 && dv >= 0.0)
-	return dv / dt;
+        return dv / dt;
     return 0.0;
 }
 
@@ -368,11 +368,11 @@ double hash_get_regex(HASH * Hash, const char *key, const char *column, const in
 
     err = regcomp(&preg, key, REG_ICASE | REG_NOSUB);
     if (err != 0) {
-	char buffer[32];
-	regerror(err, &preg, buffer, sizeof(buffer));
-	error("error in regular expression: %s", buffer);
-	regfree(&preg);
-	return 0.0;
+        char buffer[32];
+        regerror(err, &preg, buffer, sizeof(buffer));
+        error("error in regular expression: %s", buffer);
+        regfree(&preg);
+        return 0.0;
     }
 
     /* force the table to be sorted by requesting anything */
@@ -380,9 +380,9 @@ double hash_get_regex(HASH * Hash, const char *key, const char *column, const in
 
     sum = 0.0;
     for (i = 0; i < Hash->nItems; i++) {
-	if (regexec(&preg, Hash->Items[i].key, 0, NULL, 0) == 0) {
-	    sum += hash_get_delta(Hash, Hash->Items[i].key, column, delay);
-	}
+        if (regexec(&preg, Hash->Items[i].key, 0, NULL, 0) == 0) {
+            sum += hash_get_delta(Hash, Hash->Items[i].key, column, delay);
+        }
     }
     regfree(&preg);
     return sum;
@@ -405,32 +405,32 @@ static HASH_ITEM *hash_set(HASH * Hash, const char *key, const char *value, cons
 
     if (Item == NULL) {
 
-	/* add entry */
-	Hash->sorted = 0;
-	Hash->nItems++;
-	Hash->Items = realloc(Hash->Items, Hash->nItems * sizeof(HASH_ITEM));
+        /* add entry */
+        Hash->sorted = 0;
+        Hash->nItems++;
+        Hash->Items = realloc(Hash->Items, Hash->nItems * sizeof(HASH_ITEM));
 
-	Item = &(Hash->Items[Hash->nItems - 1]);
-	Item->key = strdup(key);
-	Item->index = 0;
-	Item->nSlot = delta;
-	Item->Slot = malloc(Item->nSlot * sizeof(HASH_SLOT));
-	memset(Item->Slot, 0, Item->nSlot * sizeof(HASH_SLOT));
+        Item = &(Hash->Items[Hash->nItems - 1]);
+        Item->key = strdup(key);
+        Item->index = 0;
+        Item->nSlot = delta;
+        Item->Slot = malloc(Item->nSlot * sizeof(HASH_SLOT));
+        memset(Item->Slot, 0, Item->nSlot * sizeof(HASH_SLOT));
 
     } else {
 
-	/* maybe enlarge delta table */
-	if (Item->nSlot < delta) {
-	    Item->nSlot = delta;
-	    Item->Slot = realloc(Item->Slot, Item->nSlot * sizeof(HASH_SLOT));
-	}
+        /* maybe enlarge delta table */
+        if (Item->nSlot < delta) {
+            Item->nSlot = delta;
+            Item->Slot = realloc(Item->Slot, Item->nSlot * sizeof(HASH_SLOT));
+        }
 
     }
 
     if (Item->nSlot > 1) {
-	/* move the pointer to the next free slot, wrap around if necessary */
-	if (--Item->index < 0)
-	    Item->index = Item->nSlot - 1;
+        /* move the pointer to the next free slot, wrap around if necessary */
+        if (--Item->index < 0)
+            Item->index = Item->nSlot - 1;
     }
 
     /* create entry */
@@ -439,10 +439,10 @@ static HASH_ITEM *hash_set(HASH * Hash, const char *key, const char *value, cons
 
     /* maybe enlarge value buffer */
     if (size > Slot->size) {
-	/* buffer is either empty or too small */
-	/* allocate memory in multiples of CHUNK_SIZE */
-	Slot->size = CHUNK_SIZE * (size / CHUNK_SIZE + 1);
-	Slot->value = realloc(Slot->value, Slot->size);
+        /* buffer is either empty or too small */
+        /* allocate memory in multiples of CHUNK_SIZE */
+        Slot->size = CHUNK_SIZE * (size / CHUNK_SIZE + 1);
+        Slot->value = realloc(Slot->value, Slot->size);
     }
 
     /* set value */
@@ -478,25 +478,25 @@ void hash_destroy(HASH * Hash)
 
     if (Hash->Items) {
 
-	/* free all headers */
-	for (i = 0; i < Hash->nColumns; i++) {
-	    if (Hash->Columns[i].key)
-		free(Hash->Columns[i].key);
-	}
+        /* free all headers */
+        for (i = 0; i < Hash->nColumns; i++) {
+            if (Hash->Columns[i].key)
+                free(Hash->Columns[i].key);
+        }
 
-	/* free header table */
-	free(Hash->Columns);
+        /* free header table */
+        free(Hash->Columns);
 
-	/* free all items */
-	for (i = 0; i < Hash->nItems; i++) {
-	    if (Hash->Items[i].key)
-		free(Hash->Items[i].key);
-	    if (Hash->Items[i].Slot)
-		free(Hash->Items[i].Slot);
-	}
+        /* free all items */
+        for (i = 0; i < Hash->nItems; i++) {
+            if (Hash->Items[i].key)
+                free(Hash->Items[i].key);
+            if (Hash->Items[i].Slot)
+                free(Hash->Items[i].Slot);
+        }
 
-	/* free items table */
-	free(Hash->Items);
+        /* free items table */
+        free(Hash->Items);
     }
 
     Hash->sorted = 0;

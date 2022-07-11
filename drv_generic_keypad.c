@@ -38,7 +38,7 @@
 static char *Section = NULL;
 static char *Driver = NULL;
 
-int (*drv_generic_keypad_real_press) () = NULL;
+int (*drv_generic_keypad_real_press)() = NULL;
 
 int drv_generic_keypad_init(const char *section, const char *driver)
 {
@@ -60,12 +60,12 @@ int drv_generic_keypad_press(const int num)
     int val = 0;
 
     if (drv_generic_keypad_real_press)
-	val = drv_generic_keypad_real_press(num);
+        val = drv_generic_keypad_real_press(num);
 
     w = widget_find(WIDGET_TYPE_KEYPAD, &val);
 
     if (w && w->class->draw)
-	w->class->draw(w);
+        w->class->draw(w);
 
     return val;
 }

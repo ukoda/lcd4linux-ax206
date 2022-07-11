@@ -58,6 +58,6 @@ unsigned char drv_generic_i2c_wire(const char *name, const char *deflt);
 void drv_generic_i2c_byte(const unsigned char data);
 void drv_generic_i2c_data(const unsigned char data);
 void drv_generic_i2c_command(const unsigned char command, /*const */ unsigned char *data, const unsigned char length,
-			     int bits);
+                             int bits);
 
 #endif

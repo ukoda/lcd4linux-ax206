@@ -74,18 +74,18 @@ static void drv_LL_send(const char *string, const int len)
     int run, ret;
 
     for (run = 0; run < 10; run++) {
-	ret = write(lcdlinux_fd, string, len);
-	if (ret >= 0 || errno != EAGAIN)
-	    break;
-	if (run > 0)
-	    info("%s: write(%s): EAGAIN #%d", Name, Device, run);
-	usleep(1000);
+        ret = write(lcdlinux_fd, string, len);
+        if (ret >= 0 || errno != EAGAIN)
+            break;
+        if (run > 0)
+            info("%s: write(%s): EAGAIN #%d", Name, Device, run);
+        usleep(1000);
     }
 
     if (ret < 0) {
-	error("%s: write(%s) failed: %s", Name, Device, strerror(errno));
+        error("%s: write(%s) failed: %s", Name, Device, strerror(errno));
     } else if (ret != len) {
-	error("%s: partial write(%s): len=%d ret=%d", Name, Device, len, ret);
+        error("%s: partial write(%s): len=%d ret=%d", Name, Device, len, ret);
     }
 
     return;
@@ -104,7 +104,7 @@ static void drv_LL_write(const int row, const int col, const char *data, int len
     int pos = row * DCOLS + col;
 
     if (lseek(lcdlinux_fd, pos, SEEK_SET) == (off_t) - 1) {
-	error("%s: lseek(%s) failed: %s", Name, Device, strerror(errno));
+        error("%s: lseek(%s) failed: %s", Name, Device, strerror(errno));
     }
     drv_LL_send(data, len);
 }
@@ -117,11 +117,11 @@ static void drv_LL_defchar(const int ascii, const unsigned char *matrix)
 
     buf[0] = ascii;
     for (i = 1; i < 9; i++) {
-	buf[i] = *matrix++ & 0x1f;
+        buf[i] = *matrix++ & 0x1f;
     }
 
     if (ioctl(lcdlinux_fd, LCDL_SET_CGRAM_CHAR, &buf) != 0) {
-	error("%s: ioctl(LCDL_SET_CGRAM_CHAR) failed: %s", Name, strerror(errno));
+        error("%s: ioctl(LCDL_SET_CGRAM_CHAR) failed: %s", Name, strerror(errno));
     }
 }
 
@@ -139,47 +139,47 @@ static int drv_LL_start(const char *section, const int quiet)
     /* get size from config file */
     s = cfg_get(section, "Size", NULL);
     if (s != NULL || *s != '\0') {
-	if (sscanf(s, "%dx%d", &cols, &rows) != 2 || rows < 1 || cols < 1) {
-	    error("%s: bad %s.Size '%s' from %s", Name, section, s, cfg_source());
-	    free(s);
-	    return -1;
-	}
+        if (sscanf(s, "%dx%d", &cols, &rows) != 2 || rows < 1 || cols < 1) {
+            error("%s: bad %s.Size '%s' from %s", Name, section, s, cfg_source());
+            free(s);
+            return -1;
+        }
     }
     free(s);
 
     /* open device */
     lcdlinux_fd = open(Device, O_WRONLY);
     if (lcdlinux_fd == -1) {
-	error("%s: open(%s) failed: %s", Name, Device, strerror(errno));
-	return -1;
+        error("%s: open(%s) failed: %s", Name, Device, strerror(errno));
+        return -1;
     }
 
     /* get display size */
     memset(&buf, 0, sizeof(buf));
     if (ioctl(lcdlinux_fd, LCDL_GET_PARAM, &buf) != 0) {
-	error("%s: ioctl(LCDL_GET_PARAM) failed: %s", Name, strerror(errno));
-	error("%s: Could not query display information!", Name);
-	return -1;
+        error("%s: ioctl(LCDL_GET_PARAM) failed: %s", Name, strerror(errno));
+        error("%s: Could not query display information!", Name);
+        return -1;
     }
     info("%s: %dx%d display with %d controllers, flags=0x%02lx:",
-	 Name, buf.cntr_cols, buf.cntr_rows * buf.num_cntr, buf.num_cntr, buf.flags);
+         Name, buf.cntr_cols, buf.cntr_rows * buf.num_cntr, buf.num_cntr, buf.flags);
     info("%s:   busy-flag checking %sabled", Name, (buf.flags & HD44780_CHECK_BF) ? "en" : "dis");
     info("%s:   bus width %d bits", Name, (buf.flags & HD44780_4BITS_BUS) ? 4 : 8);
     info("%s:   font size %s", Name, (buf.flags & HD44780_5X10_FONT) ? "5x10" : "5x8");
 
     /* overwrite width size from lcd4linux.conf */
     if (buf.vs_rows || buf.vs_cols) {
-	info("%s: disabling virtual screen", Name);
-	buf.vs_rows = 0;
-	buf.vs_cols = 0;
-	commit = 1;
+        info("%s: disabling virtual screen", Name);
+        buf.vs_rows = 0;
+        buf.vs_cols = 0;
+        commit = 1;
     }
 
     if ((rows > 0 && rows != buf.cntr_rows * buf.num_cntr) || (cols > 0 && cols != buf.cntr_cols)) {
-	info("%s: changing size to %dx%d", Name, cols, rows);
-	buf.cntr_rows = rows / buf.num_cntr;
-	buf.cntr_cols = cols;
-	commit = 1;
+        info("%s: changing size to %dx%d", Name, cols, rows);
+        buf.cntr_rows = rows / buf.num_cntr;
+        buf.cntr_cols = cols;
+        commit = 1;
     }
 
     DROWS = buf.cntr_rows * buf.num_cntr;
@@ -188,46 +188,46 @@ static int drv_LL_start(const char *section, const int quiet)
     /* overwrite busy-flag checking from lcd4linux.conf */
     cfg_number(section, "UseBusy", 0, 0, 1, &use_busy);
     if (use_busy && !(buf.flags & HD44780_CHECK_BF)) {
-	info("%s: activating busy-flag checking", Name);
-	buf.flags |= HD44780_CHECK_BF;
-	commit = 1;
+        info("%s: activating busy-flag checking", Name);
+        buf.flags |= HD44780_CHECK_BF;
+        commit = 1;
     } else if (!use_busy && (buf.flags & HD44780_CHECK_BF)) {
-	info("%s: deactivating busy-flag checking", Name);
-	buf.flags &= ~HD44780_CHECK_BF;
-	commit = 1;
+        info("%s: deactivating busy-flag checking", Name);
+        buf.flags &= ~HD44780_CHECK_BF;
+        commit = 1;
     }
 
     /* overwrite bus length from lcd4linux.conf */
     cfg_number(section, "Bus4Bit", 0, 0, 1, &bus4bits);
     if (bus4bits && !(buf.flags & HD44780_4BITS_BUS)) {
-	info("%s: setting bus length to 4 bits", Name);
-	buf.flags |= HD44780_4BITS_BUS;
-	commit = 1;
+        info("%s: setting bus length to 4 bits", Name);
+        buf.flags |= HD44780_4BITS_BUS;
+        commit = 1;
     } else if (!bus4bits && (buf.flags & HD44780_4BITS_BUS)) {
-	info("%s: setting bus length to 8 bits", Name);
-	buf.flags &= ~HD44780_4BITS_BUS;
-	commit = 1;
+        info("%s: setting bus length to 8 bits", Name);
+        buf.flags &= ~HD44780_4BITS_BUS;
+        commit = 1;
     }
 
     if (commit && ioctl(lcdlinux_fd, LCDL_SET_PARAM, &buf) != 0) {
-	error("%s: ioctl(LCDL_SET_PARAM) failed: %s", Name, strerror(errno));
-	return -1;
+        error("%s: ioctl(LCDL_SET_PARAM) failed: %s", Name, strerror(errno));
+        return -1;
     }
 
     /* initialize display */
-    drv_LL_clear();		/* clear display */
+    drv_LL_clear();             /* clear display */
 
     /* Disable control characters interpretation. */
     /* No return value check since this ioctl cannot fail */
     ioctl(lcdlinux_fd, LCDL_RAW_MODE, 1);
 
     if (!quiet) {
-	char buffer[40];
-	qprintf(buffer, sizeof(buffer), "%s %dx%d", Name, DCOLS, DROWS);
-	if (drv_generic_text_greet(buffer, "lcd-linux.sf.net")) {
-	    sleep(3);
-	    drv_LL_clear();
-	}
+        char buffer[40];
+        qprintf(buffer, sizeof(buffer), "%s %dx%d", Name, DCOLS, DROWS);
+        if (drv_generic_text_greet(buffer, "lcd-linux.sf.net")) {
+            sleep(3);
+            drv_LL_clear();
+        }
     }
 
     return 0;
@@ -274,11 +274,11 @@ int drv_LL_init(const char *section, const int quiet)
     info("%s: %s", Name, "$Rev$");
 
     /* display preferences */
-    XRES = 5;			/* pixel width of one char  */
-    YRES = 8;			/* pixel height of one char  */
-    CHARS = 8;			/* number of user-defineable characters */
-    CHAR0 = 0;			/* ASCII of first user-defineable char */
-    GOTO_COST = -1;		/* number of bytes a goto command requires */
+    XRES = 5;                   /* pixel width of one char  */
+    YRES = 8;                   /* pixel height of one char  */
+    CHARS = 8;                  /* number of user-defineable characters */
+    CHAR0 = 0;                  /* ASCII of first user-defineable char */
+    GOTO_COST = -1;             /* number of bytes a goto command requires */
 
     /* real worker functions */
     drv_generic_text_real_write = drv_LL_write;
@@ -287,28 +287,28 @@ int drv_LL_init(const char *section, const int quiet)
 
     /* start display */
     if ((ret = drv_LL_start(section, quiet)) != 0)
-	return ret;
+        return ret;
 
     /* initialize generic text driver */
     if ((ret = drv_generic_text_init(section, Name)) != 0)
-	return ret;
+        return ret;
 
     /* initialize generic icon driver */
     if ((ret = drv_generic_text_icon_init()) != 0)
-	return ret;
+        return ret;
 
     /* initialize generic bar driver */
     if ((ret = drv_generic_text_bar_init(0)) != 0)
-	return ret;
+        return ret;
 
     /* add fixed chars to the bar driver */
     /* most displays have a full block on ascii 255, but some have kind of  */
     /* an 'inverted P'. If you specify 'asc255bug 1 in the config, this */
     /* char will not be used, but rendered by the bar driver */
     cfg_number(section, "asc255bug", 0, 0, 1, &asc255bug);
-    drv_generic_text_bar_add_segment(0, 0, 255, 32);	/* ASCII  32 = blank */
+    drv_generic_text_bar_add_segment(0, 0, 255, 32);    /* ASCII  32 = blank */
     if (!asc255bug)
-	drv_generic_text_bar_add_segment(255, 255, 255, 255);	/* ASCII 255 = block */
+        drv_generic_text_bar_add_segment(255, 255, 255, 255);   /* ASCII 255 = block */
 
     /* register text widget */
     wc = Widget_Text;
@@ -345,7 +345,7 @@ int drv_LL_quit(const int quiet)
 
     /* say goodbye... */
     if (!quiet) {
-	drv_generic_text_greet("goodbye!", NULL);
+        drv_generic_text_greet("goodbye!", NULL);
     }
 
     /* Enable control characters interpretation. */

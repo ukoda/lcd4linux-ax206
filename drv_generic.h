@@ -30,13 +30,13 @@
 
 /* these values are chars (text displays) or pixels (graphic displays) */
 
-extern int LROWS, LCOLS;	/* layout size */
-extern int DROWS, DCOLS;	/* display size */
+extern int LROWS, LCOLS;        /* layout size */
+extern int DROWS, DCOLS;        /* display size */
 
-extern int XRES, YRES;		/* pixel width/height of one char */
+extern int XRES, YRES;          /* pixel width/height of one char */
 
 /* these function must be implemented by the generic driver */
-extern void (*drv_generic_blit) (const int row, const int col, const int height, const int width);
+extern void (*drv_generic_blit)(const int row, const int col, const int height, const int width);
 
 int drv_generic_init(void);
 

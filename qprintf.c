@@ -51,15 +51,15 @@ static char *itoa(char *buffer, const size_t size, int value, unsigned int fixed
 
     /* sanity checks */
     if (buffer == NULL || size < 2)
-	return (NULL);
+        return (NULL);
 
     /* remember sign of value */
     sign = 0;
     if (value < 0) {
-	sign = 1;
-	if (fill0)
-	    fixedlen -= 1;
-	value = -value;
+        sign = 1;
+        if (fill0)
+            fixedlen -= 1;
+        value = -value;
     }
 
     /* p points to last char */
@@ -69,24 +69,24 @@ static char *itoa(char *buffer, const size_t size, int value, unsigned int fixed
     *p = '\0';
 
     do {
-	*--p = value % 10 + '0';
-	value = value / 10;
+        *--p = value % 10 + '0';
+        value = value / 10;
     } while (value != 0 && p > buffer);
 
     if (sign && !fill0 && p > buffer)
-	*--p = '-';
+        *--p = '-';
 
     /* fill fixed length */
     while (p > buffer && strlen(p) < fixedlen) {
-	if (fill0) {
-	    *--p = '0';
-	} else {
-	    *--p = ' ';
-	}
+        if (fill0) {
+            *--p = '0';
+        } else {
+            *--p = ' ';
+        }
     }
 
     if (sign && fill0 && p > buffer)
-	*--p = '-';
+        *--p = '-';
 
     return p;
 }
@@ -98,7 +98,7 @@ static char *utoa(char *buffer, const size_t size, unsigned int value, unsigned 
 
     /* sanity checks */
     if (buffer == NULL || size < 2)
-	return (NULL);
+        return (NULL);
 
     /* p points to last char */
     p = buffer + size - 1;
@@ -107,17 +107,17 @@ static char *utoa(char *buffer, const size_t size, unsigned int value, unsigned 
     *p = '\0';
 
     do {
-	*--p = value % 10 + '0';
-	value = value / 10;
+        *--p = value % 10 + '0';
+        value = value / 10;
     } while (value != 0 && p > buffer);
 
     /* fill fixed length */
     while (p > buffer && strlen(p) < fixedlen) {
-	if (fill0) {
-	    *--p = '0';
-	} else {
-	    *--p = ' ';
-	}
+        if (fill0) {
+            *--p = '0';
+        } else {
+            *--p = ' ';
+        }
     }
 
     return p;
@@ -131,7 +131,7 @@ static char *utox(char *buffer, const size_t size, unsigned int value, unsigned 
 
     /* sanity checks */
     if (buffer == NULL || size < 2)
-	return (NULL);
+        return (NULL);
 
     /* p points to last char */
     p = buffer + size - 1;
@@ -140,18 +140,18 @@ static char *utox(char *buffer, const size_t size, unsigned int value, unsigned 
     *p = '\0';
 
     do {
-	digit = value % 16;
-	value = value / 16;
-	*--p = (digit < 10 ? '0' : 'a' - 10) + digit;
+        digit = value % 16;
+        value = value / 16;
+        *--p = (digit < 10 ? '0' : 'a' - 10) + digit;
     } while (value != 0 && p > buffer);
 
     /* fill fixed length */
     while (p > buffer && strlen(p) < fixedlen) {
-	if (fill0) {
-	    *--p = '0';
-	} else {
-	    *--p = ' ';
-	}
+        if (fill0) {
+            *--p = '0';
+        } else {
+            *--p = ' ';
+        }
     }
 
     return p;
@@ -185,74 +185,74 @@ int qprintf(char *str, const size_t size, const char *format, ...)
     /* use size-1 for terminating zero */
     while (len < size - 1) {
 
-	if (*src == '%') {
-	    char buf[12], *s;
-	    int d;
-	    unsigned int u;
-	    unsigned int fixedlen = 0;
-	    unsigned int fill0 = 0;
+        if (*src == '%') {
+            char buf[12], *s;
+            int d;
+            unsigned int u;
+            unsigned int fixedlen = 0;
+            unsigned int fill0 = 0;
 
-	    if (*++src == '0')
-		fill0 = 1;
-	    while (*src >= '0' && *src <= '9') {
-		fixedlen = fixedlen * 10 + (*src - '0');
-		src++;
-	    }
+            if (*++src == '0')
+                fill0 = 1;
+            while (*src >= '0' && *src <= '9') {
+                fixedlen = fixedlen * 10 + (*src - '0');
+                src++;
+            }
 
-	    switch (*src) {
-	    case 's':
-		src++;
-		s = va_arg(ap, char *);
-		while (len < size - 1 && *s != '\0') {
-		    len++;
-		    *dst++ = *s++;
-		}
-		break;
-	    case 'd':
-		src++;
-		d = va_arg(ap, int);
-		s = itoa(buf, sizeof(buf), d, fixedlen, fill0);
-		while (len < size && *s != '\0') {
-		    len++;
-		    *dst++ = *s++;
-		}
-		break;
-	    case 'u':
-		src++;
-		u = va_arg(ap, unsigned int);
-		s = utoa(buf, sizeof(buf), u, fixedlen, fill0);
-		while (len < size - 1 && *s != '\0') {
-		    len++;
-		    *dst++ = *s++;
-		}
-		break;
-	    case 'x':
-		src++;
-		u = va_arg(ap, unsigned int);
-		s = utox(buf, sizeof(buf), u, fixedlen, fill0);
-		while (len < size - 1 && *s != '\0') {
-		    len++;
-		    *dst++ = *s++;
-		}
-		break;
-	    default:
-		len++;
-		*dst++ = '%';
-	    }
-	} else {
-	    len++;
-	    *dst++ = *src;
-	    if (*src++ == '\0')
-		break;
-	}
+            switch (*src) {
+            case 's':
+                src++;
+                s = va_arg(ap, char *);
+                while (len < size - 1 && *s != '\0') {
+                    len++;
+                    *dst++ = *s++;
+                }
+                break;
+            case 'd':
+                src++;
+                d = va_arg(ap, int);
+                s = itoa(buf, sizeof(buf), d, fixedlen, fill0);
+                while (len < size && *s != '\0') {
+                    len++;
+                    *dst++ = *s++;
+                }
+                break;
+            case 'u':
+                src++;
+                u = va_arg(ap, unsigned int);
+                s = utoa(buf, sizeof(buf), u, fixedlen, fill0);
+                while (len < size - 1 && *s != '\0') {
+                    len++;
+                    *dst++ = *s++;
+                }
+                break;
+            case 'x':
+                src++;
+                u = va_arg(ap, unsigned int);
+                s = utox(buf, sizeof(buf), u, fixedlen, fill0);
+                while (len < size - 1 && *s != '\0') {
+                    len++;
+                    *dst++ = *s++;
+                }
+                break;
+            default:
+                len++;
+                *dst++ = '%';
+            }
+        } else {
+            len++;
+            *dst++ = *src;
+            if (*src++ == '\0')
+                break;
+        }
     }
 
     va_end(ap);
 
     /* enforce terminating zero */
     if (len >= size - 1 && *(dst - 1) != '\0') {
-	len++;
-	*dst = '\0';
+        len++;
+        *dst = '\0';
     }
 
     /* do not count terminating zero */

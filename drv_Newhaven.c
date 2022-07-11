@@ -147,7 +147,7 @@ static int drv_Newhaven_open(const char *section)
     /* open i2c port */
 
     if (drv_generic_i2c_open(section, Name) < 0)
-	return -1;
+        return -1;
 
     return 0;
 }
@@ -173,8 +173,8 @@ static void drv_Newhaven_sendData(const char *data, const unsigned int len)
 
     /* sending data using other methods is a bit more tricky... */
     for (i = 0; i < len; i++) {
-	/* send data to the i2c port */
-	drv_generic_i2c_byte(data[i]);
+        /* send data to the i2c port */
+        drv_generic_i2c_byte(data[i]);
     }
 
 }
@@ -221,7 +221,7 @@ static void drv_Newhaven_display_on(void)
 
 
 /* Turn display off */
-static void __attribute__ ((unused)) drv_Newhaven_display_off(void)
+static void __attribute__((unused)) drv_Newhaven_display_off(void)
 {
     char cmd;
 
@@ -240,25 +240,25 @@ static void drv_Newhaven_write(const int row, const int col, const char *data, i
     /* do the cursor positioning here */
     cmd = NEWHAVEN_CURSOR_SET_POS;
     if (col < 0 || col > DCOLS - 1)
-	error("%s: Invalid col, %d. Valid cols 0-%d.", Name, col, DCOLS - 1);
+        error("%s: Invalid col, %d. Valid cols 0-%d.", Name, col, DCOLS - 1);
     if (len > DCOLS - (col + 1))
-	error("%s: Data length, %d, longer than columns left in row, %d.", Name, len, DCOLS - (col + 1));
+        error("%s: Data length, %d, longer than columns left in row, %d.", Name, len, DCOLS - (col + 1));
     switch (row) {
     case 0:
-	wData[0] = NEWHAVEN_R1_C1 + col;
-	break;
+        wData[0] = NEWHAVEN_R1_C1 + col;
+        break;
     case 1:
-	wData[0] = NEWHAVEN_R2_C1 + col;
-	break;
+        wData[0] = NEWHAVEN_R2_C1 + col;
+        break;
     case 2:
-	wData[0] = NEWHAVEN_R3_C1 + col;
-	break;
+        wData[0] = NEWHAVEN_R3_C1 + col;
+        break;
     case 3:
-	wData[0] = NEWHAVEN_R4_C1 + col;
-	break;
+        wData[0] = NEWHAVEN_R4_C1 + col;
+        break;
     default:
-	error("%s: Invalid row, %d. Valid rows 0-%d.", Name, row, DROWS - 1);
-	return;
+        error("%s: Invalid row, %d. Valid rows 0-%d.", Name, row, DROWS - 1);
+        return;
     }
     drv_Newhaven_sendCommand(cmd, wData, 1);
 
@@ -280,7 +280,7 @@ static void drv_Newhaven_defchar(const int ascii, const unsigned char *matrix)
 
     /* send bitmap to the display */
     for (i = 0; i < 8; i++) {
-	wData[i + 1] = *matrix++;
+        wData[i + 1] = *matrix++;
     }
     drv_Newhaven_sendCommand(cmd, wData, 9);
 }
@@ -294,9 +294,9 @@ static int drv_Newhaven_contrast(int contrast)
 
     /* adjust limits according to the display */
     if (contrast < NEWHAVEN_CONTRAST_MIN)
-	contrast = NEWHAVEN_CONTRAST_MIN;
+        contrast = NEWHAVEN_CONTRAST_MIN;
     if (contrast > NEWHAVEN_CONTRAST_MAX)
-	contrast = NEWHAVEN_CONTRAST_MAX;
+        contrast = NEWHAVEN_CONTRAST_MAX;
 
     /* call a 'contrast' function */
     cmd = NEWHAVEN_CONTRAST_SET;
@@ -315,9 +315,9 @@ static int drv_Newhaven_brightness(int brightness)
 
     /* adjust limits according to the display */
     if (brightness < NEWHAVEN_BRIGHTNESS_MIN)
-	brightness = NEWHAVEN_BRIGHTNESS_MIN;
+        brightness = NEWHAVEN_BRIGHTNESS_MIN;
     if (brightness > NEWHAVEN_BRIGHTNESS_MAX)
-	brightness = NEWHAVEN_BRIGHTNESS_MAX;
+        brightness = NEWHAVEN_BRIGHTNESS_MAX;
 
     /* call a 'brightness' function */
     cmd = NEWHAVEN_BRIGHTNESS_SET;
@@ -337,14 +337,14 @@ static int drv_Newhaven_start(const char *section)
 
     s = cfg_get(section, "Size", NULL);
     if (s == NULL || *s == '\0') {
-	error("%s: no '%s.Size' entry from %s", Name, section, cfg_source());
-	return -1;
+        error("%s: no '%s.Size' entry from %s", Name, section, cfg_source());
+        return -1;
     }
     if (sscanf(s, "%dx%d", &cols, &rows) != 2 || rows < 1 || cols < 1 || rows > NEWHAVEN_ROW_MAX
-	|| cols > NEWHAVEN_COL_MAX) {
-	error("%s: bad %s.Size '%s' from %s", Name, section, s, cfg_source());
-	free(s);
-	return -1;
+        || cols > NEWHAVEN_COL_MAX) {
+        error("%s: bad %s.Size '%s' from %s", Name, section, s, cfg_source());
+        free(s);
+        return -1;
     }
 
     DROWS = rows;
@@ -352,24 +352,24 @@ static int drv_Newhaven_start(const char *section)
 
     /* open communication with the display */
     if (drv_Newhaven_open(section) < 0) {
-	return -1;
+        return -1;
     }
 
     /* reset & initialize display */
     drv_Newhaven_display_on();
 
     if (cfg_number
-	(section, "Contrast", NEWHAVEN_CONTRAST_DEFAULT, NEWHAVEN_CONTRAST_MIN, NEWHAVEN_CONTRAST_MAX, &contrast) > 0) {
-	drv_Newhaven_contrast(contrast);
+        (section, "Contrast", NEWHAVEN_CONTRAST_DEFAULT, NEWHAVEN_CONTRAST_MIN, NEWHAVEN_CONTRAST_MAX, &contrast) > 0) {
+        drv_Newhaven_contrast(contrast);
     }
 
     if (cfg_number
-	(section, "Brightness", NEWHAVEN_BRIGHTNESS_DEFAULT, NEWHAVEN_BRIGHTNESS_MIN, NEWHAVEN_BRIGHTNESS_MAX,
-	 &brightness) > 0) {
-	drv_Newhaven_brightness(brightness);
+        (section, "Brightness", NEWHAVEN_BRIGHTNESS_DEFAULT, NEWHAVEN_BRIGHTNESS_MIN, NEWHAVEN_BRIGHTNESS_MAX,
+         &brightness) > 0) {
+        drv_Newhaven_brightness(brightness);
     }
 
-    drv_Newhaven_clear();	/* clear display */
+    drv_Newhaven_clear();       /* clear display */
     sleep(1);
 
     return 0;
@@ -430,11 +430,11 @@ int drv_Newhaven_init(const char *section, const int quiet)
     info("%s: %s", Name, "$Rev$");
 
     /* display preferences */
-    XRES = 5;			/* pixel width of one char  */
-    YRES = 8;			/* pixel height of one char  */
-    CHARS = 8;			/* number of user-defineable characters */
-    CHAR0 = 0;			/* ASCII of first user-defineable char */
-    GOTO_COST = 2;		/* number of bytes a goto command requires */
+    XRES = 5;                   /* pixel width of one char  */
+    YRES = 8;                   /* pixel height of one char  */
+    CHARS = 8;                  /* number of user-defineable characters */
+    CHAR0 = 0;                  /* ASCII of first user-defineable char */
+    GOTO_COST = 2;              /* number of bytes a goto command requires */
 
     /* real worker functions */
     drv_generic_text_real_write = drv_Newhaven_write;
@@ -443,31 +443,31 @@ int drv_Newhaven_init(const char *section, const int quiet)
 
     /* start display */
     if ((ret = drv_Newhaven_start(section)) != 0)
-	return ret;
+        return ret;
 
     if (!quiet) {
-	char buffer[40];
-	qprintf(buffer, sizeof(buffer), "%s %dx%d", Name, DCOLS, DROWS);
-	if (drv_generic_text_greet(buffer, "www.bwct.de")) {
-	    sleep(3);
-	    drv_Newhaven_clear();
-	}
+        char buffer[40];
+        qprintf(buffer, sizeof(buffer), "%s %dx%d", Name, DCOLS, DROWS);
+        if (drv_generic_text_greet(buffer, "www.bwct.de")) {
+            sleep(3);
+            drv_Newhaven_clear();
+        }
     }
 
     /* initialize generic text driver */
     if ((ret = drv_generic_text_init(section, Name)) != 0)
-	return ret;
+        return ret;
 
     /* initialize generic icon driver */
     if ((ret = drv_generic_text_icon_init()) != 0)
-	return ret;
+        return ret;
 
     /* initialize generic bar driver */
     if ((ret = drv_generic_text_bar_init(0)) != 0)
-	return ret;
+        return ret;
 
     /* add fixed chars to the bar driver */
-    drv_generic_text_bar_add_segment(0, 0, 255, 32);	/* ASCII  32 = blank */
+    drv_generic_text_bar_add_segment(0, 0, 255, 32);    /* ASCII  32 = blank */
 
 
     /* register text widget */
@@ -507,7 +507,7 @@ int drv_Newhaven_quit(const int quiet)
 
     /* say goodbye... */
     if (!quiet) {
-	drv_generic_text_greet("goodbye!", NULL);
+        drv_generic_text_greet("goodbye!", NULL);
     }
 
     debug("closing connection");

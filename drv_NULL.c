@@ -55,19 +55,19 @@ static char Name[] = "NULL";
 /***  hardware dependant functions    ***/
 /****************************************/
 
-static void drv_NULL_write(const __attribute__ ((unused))
-			   int row, const __attribute__ ((unused))
-			   int col, const __attribute__ ((unused))
-			   char *data, const __attribute__ ((unused))
-			   int len)
+static void drv_NULL_write(const __attribute__((unused))
+                           int row, const __attribute__((unused))
+                           int col, const __attribute__((unused))
+                           char *data, const __attribute__((unused))
+                           int len)
 {
     /* empty */
 }
 
 
-static void drv_NULL_defchar(const __attribute__ ((unused))
-			     int ascii, const __attribute__ ((unused))
-			     unsigned char *matrix)
+static void drv_NULL_defchar(const __attribute__((unused))
+                             int ascii, const __attribute__((unused))
+                             unsigned char *matrix)
 {
     /* empty */
 }
@@ -79,14 +79,14 @@ static int drv_NULL_start(const char *section)
 
     s = cfg_get(section, "Size", "20x4");
     if (s == NULL || *s == '\0') {
-	error("%s: no '%s.Size' entry from %s", Name, section, cfg_source());
-	free(s);
-	return -1;
+        error("%s: no '%s.Size' entry from %s", Name, section, cfg_source());
+        free(s);
+        return -1;
     }
     if (sscanf(s, "%dx%d", &DCOLS, &DROWS) != 2 || DROWS < 1 || DCOLS < 1) {
-	error("%s: bad %s.Size '%s' from %s", Name, section, s, cfg_source());
-	free(s);
-	return -1;
+        error("%s: bad %s.Size '%s' from %s", Name, section, s, cfg_source());
+        free(s);
+        return -1;
     }
     free(s);
 
@@ -123,8 +123,8 @@ int drv_NULL_list(void)
 
 
 /* initialize driver & display */
-int drv_NULL_init(const char *section, const __attribute__ ((unused))
-		  int quiet)
+int drv_NULL_init(const char *section, const __attribute__((unused))
+                  int quiet)
 {
     WIDGET_CLASS wc;
     int ret;
@@ -132,11 +132,11 @@ int drv_NULL_init(const char *section, const __attribute__ ((unused))
     info("%s: %s", Name, "$Rev$");
 
     /* display preferences */
-    XRES = 6;			/* pixel width of one char  */
-    YRES = 8;			/* pixel height of one char  */
-    CHARS = 8;			/* number of user-defineable characters */
-    CHAR0 = 0;			/* ASCII of first user-defineable char */
-    GOTO_COST = 2;		/* number of bytes a goto command requires */
+    XRES = 6;                   /* pixel width of one char  */
+    YRES = 8;                   /* pixel height of one char  */
+    CHARS = 8;                  /* number of user-defineable characters */
+    CHAR0 = 0;                  /* ASCII of first user-defineable char */
+    GOTO_COST = 2;              /* number of bytes a goto command requires */
 
     /* real worker functions */
     drv_generic_text_real_write = drv_NULL_write;
@@ -144,19 +144,19 @@ int drv_NULL_init(const char *section, const __attribute__ ((unused))
 
     /* start display */
     if ((ret = drv_NULL_start(section)) != 0)
-	return ret;
+        return ret;
 
     /* initialize generic text driver */
     if ((ret = drv_generic_text_init(section, Name)) != 0)
-	return ret;
+        return ret;
 
     /* initialize generic bar driver */
     if ((ret = drv_generic_text_bar_init(1)) != 0)
-	return ret;
+        return ret;
 
     /* add fixed chars to the bar driver */
-    drv_generic_text_bar_add_segment(0, 0, 255, 32);	/* ASCII  32 = blank */
-    drv_generic_text_bar_add_segment(255, 255, 255, '*');	/* asterisk */
+    drv_generic_text_bar_add_segment(0, 0, 255, 32);    /* ASCII  32 = blank */
+    drv_generic_text_bar_add_segment(255, 255, 255, '*');       /* asterisk */
 
     /* register text widget */
     wc = Widget_Text;
@@ -176,8 +176,8 @@ int drv_NULL_init(const char *section, const __attribute__ ((unused))
 
 
 /* close driver & display */
-int drv_NULL_quit(const __attribute__ ((unused))
-		  int quiet)
+int drv_NULL_quit(const __attribute__((unused))
+                  int quiet)
 {
 
     info("%s: shutting down.", Name);

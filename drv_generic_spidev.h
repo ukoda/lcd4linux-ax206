@@ -51,4 +51,4 @@ int drv_generic_spidev_open(const char *section, const char *driver);
 int drv_generic_spidev_close(void);
 int drv_generic_spidev_transfer(const int count, struct spi_ioc_transfer *tr);
 
-#endif /* _DRV_GENERIC_SPIDEV_H_ */
+#endif                          /* _DRV_GENERIC_SPIDEV_H_ */

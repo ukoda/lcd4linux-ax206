@@ -73,58 +73,58 @@ static void read_MetaData()
 
     dbus_message_iter_recurse(&args, &subiter1);
     while ((current_type = dbus_message_iter_get_arg_type(&subiter1)) != DBUS_TYPE_INVALID) {
-	DBusMessageIter subiter2;
-	DBusMessageIter subiter3;
+        DBusMessageIter subiter2;
+        DBusMessageIter subiter3;
 
-	strcpy(str_key, "");
-	strcpy(str_value, "");
-	dbus_message_iter_recurse(&subiter1, &subiter2);
-	current_type = dbus_message_iter_get_arg_type(&subiter2);
+        strcpy(str_key, "");
+        strcpy(str_value, "");
+        dbus_message_iter_recurse(&subiter1, &subiter2);
+        current_type = dbus_message_iter_get_arg_type(&subiter2);
 
-	if (current_type == DBUS_TYPE_INVALID)
-	    break;
-	if (current_type == DBUS_TYPE_STRING) {
-	    void *str_tmp1;
-	    void *str_tmp2;
-	    dbus_message_iter_get_basic(&subiter2, &str_tmp1);
-	    strcpy(str_key, str_tmp1);
-	    dbus_message_iter_next(&subiter2);
-	    dbus_message_iter_recurse(&subiter2, &subiter3);
-	    current_type = dbus_message_iter_get_arg_type(&subiter3);
-	    switch (current_type) {
-	    case DBUS_TYPE_STRING:
-		{
-		    dbus_message_iter_get_basic(&subiter3, &str_tmp2);
-		    strcpy(str_value, str_tmp2);
-		    break;
-		}
-	    case DBUS_TYPE_INT32:
-		{
-		    dbus_int32_t val;
-		    dbus_message_iter_get_basic(&subiter3, &val);
-		    sprintf(str_value, "%d", val);
-		    break;
-		}
-	    case DBUS_TYPE_INT64:
-		{
-		    dbus_int64_t val;
-		    dbus_message_iter_get_basic(&subiter3, &val);
-		    sprintf(str_value, "%jd", (intmax_t) val);
-		    break;
-		}
-	    default:
-		// unexpected type
-		//printf (" (2-dbus-monitor too dumb to decipher arg type '%c')\n", current_type);
-		break;
-	    }
-	    // add key-value pair to hash
-	    hash_put(&DBUS, str_key, str_value);
-	    //printf("Key: %s , Value: %s\t",str_key,str_value);
-	}
-	//else
-	// unexpected type
-	//printf (" (2-dbus-monitor too dumb to decipher arg type '%c')\n", current_type);                                                              
-	dbus_message_iter_next(&subiter1);
+        if (current_type == DBUS_TYPE_INVALID)
+            break;
+        if (current_type == DBUS_TYPE_STRING) {
+            void *str_tmp1;
+            void *str_tmp2;
+            dbus_message_iter_get_basic(&subiter2, &str_tmp1);
+            strcpy(str_key, str_tmp1);
+            dbus_message_iter_next(&subiter2);
+            dbus_message_iter_recurse(&subiter2, &subiter3);
+            current_type = dbus_message_iter_get_arg_type(&subiter3);
+            switch (current_type) {
+            case DBUS_TYPE_STRING:
+                {
+                    dbus_message_iter_get_basic(&subiter3, &str_tmp2);
+                    strcpy(str_value, str_tmp2);
+                    break;
+                }
+            case DBUS_TYPE_INT32:
+                {
+                    dbus_int32_t val;
+                    dbus_message_iter_get_basic(&subiter3, &val);
+                    sprintf(str_value, "%d", val);
+                    break;
+                }
+            case DBUS_TYPE_INT64:
+                {
+                    dbus_int64_t val;
+                    dbus_message_iter_get_basic(&subiter3, &val);
+                    sprintf(str_value, "%jd", (intmax_t) val);
+                    break;
+                }
+            default:
+                // unexpected type
+                //printf (" (2-dbus-monitor too dumb to decipher arg type '%c')\n", current_type);
+                break;
+            }
+            // add key-value pair to hash
+            hash_put(&DBUS, str_key, str_value);
+            //printf("Key: %s , Value: %s\t",str_key,str_value);
+        }
+        //else
+        // unexpected type
+        //printf (" (2-dbus-monitor too dumb to decipher arg type '%c')\n", current_type);                                                              
+        dbus_message_iter_next(&subiter1);
     }
 }
 
@@ -136,23 +136,23 @@ static int listen_TrackChange(void)
 
     // nothing to do if we haven't read a message
     if (NULL == msg)
-	return 0;
+        return 0;
 
     // check if the message is a signal from the correct interface and with the correct name
     if (dbus_message_is_signal(msg, "org.freedesktop.MediaPlayer", "TrackChange")) {
-	// read the parameters
-	// TrackChange signal returns an array of string-variant pairs
-	if (!dbus_message_iter_init(msg, &args)) {
-	    // No parameter !
-	    //fprintf(stderr, "Message Has No Parameters\n");
-	    return 0;
-	} else if (DBUS_TYPE_ARRAY != dbus_message_iter_get_arg_type(&args)) {
-	    // Argument is not array
-	    //fprintf(stderr, "Argument is not array!\n");
-	    return 0;
-	} else
-	    read_MetaData();
-	//printf("Got Signal\n");
+        // read the parameters
+        // TrackChange signal returns an array of string-variant pairs
+        if (!dbus_message_iter_init(msg, &args)) {
+            // No parameter !
+            //fprintf(stderr, "Message Has No Parameters\n");
+            return 0;
+        } else if (DBUS_TYPE_ARRAY != dbus_message_iter_get_arg_type(&args)) {
+            // Argument is not array
+            //fprintf(stderr, "Argument is not array!\n");
+            return 0;
+        } else
+            read_MetaData();
+        //printf("Got Signal\n");
     }
     // free message
     dbus_message_unref(msg);
@@ -164,22 +164,22 @@ static unsigned long int call_PositionGet(char *target)
     unsigned long int value = 0;
 
     // create a new method call and check for errors
-    msg = dbus_message_new_method_call(target,	//target for the method call e.g "org.kde.amarok"
-				       "/Player",	// object to call on
-				       "org.freedesktop.MediaPlayer",	// interface to call on
-				       "PositionGet");	// method name
+    msg = dbus_message_new_method_call(target,  //target for the method call e.g "org.kde.amarok"
+                                       "/Player",       // object to call on
+                                       "org.freedesktop.MediaPlayer",   // interface to call on
+                                       "PositionGet");  // method name
     if (NULL == msg) {
-	//fprintf(stderr, "Message Null\n");
-	return 0;
+        //fprintf(stderr, "Message Null\n");
+        return 0;
     }
     // send message and get a handle for a reply
-    if (!dbus_connection_send_with_reply(conn, msg, &pending, -1)) {	// -1 is default timeout
-	//fprintf(stderr, "Out Of Memory!\n");
-	return 0;
+    if (!dbus_connection_send_with_reply(conn, msg, &pending, -1)) {    // -1 is default timeout
+        //fprintf(stderr, "Out Of Memory!\n");
+        return 0;
     }
     if (NULL == pending) {
-	//fprintf(stderr, "Pending Call Null\n");
-	return 0;
+        //fprintf(stderr, "Pending Call Null\n");
+        return 0;
     }
     dbus_connection_flush(conn);
 
@@ -194,22 +194,22 @@ static unsigned long int call_PositionGet(char *target)
     // get the reply message
     msg = dbus_pending_call_steal_reply(pending);
     if (NULL == msg) {
-	//fprintf(stderr, "Reply Null\n");
-	return 0;
+        //fprintf(stderr, "Reply Null\n");
+        return 0;
     }
     // free the pending message handle
     dbus_pending_call_unref(pending);
 
     // read the parameters
     if (!dbus_message_iter_init(msg, &args)) {
-	//fprintf(stderr, "Message has no arguments!\n");
-	return 0;
+        //fprintf(stderr, "Message has no arguments!\n");
+        return 0;
     }
     if (DBUS_TYPE_INT32 != dbus_message_iter_get_arg_type(&args)) {
-	//fprintf(stderr, "Argument is not INT32!\n");
-	return 0;
+        //fprintf(stderr, "Argument is not INT32!\n");
+        return 0;
     } else
-	dbus_message_iter_get_basic(&args, &value);
+        dbus_message_iter_get_basic(&args, &value);
     //printf("\nGot Reply: %d", value);
 
     // free message
@@ -230,7 +230,7 @@ static void signal_TrackChange(RESULT * result, RESULT * arg1)
     listen_TrackChange();
     str_tmp = hash_get(&DBUS, R2S(arg1), NULL);
     if (str_tmp == NULL)
-	str_tmp = "";
+        str_tmp = "";
 
     SetResult(&result, R_STRING, str_tmp);
 }
@@ -248,9 +248,9 @@ static void method_PositionGet(RESULT * result, RESULT * arg1)
 
     str_tmp = hash_get(&DBUS, "mtime", NULL);
     if (str_tmp != NULL)
-	mtime = atoi(str_tmp);
+        mtime = atoi(str_tmp);
     if (mtime > 0)
-	ratio = (double) (((float) value / mtime) * 100);
+        ratio = (double) (((float) value / mtime) * 100);
 
     //printf("\nvalue:%d mtime:%d ratio:%f",value,mtime,ratio);
     // return actual position as percentage of total length 
@@ -279,7 +279,7 @@ int plugin_init_mpris_dbus(void)
        }
      */
     if (NULL == conn)
-	return 0;
+        return 0;
 
     // request our name on the bus and check for errors
     ret = dbus_bus_request_name(conn, "org.lcd4linux.mpris_dbus", DBUS_NAME_FLAG_REPLACE_EXISTING, &err);
@@ -290,10 +290,10 @@ int plugin_init_mpris_dbus(void)
        }
      */
     if (DBUS_REQUEST_NAME_REPLY_PRIMARY_OWNER != ret)
-	return 0;
+        return 0;
 
     // add a rule for which messages we want to see
-    dbus_bus_add_match(conn, "type='signal',interface='org.freedesktop.MediaPlayer'", &err);	// see signals from the given interface
+    dbus_bus_add_match(conn, "type='signal',interface='org.freedesktop.MediaPlayer'", &err);    // see signals from the given interface
     dbus_connection_flush(conn);
     /*
        if (dbus_error_is_set(&err)) {
@@ -320,6 +320,6 @@ void plugin_exit_mpris_dbus(void)
     hash_destroy(&DBUS);
 
     if (NULL != msg)
-	dbus_message_unref(msg);
+        dbus_message_unref(msg);
     dbus_error_free(&err);
 }

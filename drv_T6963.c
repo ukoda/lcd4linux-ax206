@@ -65,8 +65,8 @@ typedef struct {
 } MODEL;
 
 static MODEL Models[] = {
-    {0x01, "T6963"},
-    {0xff, "Unknown"}
+    { 0x01, "T6963" },
+    { 0xff, "Unknown" }
 };
 
 
@@ -114,12 +114,12 @@ static void drv_T6_status1(void)
     /* wait for STA0=1 and STA1=1 */
     n = 0;
     do {
-	rep_nop();
-	if (++n > 1000) {
-	    debug("hang in status1");
-	    bug = 1;
-	    break;
-	}
+        rep_nop();
+        if (++n > 1000) {
+            debug("hang in status1");
+            bug = 1;
+            break;
+        }
     } while ((drv_generic_parport_read() & 0x03) != 0x03);
 
     /* rise RD and CE */
@@ -150,12 +150,12 @@ static void drv_T6_status2(void)
     /* wait for STA3=1 */
     n = 0;
     do {
-	rep_nop();
-	if (++n > 1000) {
-	    debug("hang in status2");
-	    bug = 1;
-	    break;
-	}
+        rep_nop();
+        if (++n > 1000) {
+            debug("hang in status2");
+            bug = 1;
+            break;
+        }
     } while ((drv_generic_parport_read() & 0x08) != 0x08);
 
     /* rise RD and CE */
@@ -253,7 +253,7 @@ static void drv_T6_write_auto(const unsigned char data)
 }
 
 
-#if 0				/* not used */
+#if 0                           /* not used */
 static void drv_T6_send_byte(const unsigned char cmd, const unsigned char data)
 {
     drv_T6_write_data(data);
@@ -273,17 +273,17 @@ static void drv_T6_clear(const unsigned short addr, const int len)
 {
     int i;
 
-    drv_T6_send_word(0x24, addr);	/* Set Adress Pointer */
-    drv_T6_write_cmd(0xb0);	/* Set Data Auto Write */
+    drv_T6_send_word(0x24, addr);       /* Set Adress Pointer */
+    drv_T6_write_cmd(0xb0);     /* Set Data Auto Write */
     for (i = 0; i < len; i++) {
-	drv_T6_write_auto(0x0);
-	if (bug) {
-	    bug = 0;
-	    debug("bug occurred at byte %d of %d", i, len);
-	}
+        drv_T6_write_auto(0x0);
+        if (bug) {
+            bug = 0;
+            debug("bug occurred at byte %d of %d", i, len);
+        }
     }
     drv_T6_status2();
-    drv_T6_write_cmd(0xb2);	/* Auto Reset */
+    drv_T6_write_cmd(0xb2);     /* Auto Reset */
 }
 
 
@@ -291,17 +291,17 @@ static void drv_T6_copy(const unsigned short addr, const unsigned char *data, co
 {
     int i;
 
-    drv_T6_send_word(0x24, addr);	/* Set Adress Pointer */
-    drv_T6_write_cmd(0xb0);	/* Set Data Auto Write */
+    drv_T6_send_word(0x24, addr);       /* Set Adress Pointer */
+    drv_T6_write_cmd(0xb0);     /* Set Data Auto Write */
     for (i = 0; i < len; i++) {
-	drv_T6_write_auto(*(data++));
-	if (bug) {
-	    bug = 0;
-	    debug("bug occurred at byte %d of %d, addr=%d", i, len, addr);
-	}
+        drv_T6_write_auto(*(data++));
+        if (bug) {
+            bug = 0;
+            debug("bug occurred at byte %d of %d, addr=%d", i, len, addr);
+        }
     }
     drv_T6_status2();
-    drv_T6_write_cmd(0xb2);	/* Auto Reset */
+    drv_T6_write_cmd(0xb2);     /* Auto Reset */
 }
 
 
@@ -312,38 +312,38 @@ static void drv_T6_blit(const int row, const int col, const int height, const in
     int base;
 
     for (r = row; r < row + height; r++) {
-	for (c = col; c < col + width; c++) {
-	    unsigned char mask = 1 << (CELL - 1 - c % CELL);
-	    if (drv_generic_graphic_black(r, c)) {
-		/* set bit */
-		Buffer1[(r * DCOLS + c) / CELL] |= mask;
-	    } else {
-		/* clear bit */
-		Buffer1[(r * DCOLS + c) / CELL] &= ~mask;
-	    }
-	}
-	a = (r * DCOLS + col) / CELL;
-	b = (r * DCOLS + col + width + CELL - 1) / CELL;
-	for (i = a; i <= b; i++) {
-	    if (Buffer1[i] == Buffer2[i])
-		continue;
-	    for (j = i, e = 0; i <= b; i++) {
-		if (Buffer1[i] == Buffer2[i]) {
-		    if (++e > 4)
-			break;
-		} else {
-		    e = 0;
-		}
-	    }
-	    if (DualScan && r >= DROWS / 2) {
-		base = 0x8200 - DCOLS * DROWS / 2 / CELL;
-	    } else {
-		base = 0x0200;
-	    }
-	    n = i - j - e + 1;
-	    memcpy(Buffer2 + j, Buffer1 + j, n);
-	    drv_T6_copy(base + j, Buffer1 + j, n);
-	}
+        for (c = col; c < col + width; c++) {
+            unsigned char mask = 1 << (CELL - 1 - c % CELL);
+            if (drv_generic_graphic_black(r, c)) {
+                /* set bit */
+                Buffer1[(r * DCOLS + c) / CELL] |= mask;
+            } else {
+                /* clear bit */
+                Buffer1[(r * DCOLS + c) / CELL] &= ~mask;
+            }
+        }
+        a = (r * DCOLS + col) / CELL;
+        b = (r * DCOLS + col + width + CELL - 1) / CELL;
+        for (i = a; i <= b; i++) {
+            if (Buffer1[i] == Buffer2[i])
+                continue;
+            for (j = i, e = 0; i <= b; i++) {
+                if (Buffer1[i] == Buffer2[i]) {
+                    if (++e > 4)
+                        break;
+                } else {
+                    e = 0;
+                }
+            }
+            if (DualScan && r >= DROWS / 2) {
+                base = 0x8200 - DCOLS * DROWS / 2 / CELL;
+            } else {
+                base = 0x0200;
+            }
+            n = i - j - e + 1;
+            memcpy(Buffer2 + j, Buffer1 + j, n);
+            drv_T6_copy(base + j, Buffer1 + j, n);
+        }
     }
 }
 
@@ -354,39 +354,39 @@ static int drv_T6_start(const char *section)
 
     model = cfg_get(section, "Model", "generic");
     if (model != NULL && *model != '\0') {
-	int i;
-	for (i = 0; Models[i].type != 0xff; i++) {
-	    if (strcasecmp(Models[i].name, model) == 0)
-		break;
-	}
-	if (Models[i].type == 0xff) {
-	    error("%s: %s.Model '%s' is unknown from %s", Name, section, model, cfg_source());
-	    return -1;
-	}
-	Model = i;
+        int i;
+        for (i = 0; Models[i].type != 0xff; i++) {
+            if (strcasecmp(Models[i].name, model) == 0)
+                break;
+        }
+        if (Models[i].type == 0xff) {
+            error("%s: %s.Model '%s' is unknown from %s", Name, section, model, cfg_source());
+            return -1;
+        }
+        Model = i;
     } else {
-	error("%s: empty '%s.Model' entry from %s", Name, section, cfg_source());
-	return -1;
+        error("%s: empty '%s.Model' entry from %s", Name, section, cfg_source());
+        return -1;
     }
 
     /* read display size from config */
     s = cfg_get(section, "Size", NULL);
     if (s == NULL || *s == '\0') {
-	error("%s: no '%s.Size' entry from %s", Name, section, cfg_source());
-	return -1;
+        error("%s: no '%s.Size' entry from %s", Name, section, cfg_source());
+        return -1;
     }
 
     DROWS = -1;
     DCOLS = -1;
     if (sscanf(s, "%dx%d", &DCOLS, &DROWS) != 2 || DCOLS < 1 || DROWS < 1) {
-	error("%s: bad Size '%s' from %s", Name, s, cfg_source());
-	return -1;
+        error("%s: bad Size '%s' from %s", Name, s, cfg_source());
+        return -1;
     }
 
     if (sscanf(s = cfg_get(section, "font", "6x8"), "%dx%d", &XRES, &YRES) != 2 || XRES < 1 || YRES < 1) {
-	error("%s: bad %s.Font '%s' from %s", Name, section, s, cfg_source());
-	free(s);
-	return -1;
+        error("%s: bad %s.Font '%s' from %s", Name, section, s, cfg_source());
+        free(s);
+        return -1;
     }
     free(s);
 
@@ -394,8 +394,8 @@ static int drv_T6_start(const char *section)
     /* get font width of display */
     cfg_number(section, "Cell", 6, 5, 8, &CELL);
 
-    TROWS = DROWS / 8;		/* text rows */
-    TCOLS = DCOLS / CELL;	/* text columns */
+    TROWS = DROWS / 8;          /* text rows */
+    TCOLS = DCOLS / CELL;       /* text columns */
 
     /* get DualScan mode */
     cfg_number(section, "DualScan", 0, 0, 1, &DualScan);
@@ -404,76 +404,76 @@ static int drv_T6_start(const char *section)
 
     Buffer1 = malloc(TCOLS * DROWS);
     if (Buffer1 == NULL) {
-	error("%s: framebuffer #1 could not be allocated: malloc() failed", Name);
-	return -1;
+        error("%s: framebuffer #1 could not be allocated: malloc() failed", Name);
+        return -1;
     }
 
     Buffer2 = malloc(TCOLS * DROWS);
     if (Buffer2 == NULL) {
-	error("%s: framebuffer #2 could not be allocated: malloc() failed", Name);
-	return -1;
+        error("%s: framebuffer #2 could not be allocated: malloc() failed", Name);
+        return -1;
     }
 
     memset(Buffer1, 0, TCOLS * DROWS * sizeof(*Buffer1));
     memset(Buffer2, 0, TCOLS * DROWS * sizeof(*Buffer2));
 
     if (drv_generic_parport_open(section, Name) != 0) {
-	error("%s: could not initialize parallel port!", Name);
-	return -1;
+        error("%s: could not initialize parallel port!", Name);
+        return -1;
     }
 
     /* soft-wiring */
     if ((SIGNAL_CE = drv_generic_parport_wire_ctrl("CE", "STROBE")) == 0xff)
-	return -1;
+        return -1;
     if ((SIGNAL_CD = drv_generic_parport_wire_ctrl("CD", "SLCTIN")) == 0xff)
-	return -1;
+        return -1;
     if ((SIGNAL_RD = drv_generic_parport_wire_ctrl("RD", "AUTOFD")) == 0xff)
-	return -1;
+        return -1;
     if ((SIGNAL_WR = drv_generic_parport_wire_ctrl("WR", "INIT")) == 0xff)
-	return -1;
+        return -1;
 
     /* timings */
-    T_ACC = timing(Name, section, "ACC", 150, "ns");	/* Access Time */
-    T_OH = timing(Name, section, "OH", 50, "ns");	/* Output Hold Time */
-    T_PW = timing(Name, section, "PW", 80, "ns");	/* CE, RD, WR Pulse Width */
-    T_DH = timing(Name, section, "DH", 40, "ns");	/* Data Hold Time */
-    T_CDS = timing(Name, section, "CDS", 100, "ns");	/* C/D Setup Time */
+    T_ACC = timing(Name, section, "ACC", 150, "ns");    /* Access Time */
+    T_OH = timing(Name, section, "OH", 50, "ns");       /* Output Hold Time */
+    T_PW = timing(Name, section, "PW", 80, "ns");       /* CE, RD, WR Pulse Width */
+    T_DH = timing(Name, section, "DH", 40, "ns");       /* Data Hold Time */
+    T_CDS = timing(Name, section, "CDS", 100, "ns");    /* C/D Setup Time */
 
 
     /* rise CE, CD, RD and WR */
     drv_generic_parport_control(SIGNAL_CE | SIGNAL_CD | SIGNAL_RD | SIGNAL_WR,
-				SIGNAL_CE | SIGNAL_CD | SIGNAL_RD | SIGNAL_WR);
+                                SIGNAL_CE | SIGNAL_CD | SIGNAL_RD | SIGNAL_WR);
     /* set direction: write */
     drv_generic_parport_direction(0);
 
 
     /* initialize display */
 
-    drv_T6_send_word(0x40, 0x0000);	/* Set Text Home Address */
-    drv_T6_send_word(0x41, TCOLS);	/* Set Text Area */
+    drv_T6_send_word(0x40, 0x0000);     /* Set Text Home Address */
+    drv_T6_send_word(0x41, TCOLS);      /* Set Text Area */
 
-    drv_T6_send_word(0x42, 0x0200);	/* Set Graphic Home Address */
-    drv_T6_send_word(0x43, TCOLS);	/* Set Graphic Area */
+    drv_T6_send_word(0x42, 0x0200);     /* Set Graphic Home Address */
+    drv_T6_send_word(0x43, TCOLS);      /* Set Graphic Area */
 
-    drv_T6_write_cmd(0x80);	/* Mode Set: OR mode, Internal CG RAM mode */
-    drv_T6_send_word(0x22, 0x0002);	/* Set Offset Register */
-    drv_T6_write_cmd(0x98);	/* Set Display Mode: Curser off, Text off, Graphics on */
-    drv_T6_write_cmd(0xa0);	/* Set Cursor Pattern: 1 line cursor */
-    drv_T6_send_word(0x21, 0x0000);	/* Set Cursor Pointer to (0,0) */
+    drv_T6_write_cmd(0x80);     /* Mode Set: OR mode, Internal CG RAM mode */
+    drv_T6_send_word(0x22, 0x0002);     /* Set Offset Register */
+    drv_T6_write_cmd(0x98);     /* Set Display Mode: Curser off, Text off, Graphics on */
+    drv_T6_write_cmd(0xa0);     /* Set Cursor Pattern: 1 line cursor */
+    drv_T6_send_word(0x21, 0x0000);     /* Set Cursor Pointer to (0,0) */
 
 
     /* clear display */
 
     if (DualScan) {
-	/* upper half */
-	drv_T6_clear(0x0000, TCOLS * TROWS / 2);	/* clear text area  */
-	drv_T6_clear(0x0200, TCOLS * TROWS * 8 / 2);	/* clear graphic area */
-	/* lower half */
-	drv_T6_clear(0x8000, TCOLS * TROWS / 2);	/* clear text area  */
-	drv_T6_clear(0x8200, TCOLS * TROWS * 8 / 2);	/* clear graphic area */
+        /* upper half */
+        drv_T6_clear(0x0000, TCOLS * TROWS / 2);        /* clear text area  */
+        drv_T6_clear(0x0200, TCOLS * TROWS * 8 / 2);    /* clear graphic area */
+        /* lower half */
+        drv_T6_clear(0x8000, TCOLS * TROWS / 2);        /* clear text area  */
+        drv_T6_clear(0x8200, TCOLS * TROWS * 8 / 2);    /* clear graphic area */
     } else {
-	drv_T6_clear(0x0000, TCOLS * TROWS);	/* clear text area  */
-	drv_T6_clear(0x0200, TCOLS * TROWS * 8);	/* clear graphic area */
+        drv_T6_clear(0x0000, TCOLS * TROWS);    /* clear text area  */
+        drv_T6_clear(0x0200, TCOLS * TROWS * 8);        /* clear graphic area */
     }
 
     return 0;
@@ -498,7 +498,7 @@ int drv_T6_list(void)
     int i;
 
     for (i = 0; Models[i].type != 0xff; i++) {
-	printf("%s ", Models[i].name);
+        printf("%s ", Models[i].name);
     }
     return 0;
 }
@@ -516,19 +516,19 @@ int drv_T6_init(const char *section, const int quiet)
 
     /* start display */
     if ((ret = drv_T6_start(section)) != 0)
-	return ret;
+        return ret;
 
     /* initialize generic graphic driver */
     if ((ret = drv_generic_graphic_init(section, Name)) != 0)
-	return ret;
+        return ret;
 
     if (!quiet) {
-	char buffer[40];
-	qprintf(buffer, sizeof(buffer), "%s %dx%d", Name, DCOLS, DROWS);
-	if (drv_generic_graphic_greet(buffer, NULL)) {
-	    sleep(3);
-	    drv_generic_graphic_clear();
-	}
+        char buffer[40];
+        qprintf(buffer, sizeof(buffer), "%s %dx%d", Name, DCOLS, DROWS);
+        if (drv_generic_graphic_greet(buffer, NULL)) {
+            sleep(3);
+            drv_generic_graphic_clear();
+        }
     }
 
     /* register plugins */
@@ -548,20 +548,20 @@ int drv_T6_quit(const int quiet)
     drv_generic_graphic_clear();
 
     if (!quiet) {
-	drv_generic_graphic_greet("goodbye!", NULL);
+        drv_generic_graphic_greet("goodbye!", NULL);
     }
 
     drv_generic_graphic_quit();
     drv_generic_parport_close();
 
     if (Buffer1) {
-	free(Buffer1);
-	Buffer1 = NULL;
+        free(Buffer1);
+        Buffer1 = NULL;
     }
 
     if (Buffer2) {
-	free(Buffer2);
-	Buffer2 = NULL;
+        free(Buffer2);
+        Buffer2 = NULL;
     }
 
     return (0);

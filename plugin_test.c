@@ -62,18 +62,18 @@ static void my_test_bar(RESULT * result, RESULT * rbar, RESULT * rmax, RESULT * 
     /* the maths is just to stop double rounding errors and bad values. */
     bar = ((int) floor(R2N(rbar) + 0.1)) % 10;
     if (fabs(delta) > 0.1) {
-	/* don't move or init the bar if delta=0 (the widget is only browsing) */
-	if (values[bar] == -1) {
-	    /* first time called. */
-	    values[bar] = R2N(rstart);
-	    deltas[bar] = delta;
-	};
-	values[bar] += deltas[bar];
+        /* don't move or init the bar if delta=0 (the widget is only browsing) */
+        if (values[bar] == -1) {
+            /* first time called. */
+            values[bar] = R2N(rstart);
+            deltas[bar] = delta;
+        };
+        values[bar] += deltas[bar];
     };
     if (values[bar] < 0 || values[bar] > max) {
-	/* turn around. */
-	deltas[bar] = -deltas[bar];
-	values[bar] += deltas[bar];
+        /* turn around. */
+        deltas[bar] = -deltas[bar];
+        values[bar] += deltas[bar];
     };
     value = values[bar];
     SetResult(&result, R_NUMBER, &value);

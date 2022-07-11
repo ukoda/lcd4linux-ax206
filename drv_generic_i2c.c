@@ -75,7 +75,7 @@ static void my_i2c_smbus_write_byte_data(const int device, const unsigned char v
     data.byte = val;
     args.data = &data;
     if (ioctl(device, I2C_SMBUS, &args) < 0) {
-	info("I2C: device %d IOCTL failed !\n", device);
+        info("I2C: device %d IOCTL failed !\n", device);
     }
 }
 
@@ -97,14 +97,14 @@ int drv_generic_i2c_pre_write(int dev)
 
     info("%s: selecting slave device 0x%x", Driver, dev);
     if (ioctl(i2c_device, I2C_SLAVE, dev) < 0) {
-	error("%s: error selecting slave device 0x%x\n", Driver, dev);
-	return -EPIPE;
+        error("%s: error selecting slave device 0x%x\n", Driver, dev);
+        return -EPIPE;
     }
 
     info("%s: initializing I2C slave device 0x%x for output", Driver, dev);
     if (i2c_smbus_write_byte_data(i2c_device, 3, 0) < 0) {
-	error("%s: error initializing device 0x%x\n", Driver, dev);
-	close(i2c_device);
+        error("%s: error initializing device 0x%x\n", Driver, dev);
+        close(i2c_device);
     }
 
     return 0;
@@ -124,17 +124,17 @@ int drv_generic_i2c_open(const char *section, const char *driver)
 
     info("%s: initializing I2C bus %s", Driver, bus);
     if ((i2c_device = open(bus, O_WRONLY)) < 0) {
-	error("%s: I2C bus %s open failed !\n", Driver, bus);
-	goto exit_error;
+        error("%s: I2C bus %s open failed !\n", Driver, bus);
+        goto exit_error;
     }
 
     if (datadev) {
-	if (drv_generic_i2c_pre_write(datadev) < 0)
-	    goto exit_error;
+        if (drv_generic_i2c_pre_write(datadev) < 0)
+            goto exit_error;
     }
 
     if (drv_generic_i2c_pre_write(ctrldev) < 0)
-	goto exit_error;
+        goto exit_error;
 
     return 0;
 
@@ -159,19 +159,19 @@ unsigned char drv_generic_i2c_wire(const char *name, const char *deflt)
     qprintf(wire, sizeof(wire), "Wire.%s", name);
     s = cfg_get(Section, wire, deflt);
     if (strlen(s) == 3 && strncasecmp(s, "DB", 2) == 0 && s[2] >= '0' && s[2] <= '7') {
-	w = s[2] - '0';
+        w = s[2] - '0';
     } else if (strcasecmp(s, "GND") == 0) {
-	w = 0;
+        w = 0;
     } else {
-	error("%s: unknown signal <%s> for wire <%s>", Driver, s, name);
-	error("%s: should be DB0..7 or GND", Driver);
-	return 0xff;
+        error("%s: unknown signal <%s> for wire <%s>", Driver, s, name);
+        error("%s: should be DB0..7 or GND", Driver);
+        return 0xff;
     }
     free(s);
     if (w == 0) {
-	info("%s: wiring: [DISPLAY:%s]<==>[i2c:GND]", Driver, name);
+        info("%s: wiring: [DISPLAY:%s]<==>[i2c:GND]", Driver, name);
     } else {
-	info("%s: wiring: [DISPLAY:%s]<==>[i2c:DB%d]", Driver, name, w);
+        info("%s: wiring: [DISPLAY:%s]<==>[i2c:DB%d]", Driver, name, w);
     }
     w = 1 << w;
     return w;
@@ -193,26 +193,26 @@ static void i2c_out(int dev, unsigned char val)
 {
     info("%s: initializing I2C slave device 0x%x", Driver, dev);
     if (ioctl(i2c_device, I2C_SLAVE, dev) < 0) {
-	error("%s: error selecting slave device 0x%x\n", Driver, dev);
-	return;
+        error("%s: error selecting slave device 0x%x\n", Driver, dev);
+        return;
     }
 
     i2c_smbus_write_byte_data(i2c_device, 1, val);
 }
 
 void drv_generic_i2c_command(const unsigned char command, /*const */ unsigned char *data, const unsigned char length,
-			     int bits)
+                             int bits)
 {
     if (bits == 4) {
-	i2c_smbus_write_block_data(i2c_device, command, length, data);
+        i2c_smbus_write_block_data(i2c_device, command, length, data);
     } else if (bits == 8 && datadev) {
-	/* set data on pins */
-	info("cmd: %08x, data0: %08x, data1: %08x\n", command, data[0], data[1]);
-	i2c_out(datadev, data[0]);
-	/* set enable pin including optional rs and rw */
-	i2c_out(ctrldev, command | data[1]);
-	/* unset enable pin including optional rs and rw */
-	i2c_out(ctrldev, command);
+        /* set data on pins */
+        info("cmd: %08x, data0: %08x, data1: %08x\n", command, data[0], data[1]);
+        i2c_out(datadev, data[0]);
+        /* set enable pin including optional rs and rw */
+        i2c_out(ctrldev, command | data[1]);
+        /* unset enable pin including optional rs and rw */
+        i2c_out(ctrldev, command);
     }
 
 }

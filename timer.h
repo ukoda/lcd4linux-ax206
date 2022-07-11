@@ -33,13 +33,13 @@
 
 #include <time.h>
 
-int timer_add(void (*callback) (void *data), void *data, const int interval, const int one_shot);
+int timer_add(void (*callback)(void *data), void *data, const int interval, const int one_shot);
 
-int timer_add_late(void (*callback) (void *data), void *data, const int interval, const int one_shot);
+int timer_add_late(void (*callback)(void *data), void *data, const int interval, const int one_shot);
 
 int timer_process(struct timespec *delay);
 
-int timer_remove(void (*callback) (void *data), void *data);
+int timer_remove(void (*callback)(void *data), void *data);
 
 void timer_exit(void);
 

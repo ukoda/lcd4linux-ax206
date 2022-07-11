@@ -69,22 +69,22 @@
 
 static char Name[] = "X11";
 
-static int pixel = -1;		/* pointsize in pixel */
-static int pgap = 0;		/* gap between points */
-static int rgap = 0;		/* row gap between lines */
-static int cgap = 0;		/* column gap between characters */
-static int border = 0;		/* window border */
-static int buttons = 0;		/* number of keypad buttons */
+static int pixel = -1;          /* pointsize in pixel */
+static int pgap = 0;            /* gap between points */
+static int rgap = 0;            /* row gap between lines */
+static int cgap = 0;            /* column gap between characters */
+static int border = 0;          /* window border */
+static int buttons = 0;         /* number of keypad buttons */
 static int btnwidth = 0;
 static int btnheight = 0;
 
-static int dimx, dimy;		/* total window dimension in pixel */
+static int dimx, dimy;          /* total window dimension in pixel */
 static Atom wmDeleteMessage;
 
-static RGBA *drv_X11_FB = NULL;	/* framebuffer */
+static RGBA *drv_X11_FB = NULL; /* framebuffer */
 
-static RGBA BP_COL = {.R = 0xff,.G = 0xff,.B = 0xff,.A = 0x00 };	/* pixel background color */
-static RGBA BR_COL = {.R = 0xff,.G = 0xff,.B = 0xff,.A = 0x00 };	/* border color */
+static RGBA BP_COL = {.R = 0xff,.G = 0xff,.B = 0xff,.A = 0x00 };        /* pixel background color */
+static RGBA BR_COL = {.R = 0xff,.G = 0xff,.B = 0xff,.A = 0x00 };        /* border color */
 
 static Display *dp;
 static int sc, dd;
@@ -94,13 +94,13 @@ static GC gc;
 static Colormap cm;
 static Pixmap pm;
 
-static int allow_autorepeat = 1;	/* consider auto-repeated KeyPress events? */
+static int allow_autorepeat = 1;        /* consider auto-repeated KeyPress events? */
 
 static char myDisplayName[256] = "";
 static int opTableEntries = 2;
 static XrmOptionDescRec opTable[] = {
-    {"-display", ".display", XrmoptionSepArg, NULL},
-    {"-synchronous", "*synchronous", XrmoptionNoArg, "on"},
+    { "-display", ".display", XrmoptionSepArg, NULL },
+    { "-synchronous", "*synchronous", XrmoptionNoArg, "on" },
 };
 
 static XrmDatabase commandlineDB;
@@ -114,9 +114,9 @@ static XColor drv_X11_color(RGBA c, int brightness)
 {
     static XColor col[64];
     static unsigned char alloced[64] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
     };
     XColor xc;
     int key;
@@ -128,14 +128,14 @@ static XColor drv_X11_color(RGBA c, int brightness)
     key = (xc.red & 0xc000) >> 10 | (xc.green & 0xc000) >> 12 | (xc.blue & 0xc000) >> 14;
     /* todo: support more than 64 colors: check if allocated color is exactly the requested */
     if (alloced[key]) {
-	xc = col[key];
+        xc = col[key];
     } else {
-	xc.flags = DoRed | DoGreen | DoBlue;
-	if (XAllocColor(dp, cm, &xc) == False) {
-	    error("%s: XAllocColor(%02x%02x%02x) failed!", Name, c.R, c.G, c.B);
-	}
-	col[key] = xc;
-	alloced[key] = 1;
+        xc.flags = DoRed | DoGreen | DoBlue;
+        if (XAllocColor(dp, cm, &xc) == False) {
+            error("%s: XAllocColor(%02x%02x%02x) failed!", Name, c.R, c.G, c.B);
+        }
+        col[key] = xc;
+        alloced[key] = 1;
     }
 
     XSetForeground(dp, gc, xc.pixel);
@@ -149,16 +149,16 @@ static void drv_X11_blit(const int row, const int col, const int height, const i
     int r, c;
 
     for (r = row; r < row + height; r++) {
-	int y = border + (r / YRES) * rgap + r * (pixel + pgap);
-	for (c = col; c < col + width; c++) {
-	    int x = border + (c / XRES) * cgap + c * (pixel + pgap);
-	    RGBA p1 = drv_X11_FB[r * DCOLS + c];
-	    RGBA p2 = drv_generic_graphic_rgb(r, c);
-	    if (p1.R != p2.R || p1.G != p2.G || p1.B != p2.B) {
-		XClearArea(dp, w, x, y, pixel, pixel, 1);
-		drv_X11_FB[r * DCOLS + c] = p2;
-	    }
-	}
+        int y = border + (r / YRES) * rgap + r * (pixel + pgap);
+        for (c = col; c < col + width; c++) {
+            int x = border + (c / XRES) * cgap + c * (pixel + pgap);
+            RGBA p1 = drv_X11_FB[r * DCOLS + c];
+            RGBA p2 = drv_generic_graphic_rgb(r, c);
+            if (p1.R != p2.R || p1.G != p2.G || p1.B != p2.B) {
+                XClearArea(dp, w, x, y, pixel, pixel, 1);
+                drv_X11_FB[r * DCOLS + c] = p2;
+            }
+        }
     }
 }
 
@@ -170,31 +170,31 @@ static int drv_X11_brightness(int brightness)
 
     /* -1 is used to query the current brightness */
     if (brightness == -1)
-	return Brightness;
+        return Brightness;
 
     if (brightness < 0)
-	brightness = 0;
+        brightness = 0;
     if (brightness > 255)
-	brightness = 255;
+        brightness = 255;
 
     if (Brightness != brightness) {
 
-	float dim = brightness / 255.0;
+        float dim = brightness / 255.0;
 
-	debug("%s: set brightness to %d%%", Name, (int) (dim * 100));
+        debug("%s: set brightness to %d%%", Name, (int) (dim * 100));
 
-	/* set new background */
-	XSetWindowBackground(dp, w, drv_X11_color(BR_COL, brightness).pixel);
+        /* set new background */
+        XSetWindowBackground(dp, w, drv_X11_color(BR_COL, brightness).pixel);
 
-	/* redraw every LCD pixel */
-	XClearWindow(dp, w);
-	for (i = 0; i < DROWS * DCOLS; i++) {
-	    drv_X11_FB[i] = NO_COL;
-	}
-	drv_X11_blit(0, 0, LROWS, LCOLS);
+        /* redraw every LCD pixel */
+        XClearWindow(dp, w);
+        for (i = 0; i < DROWS * DCOLS; i++) {
+            drv_X11_FB[i] = NO_COL;
+        }
+        drv_X11_blit(0, 0, LROWS, LCOLS);
 
-	/* remember new brightness */
-	Brightness = brightness;
+        /* remember new brightness */
+        Brightness = brightness;
     }
 
     return Brightness;
@@ -207,34 +207,34 @@ static int drv_X11_keypad(const int num)
     int new_num = num;
 
     if (new_num > 0)
-	val = WIDGET_KEY_PRESSED;
+        val = WIDGET_KEY_PRESSED;
     else {
-	/* negative values mark a key release */
-	new_num = -num;
-	val = WIDGET_KEY_RELEASED;
+        /* negative values mark a key release */
+        new_num = -num;
+        val = WIDGET_KEY_RELEASED;
     }
 
     switch (new_num) {
     case 1:
-	val += WIDGET_KEY_UP;
-	break;
+        val += WIDGET_KEY_UP;
+        break;
     case 2:
-	val += WIDGET_KEY_DOWN;
-	break;
+        val += WIDGET_KEY_DOWN;
+        break;
     case 3:
-	val += WIDGET_KEY_LEFT;
-	break;
+        val += WIDGET_KEY_LEFT;
+        break;
     case 4:
-	val += WIDGET_KEY_RIGHT;
-	break;
+        val += WIDGET_KEY_RIGHT;
+        break;
     case 5:
-	val += WIDGET_KEY_CONFIRM;
-	break;
+        val += WIDGET_KEY_CONFIRM;
+        break;
     case 6:
-	val += WIDGET_KEY_CANCEL;
-	break;
+        val += WIDGET_KEY_CANCEL;
+        break;
     default:
-	error("%s: unknown keypad value %d", Name, num);
+        error("%s: unknown keypad value %d", Name, num);
     }
 
     return val;
@@ -273,35 +273,35 @@ static void drv_X11_expose(const int x, const int y, const int width, const int 
     y1 = y + pixel + height;
 
     for (r = 0; r < DROWS; r++) {
-	int yc = border + (r / YRES) * rgap + r * (pixel + pgap);
-	if (yc < y0 || yc > y1)
-	    continue;
-	for (c = 0; c < DCOLS; c++) {
-	    int xc = border + (c / XRES) * cgap + c * (pixel + pgap);
-	    if (xc < x0 || xc > x1)
-		continue;
-	    col = drv_generic_graphic_rgb(r, c);
-	    if (hasLastCol) {
-		/* if the color of this pixel is different to the last pixels draw the old ones */
-		if (col.R != lastCol.R || col.G != lastCol.G || col.B != lastCol.B) {
-		    drv_X11_color(lastCol, brightness);
-		    XFillRectangles(dp, w, gc, rect, nrect);
-		    nrect = 0;
-		    lastCol = col;
-		}
-		rect[nrect].x = xc;
-		rect[nrect].y = yc;
-		rect[nrect].width = pixel;
-		rect[nrect].height = pixel;
-		nrect++;
-	    } else {
-		/* 1st shot: no old color */
-		drv_X11_color(col, brightness);
-		XFillRectangle(dp, w, gc, xc, yc, pixel, pixel);
-		lastCol = col;
-		hasLastCol = 1;
-	    }
-	}
+        int yc = border + (r / YRES) * rgap + r * (pixel + pgap);
+        if (yc < y0 || yc > y1)
+            continue;
+        for (c = 0; c < DCOLS; c++) {
+            int xc = border + (c / XRES) * cgap + c * (pixel + pgap);
+            if (xc < x0 || xc > x1)
+                continue;
+            col = drv_generic_graphic_rgb(r, c);
+            if (hasLastCol) {
+                /* if the color of this pixel is different to the last pixels draw the old ones */
+                if (col.R != lastCol.R || col.G != lastCol.G || col.B != lastCol.B) {
+                    drv_X11_color(lastCol, brightness);
+                    XFillRectangles(dp, w, gc, rect, nrect);
+                    nrect = 0;
+                    lastCol = col;
+                }
+                rect[nrect].x = xc;
+                rect[nrect].y = yc;
+                rect[nrect].width = pixel;
+                rect[nrect].height = pixel;
+                nrect++;
+            } else {
+                /* 1st shot: no old color */
+                drv_X11_color(col, brightness);
+                XFillRectangle(dp, w, gc, xc, yc, pixel, pixel);
+                lastCol = col;
+                hasLastCol = 1;
+            }
+        }
     }
     /* draw the last block of rectangles */
     drv_X11_color(lastCol, brightness);
@@ -309,48 +309,48 @@ static void drv_X11_expose(const int x, const int y, const int width, const int 
 
     /* Keypad on the right side */
     if (x1 >= xoffset) {
-	xfs = XQueryFont(dp, XGContextFromGC(DefaultGC(dp, 0)));
-	if (drv_X11_brightness(-1) > 127) {
-	    drv_X11_color(FG_COL, 255);
-	} else {
-	    drv_X11_color(BG_COL, 255);
-	}
-	for (r = 0; r < buttons; r++) {
-	    yk = yoffset + r * (btnheight + pgap);
-	    switch (r) {
-	    case 0:
-		s = "Up";
-		break;
-	    case 1:
-		s = "Down";
-		break;
-	    case 2:
-		s = "Left";
-		break;
-	    case 3:
-		s = "Right";
-		break;
-	    case 4:
-		s = "Confirm";
-		break;
-	    case 5:
-		s = "Cancel";
-		break;
-	    default:
-		snprintf(unknownTxt, sizeof(unknownTxt), "#%d??", r);
-		s = unknownTxt;
-	    }
-	    XDrawRectangle(dp, w, gc, xoffset, yk, btnwidth, btnheight - 2);
-	    XDrawString(dp, w, gc,
-			xoffset + btnwidth / 2 - (xfs->max_bounds.width * strlen(s)) / 2,
-			yk + btnheight / 2 + xfs->max_bounds.ascent / 2, s, strlen(s));
-	}
+        xfs = XQueryFont(dp, XGContextFromGC(DefaultGC(dp, 0)));
+        if (drv_X11_brightness(-1) > 127) {
+            drv_X11_color(FG_COL, 255);
+        } else {
+            drv_X11_color(BG_COL, 255);
+        }
+        for (r = 0; r < buttons; r++) {
+            yk = yoffset + r * (btnheight + pgap);
+            switch (r) {
+            case 0:
+                s = "Up";
+                break;
+            case 1:
+                s = "Down";
+                break;
+            case 2:
+                s = "Left";
+                break;
+            case 3:
+                s = "Right";
+                break;
+            case 4:
+                s = "Confirm";
+                break;
+            case 5:
+                s = "Cancel";
+                break;
+            default:
+                snprintf(unknownTxt, sizeof(unknownTxt), "#%d??", r);
+                s = unknownTxt;
+            }
+            XDrawRectangle(dp, w, gc, xoffset, yk, btnwidth, btnheight - 2);
+            XDrawString(dp, w, gc,
+                        xoffset + btnwidth / 2 - (xfs->max_bounds.width * strlen(s)) / 2,
+                        yk + btnheight / 2 + xfs->max_bounds.ascent / 2, s, strlen(s));
+        }
     }
 }
 
 
-static void drv_X11_timer( __attribute__ ((unused))
-			  void *notused)
+static void drv_X11_timer( __attribute__((unused))
+                          void *notused)
 {
     XEvent ev;
     XRectangle exp;
@@ -360,10 +360,10 @@ static void drv_X11_timer( __attribute__ ((unused))
     static int btn = 0;
 
     if (XCheckWindowEvent
-	(dp, w, ExposureMask | KeyPressMask | KeyReleaseMask | ButtonPressMask | ButtonReleaseMask, &ev) == 0
-	/* there is no ClientMessageMask, so this will be checked separately */
-	&& XCheckTypedWindowEvent(dp, w, ClientMessage, &ev) == 0)
-	return;
+        (dp, w, ExposureMask | KeyPressMask | KeyReleaseMask | ButtonPressMask | ButtonReleaseMask, &ev) == 0
+        /* there is no ClientMessageMask, so this will be checked separately */
+        && XCheckTypedWindowEvent(dp, w, ClientMessage, &ev) == 0)
+        return;
 
     /* check whether key has been retriggered by "auto repeat" */
     unsigned short is_retriggered = 0;
@@ -371,153 +371,153 @@ static void drv_X11_timer( __attribute__ ((unused))
     switch (ev.type) {
 
     case Expose:
-	/* collect all expose events in eventqueue */
-	exp.x = ev.xexpose.x;
-	exp.y = ev.xexpose.y;
-	exp.width = ev.xexpose.width;
-	exp.height = ev.xexpose.height;
-	while (XCheckWindowEvent(dp, w, ExposureMask, &ev)) {
-	    if (ev.xexpose.x < exp.x) {
-		exp.width += exp.x - ev.xexpose.x;
-		exp.x -= exp.x - ev.xexpose.x;
-	    }
-	    if (ev.xexpose.y < exp.y) {
-		exp.height += exp.y - ev.xexpose.y;
-		exp.y -= exp.y - ev.xexpose.y;
-	    }
-	    if (ev.xexpose.x + ev.xexpose.width > exp.x + exp.width) {
-		exp.width += ev.xexpose.x + ev.xexpose.width - (exp.x + exp.width);
-	    }
-	    if (ev.xexpose.y + ev.xexpose.height > exp.y + exp.height) {
-		exp.height += ev.xexpose.y + ev.xexpose.height - (exp.y + exp.height);
-	    }
-	}
-	drv_X11_expose(exp.x, exp.y, exp.width, exp.height);
-	break;
+        /* collect all expose events in eventqueue */
+        exp.x = ev.xexpose.x;
+        exp.y = ev.xexpose.y;
+        exp.width = ev.xexpose.width;
+        exp.height = ev.xexpose.height;
+        while (XCheckWindowEvent(dp, w, ExposureMask, &ev)) {
+            if (ev.xexpose.x < exp.x) {
+                exp.width += exp.x - ev.xexpose.x;
+                exp.x -= exp.x - ev.xexpose.x;
+            }
+            if (ev.xexpose.y < exp.y) {
+                exp.height += exp.y - ev.xexpose.y;
+                exp.y -= exp.y - ev.xexpose.y;
+            }
+            if (ev.xexpose.x + ev.xexpose.width > exp.x + exp.width) {
+                exp.width += ev.xexpose.x + ev.xexpose.width - (exp.x + exp.width);
+            }
+            if (ev.xexpose.y + ev.xexpose.height > exp.y + exp.height) {
+                exp.height += ev.xexpose.y + ev.xexpose.height - (exp.y + exp.height);
+            }
+        }
+        drv_X11_expose(exp.x, exp.y, exp.width, exp.height);
+        break;
 
     case KeyPress:
-	key = XLookupKeysym(&ev.xkey, 0);
-	switch (key) {
-	case XK_Up:
-	    btn = 1;
-	    break;
-	case XK_Down:
-	    btn = 2;
-	    break;
-	case XK_Left:
-	    btn = 3;
-	    break;
-	case XK_Right:
-	    btn = 4;
-	    break;
-	case XK_Return:
-	    btn = 5;
-	    break;
-	case XK_Escape:
-	    btn = 6;
-	    break;
-	default:
-	    btn = 0;
-	}
-	/* only register key press if button is defined on GUI */
-	if (btn > 0) {
-	    if (btn <= buttons) {
-		debug("key for button %i pressed", btn);
-		drv_X11_color(BG_COL, 255);
-		XFillRectangle(dp, w, gc, xoffset + 1, yoffset + (btn - 1) * (btnheight + pgap) + 1, btnwidth - 1,
-			       btnheight - 2 - 1);
-		drv_generic_keypad_press(btn);
-	    } else {
-		debug("key press for button %i ignored", btn);
-	    }
-	}
-	break;
+        key = XLookupKeysym(&ev.xkey, 0);
+        switch (key) {
+        case XK_Up:
+            btn = 1;
+            break;
+        case XK_Down:
+            btn = 2;
+            break;
+        case XK_Left:
+            btn = 3;
+            break;
+        case XK_Right:
+            btn = 4;
+            break;
+        case XK_Return:
+            btn = 5;
+            break;
+        case XK_Escape:
+            btn = 6;
+            break;
+        default:
+            btn = 0;
+        }
+        /* only register key press if button is defined on GUI */
+        if (btn > 0) {
+            if (btn <= buttons) {
+                debug("key for button %i pressed", btn);
+                drv_X11_color(BG_COL, 255);
+                XFillRectangle(dp, w, gc, xoffset + 1, yoffset + (btn - 1) * (btnheight + pgap) + 1, btnwidth - 1,
+                               btnheight - 2 - 1);
+                drv_generic_keypad_press(btn);
+            } else {
+                debug("key press for button %i ignored", btn);
+            }
+        }
+        break;
 
     case KeyRelease:
-	/* check whether key has been retriggered by "auto repeat" */
-	if (!allow_autorepeat && XEventsQueued(dp, QueuedAfterReading)) {
-	    XEvent nev;
-	    XPeekEvent(dp, &nev);
+        /* check whether key has been retriggered by "auto repeat" */
+        if (!allow_autorepeat && XEventsQueued(dp, QueuedAfterReading)) {
+            XEvent nev;
+            XPeekEvent(dp, &nev);
 
-	    if (nev.type == KeyPress && nev.xkey.time == ev.xkey.time && nev.xkey.keycode == ev.xkey.keycode) {
-		is_retriggered = 1;
+            if (nev.type == KeyPress && nev.xkey.time == ev.xkey.time && nev.xkey.keycode == ev.xkey.keycode) {
+                is_retriggered = 1;
 
-		/* delete retriggered KeyPress event */
-		XNextEvent(dp, &ev);
-	    }
-	}
+                /* delete retriggered KeyPress event */
+                XNextEvent(dp, &ev);
+            }
+        }
 
-	key = XLookupKeysym(&ev.xkey, 0);
-	switch (key) {
-	case XK_Up:
-	    btn = 1;
-	    break;
-	case XK_Down:
-	    btn = 2;
-	    break;
-	case XK_Left:
-	    btn = 3;
-	    break;
-	case XK_Right:
-	    btn = 4;
-	    break;
-	case XK_Return:
-	    btn = 5;
-	    break;
-	case XK_Escape:
-	    btn = 6;
-	    break;
-	}
-	/* only register key release if button is defined on GUI */
-	if (!is_retriggered && (btn > 0)) {
-	    if (btn <= buttons) {
-		debug("key for button %i released", btn);
-		XClearArea(dp, w, xoffset, yoffset + (btn - 1) * (btnheight + pgap), btnwidth, btnheight - 2,
-			   1 /* true */ );
-		/* negative values mark a key release */
-		drv_generic_keypad_press(-btn);
-	    } else {
-		debug("key release for button %i ignored", btn);
-	    }
-	}
-	break;
+        key = XLookupKeysym(&ev.xkey, 0);
+        switch (key) {
+        case XK_Up:
+            btn = 1;
+            break;
+        case XK_Down:
+            btn = 2;
+            break;
+        case XK_Left:
+            btn = 3;
+            break;
+        case XK_Right:
+            btn = 4;
+            break;
+        case XK_Return:
+            btn = 5;
+            break;
+        case XK_Escape:
+            btn = 6;
+            break;
+        }
+        /* only register key release if button is defined on GUI */
+        if (!is_retriggered && (btn > 0)) {
+            if (btn <= buttons) {
+                debug("key for button %i released", btn);
+                XClearArea(dp, w, xoffset, yoffset + (btn - 1) * (btnheight + pgap), btnwidth, btnheight - 2,
+                           1 /* true */ );
+                /* negative values mark a key release */
+                drv_generic_keypad_press(-btn);
+            } else {
+                debug("key release for button %i ignored", btn);
+            }
+        }
+        break;
 
     case ButtonPress:
-	if (ev.xbutton.x >= xoffset && ev.xbutton.x <= xoffset + btnwidth
-	    && ev.xbutton.y >= yoffset && ev.xbutton.y <= yoffset + buttons * btnheight + (buttons - 1) * pgap) {
-	    btn = (ev.xbutton.y - yoffset) / (btnheight + pgap) + 1;	/* btn 0 is unused */
-	    debug("button %d pressed", btn);
-	    drv_X11_color(BG_COL, 255);
-	    XFillRectangle(dp, w, gc, xoffset + 1, yoffset + (btn - 1) * (btnheight + pgap) + 1, btnwidth - 1,
-			   btnheight - 2 - 1);
-	    drv_generic_keypad_press(btn);
-	}
-	break;
+        if (ev.xbutton.x >= xoffset && ev.xbutton.x <= xoffset + btnwidth
+            && ev.xbutton.y >= yoffset && ev.xbutton.y <= yoffset + buttons * btnheight + (buttons - 1) * pgap) {
+            btn = (ev.xbutton.y - yoffset) / (btnheight + pgap) + 1;    /* btn 0 is unused */
+            debug("button %d pressed", btn);
+            drv_X11_color(BG_COL, 255);
+            XFillRectangle(dp, w, gc, xoffset + 1, yoffset + (btn - 1) * (btnheight + pgap) + 1, btnwidth - 1,
+                           btnheight - 2 - 1);
+            drv_generic_keypad_press(btn);
+        }
+        break;
 
     case ButtonRelease:
-	if (ev.xbutton.x >= xoffset && ev.xbutton.x <= xoffset + btnwidth
-	    && ev.xbutton.y >= yoffset && ev.xbutton.y <= yoffset + buttons * btnheight + (buttons - 1) * pgap) {
-	    btn = (ev.xbutton.y - yoffset) / (btnheight + pgap) + 1;	/* btn 0 is unused */
-	    debug("button %d released", btn);
-	    XClearArea(dp, w, xoffset, yoffset + (btn - 1) * (btnheight + pgap), btnwidth, btnheight - 2,
-		       1 /* true */ );
-	}
-	break;
+        if (ev.xbutton.x >= xoffset && ev.xbutton.x <= xoffset + btnwidth
+            && ev.xbutton.y >= yoffset && ev.xbutton.y <= yoffset + buttons * btnheight + (buttons - 1) * pgap) {
+            btn = (ev.xbutton.y - yoffset) / (btnheight + pgap) + 1;    /* btn 0 is unused */
+            debug("button %d released", btn);
+            XClearArea(dp, w, xoffset, yoffset + (btn - 1) * (btnheight + pgap), btnwidth, btnheight - 2,
+                       1 /* true */ );
+        }
+        break;
 
     case ClientMessage:
-	if ((Atom) (ev.xclient.data.l[0]) == wmDeleteMessage) {
-	    info("%s: Window closed by WindowManager, quit.", Name);
-	    if (raise(SIGTERM) != 0) {
-		error("%s: Error raising SIGTERM: exit!", Name);
-		exit(1);
-	    }
-	} else {
-	    debug("%s: Got XClient message 0x%lx %lx %lx %lx %lx", Name, ev.xclient.data.l[0],
-		  ev.xclient.data.l[1], ev.xclient.data.l[2], ev.xclient.data.l[3], ev.xclient.data.l[4]);
-	}
+        if ((Atom) (ev.xclient.data.l[0]) == wmDeleteMessage) {
+            info("%s: Window closed by WindowManager, quit.", Name);
+            if (raise(SIGTERM) != 0) {
+                error("%s: Error raising SIGTERM: exit!", Name);
+                exit(1);
+            }
+        } else {
+            debug("%s: Got XClient message 0x%lx %lx %lx %lx %lx", Name, ev.xclient.data.l[0],
+                  ev.xclient.data.l[1], ev.xclient.data.l[2], ev.xclient.data.l[3], ev.xclient.data.l[4]);
+        }
 
     default:
-	debug("%s: unknown XEvent %d", Name, ev.type);
+        debug("%s: unknown XEvent %d", Name, ev.type);
     }
 }
 
@@ -534,40 +534,40 @@ static int drv_X11_start(const char *section)
 
     /* read display size from config */
     if (sscanf(s = cfg_get(section, "Size", "120x32"), "%dx%d", &DCOLS, &DROWS) != 2 || DCOLS < 1 || DROWS < 1) {
-	error("%s: bad %s.Size '%s' from %s", Name, section, s, cfg_source());
-	free(s);
-	return -1;
+        error("%s: bad %s.Size '%s' from %s", Name, section, s, cfg_source());
+        free(s);
+        return -1;
     }
     free(s);
 
     if (sscanf(s = cfg_get(section, "font", "5x8"), "%dx%d", &XRES, &YRES) != 2 || XRES < 1 || YRES < 1) {
-	error("%s: bad %s.font '%s' from %s", Name, section, s, cfg_source());
-	free(s);
-	return -1;
+        error("%s: bad %s.font '%s' from %s", Name, section, s, cfg_source());
+        free(s);
+        return -1;
     }
     free(s);
 
     if (sscanf(s = cfg_get(section, "pixel", "4+1"), "%d+%d", &pixel, &pgap) != 2 || pixel < 1 || pgap < 0) {
-	error("%s: bad %s.pixel '%s' from %s", Name, section, s, cfg_source());
-	free(s);
-	return -1;
+        error("%s: bad %s.pixel '%s' from %s", Name, section, s, cfg_source());
+        free(s);
+        return -1;
     }
     free(s);
 
     if (sscanf(s = cfg_get(section, "gap", "-1x-1"), "%dx%d", &cgap, &rgap) != 2 || cgap < -1 || rgap < -1) {
-	error("%s: bad %s.gap '%s' from %s", Name, section, s, cfg_source());
-	free(s);
-	return -1;
+        error("%s: bad %s.gap '%s' from %s", Name, section, s, cfg_source());
+        free(s);
+        return -1;
     }
     free(s);
 
     if (rgap < 0)
-	rgap = pixel + pgap;
+        rgap = pixel + pgap;
     if (cgap < 0)
-	cgap = pixel + pgap;
+        cgap = pixel + pgap;
 
     if (cfg_number(section, "border", 0, 0, -1, &border) < 0)
-	return -1;
+        return -1;
 
     /* special case for the X11 driver: 
      * the border color may be different from the backlight color
@@ -577,17 +577,17 @@ static int drv_X11_start(const char *section)
      */
     s = cfg_get(section, "basecolor", "000000ff");
     if (color2RGBA(s, &BP_COL) < 0) {
-	error("%s: ignoring illegal color '%s'", Name, s);
+        error("%s: ignoring illegal color '%s'", Name, s);
     }
     free(s);
     BL_COL = BP_COL;
 
     BR_COL = BP_COL;
     if ((s = cfg_get(section, "bordercolor", NULL)) != NULL) {
-	if (color2RGBA(s, &BR_COL) < 0) {
-	    error("%s: ignoring illegal color '%s'", Name, s);
-	}
-	free(s);
+        if (color2RGBA(s, &BR_COL) < 0) {
+            error("%s: ignoring illegal color '%s'", Name, s);
+        }
+        free(s);
     }
 
     /* consider auto-repeated KeyPress events? */
@@ -595,31 +595,31 @@ static int drv_X11_start(const char *section)
 
     /* virtual keyboard: number of buttons (0..6) */
     if (cfg_number(section, "buttons", 0, 0, 6, &buttons) < 0)
-	return -1;
+        return -1;
 
     drv_X11_FB = malloc(DCOLS * DROWS * sizeof(*drv_X11_FB));
     if (drv_X11_FB == NULL) {
-	error("%s: framebuffer could not be allocated: malloc() failed", Name);
-	return -1;
+        error("%s: framebuffer could not be allocated: malloc() failed", Name);
+        return -1;
     }
 
     for (i = 0; i < DCOLS * DROWS; i++) {
-	drv_X11_FB[i] = NO_COL;
+        drv_X11_FB[i] = NO_COL;
     }
 
     if (XrmGetResource(commandlineDB, "lcd4linux.display", "Lcd4linux.Display", str_type, &value)) {
-	strncpy(myDisplayName, value.addr, value.size);
-	debug("%s: X11 display name from command line: %s", Name, myDisplayName);
+        strncpy(myDisplayName, value.addr, value.size);
+        debug("%s: X11 display name from command line: %s", Name, myDisplayName);
     }
 
     if ((dp = XOpenDisplay(strlen(myDisplayName) > 0 ? myDisplayName : NULL)) == NULL) {
-	error("%s: can't open display %s", Name, XDisplayName(strlen(myDisplayName) > 0 ? myDisplayName : NULL));
-	return -1;
+        error("%s: can't open display %s", Name, XDisplayName(strlen(myDisplayName) > 0 ? myDisplayName : NULL));
+        return -1;
     }
 
     if (XrmGetResource(commandlineDB, "lcd4linux*synchronous", "Lcd4linux*Synchronous", str_type, &value)) {
-	debug("%s: X synchronize on", Name);
-	XSynchronize(dp, 1 /* true */ );
+        debug("%s: X synchronize on", Name);
+        XSynchronize(dp, 1 /* true */ );
     }
 
     sc = DefaultScreen(dp);
@@ -632,8 +632,8 @@ static int drv_X11_start(const char *section)
     dimx = DCOLS * pixel + (DCOLS - 1) * pgap + (DCOLS / XRES - 1) * cgap;
     dimy = DROWS * pixel + (DROWS - 1) * pgap + (DROWS / YRES - 1) * rgap;
     if (buttons != 0) {
-	btnwidth = (DCOLS * pixel + (DCOLS - 1) * pgap) / 10;
-	btnheight = (DROWS * pixel + (DROWS - 1) * pgap) / buttons;
+        btnwidth = (DCOLS * pixel + (DCOLS - 1) * pgap) / 10;
+        btnheight = (DROWS * pixel + (DROWS - 1) * pgap) / buttons;
     }
 
     wa.event_mask = ExposureMask | KeyPressMask | KeyReleaseMask | ButtonPressMask | ButtonReleaseMask;
@@ -643,12 +643,12 @@ static int drv_X11_start(const char *section)
     sh.flags = PPosition | PSize | PMinSize | PMaxSize;
 
     if (sh.min_width > DisplayWidth(dp, sc) || sh.min_height > DisplayHeight(dp, sc)) {
-	error("%s: Warning: X11-Window with dimensions (%d,%d) is greater than display (%d,%d)!",
-	      Name, sh.min_width, sh.min_height, DisplayWidth(dp, sc), DisplayHeight(dp, sc));
-	if (sh.min_width > 32767 || sh.min_height > 32676) {
-	    /* XProtocol data size exceeded */
-	    exit(1);
-	}
+        error("%s: Warning: X11-Window with dimensions (%d,%d) is greater than display (%d,%d)!",
+              Name, sh.min_width, sh.min_height, DisplayWidth(dp, sc), DisplayHeight(dp, sc));
+        if (sh.min_width > 32767 || sh.min_height > 32676) {
+            /* XProtocol data size exceeded */
+            exit(1);
+        }
     }
     w = XCreateWindow(dp, rw, 0, 0, sh.min_width, sh.min_height, 0, 0, InputOutput, vi, CWEventMask, &wa);
 
@@ -663,7 +663,7 @@ static int drv_X11_start(const char *section)
 
     /* set brightness (after first background painting) */
     if (cfg_number(section, "Brightness", 255, 0, 255, &i) > 0) {
-	drv_X11_brightness(i);
+        drv_X11_brightness(i);
     }
 
     XStoreName(dp, w, "LCD4Linux");
@@ -672,9 +672,9 @@ static int drv_X11_start(const char *section)
     XFlush(dp);
 
     while (1) {
-	XNextEvent(dp, &ev);
-	if (ev.type == Expose && ev.xexpose.count == 0)
-	    break;
+        XNextEvent(dp, &ev);
+        if (ev.type == Expose && ev.xexpose.count == 0)
+            break;
     }
 
     /* regularly process X events */
@@ -696,16 +696,16 @@ static void plugin_brightness(RESULT * result, const int argc, RESULT * argv[])
 
     switch (argc) {
     case 0:
-	brightness = drv_X11_brightness(-1);
-	SetResult(&result, R_NUMBER, &brightness);
-	break;
+        brightness = drv_X11_brightness(-1);
+        SetResult(&result, R_NUMBER, &brightness);
+        break;
     case 1:
-	brightness = drv_X11_brightness(R2N(argv[0]));
-	SetResult(&result, R_NUMBER, &brightness);
-	break;
+        brightness = drv_X11_brightness(R2N(argv[0]));
+        SetResult(&result, R_NUMBER, &brightness);
+        break;
     default:
-	error("%s.brightness(): wrong number of parameters", Name);
-	SetResult(&result, R_STRING, "");
+        error("%s.brightness(): wrong number of parameters", Name);
+        SetResult(&result, R_STRING, "");
     }
 }
 
@@ -742,7 +742,7 @@ int drv_X11_init(const char *section, const int quiet)
 
     /* start display */
     if ((ret = drv_X11_start(section)) != 0)
-	return ret;
+        return ret;
 
     /* real worker functions */
     drv_generic_graphic_real_blit = drv_X11_blit;
@@ -752,12 +752,12 @@ int drv_X11_init(const char *section, const int quiet)
     /* save BL_COL which may already be dimmed */
     bl_col = BL_COL;
     if ((ret = drv_generic_graphic_init(section, Name)) != 0)
-	return ret;
+        return ret;
     BL_COL = bl_col;
 
     /* initialize generic key pad driver */
     if ((ret = drv_generic_keypad_init(section, Name)) != 0)
-	return ret;
+        return ret;
 
     drv_generic_graphic_clear();
 
@@ -765,13 +765,13 @@ int drv_X11_init(const char *section, const int quiet)
     drv_X11_expose(0, 0, dimx + 2 * border, dimy + 2 * border);
 
     if (!quiet) {
-	char buffer[40];
-	qprintf(buffer, sizeof(buffer), "%s %dx%d", Name, DCOLS, DROWS);
-	if (drv_generic_graphic_greet(buffer, NULL)) {
-	    drv_X11_expose(0, 0, dimx + 2 * border, dimy + 2 * border);
-	    sleep(3);
-	    drv_generic_graphic_clear();
-	}
+        char buffer[40];
+        qprintf(buffer, sizeof(buffer), "%s %dx%d", Name, DCOLS, DROWS);
+        if (drv_generic_graphic_greet(buffer, NULL)) {
+            drv_X11_expose(0, 0, dimx + 2 * border, dimy + 2 * border);
+            sleep(3);
+            drv_generic_graphic_clear();
+        }
     }
 
     /* register plugins */
@@ -783,8 +783,8 @@ int drv_X11_init(const char *section, const int quiet)
 
 
 /* close driver & display */
-int drv_X11_quit(const __attribute__ ((unused))
-		 int quiet)
+int drv_X11_quit(const __attribute__((unused))
+                 int quiet)
 {
 
     info("%s: shutting down.", Name);
@@ -792,8 +792,8 @@ int drv_X11_quit(const __attribute__ ((unused))
     drv_generic_keypad_quit();
 
     if (drv_X11_FB) {
-	free(drv_X11_FB);
-	drv_X11_FB = NULL;
+        free(drv_X11_FB);
+        drv_X11_FB = NULL;
     }
 
     return (0);

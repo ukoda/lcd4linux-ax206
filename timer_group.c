@@ -98,7 +98,7 @@ typedef struct TIMER_GROUP_WIDGET {
     /* pointer to function of type void func(void *data) that will be
        called when the timer is processed; it will also be used to
        identify a specific widget */
-    void (*callback) (void *data);
+    void (*callback)(void *data);
 
     /* pointer to data which will be passed to the callback function;
        it will also be used to identify a specific widget */
@@ -135,20 +135,20 @@ int timer_group_exists(const int interval)
 	exists; otherwise returns a value of 0
 */
 {
-    int group;			/* current timer group's ID */
+    int group;                  /* current timer group's ID */
 
     /* loop through the timer group slots to search for one that
        matches the specified interval */
     for (group = 0; group < nTimerGroups; group++) {
-	/* skip inactive (i.e. deleted) timer groups */
-	if (TimerGroups[group].active == TIMER_INACTIVE)
-	    continue;
+        /* skip inactive (i.e. deleted) timer groups */
+        if (TimerGroups[group].active == TIMER_INACTIVE)
+            continue;
 
-	if (*TimerGroups[group].interval == interval) {
-	    /* matching timer group found, so signal success by returning
-	       a value of 1 */
-	    return 1;
-	}
+        if (*TimerGroups[group].interval == interval) {
+            /* matching timer group found, so signal success by returning
+               a value of 1 */
+            return 1;
+        }
     }
 
     /* matching timer group not found, so signal failure by returning
@@ -171,42 +171,42 @@ int timer_add_group(const int interval)
     /* if timer group for update interval already exists, signal
        success by returning a value of 0 */
     if (timer_group_exists(interval))
-	return 0;
+        return 0;
 
     /* display an info message to inform the user that a new timer
        group is being created */
     info("Creating new timer group (%d ms)", interval);
 
-    int group;			/* current timer group's ID */
+    int group;                  /* current timer group's ID */
 
     /* try to minimize memory usage by looping through timer group
        slots and looking for an inactive timer group */
     for (group = 0; group < nTimerGroups; group++) {
-	if (TimerGroups[group].active == TIMER_INACTIVE) {
-	    /* we've just found one, so let's reuse it ("group" holds its
-	       ID) by breaking the loop */
-	    debug("Reusing Timergroup %i", group);
-	    break;
-	}
+        if (TimerGroups[group].active == TIMER_INACTIVE) {
+            /* we've just found one, so let's reuse it ("group" holds its
+               ID) by breaking the loop */
+            debug("Reusing Timergroup %i", group);
+            break;
+        }
     }
 
     /* no inactive timer groups (or none at all) found, so we have to
        add a new timer group slot */
     if (group == nTimerGroups) {
-	TIMER_GROUP *tmp;
+        TIMER_GROUP *tmp;
 
-	if ((tmp = realloc(TimerGroups, (nTimerGroups + 1) * sizeof(*TimerGroups))) == NULL) {
-	    error("Error expanding TimerGroups");
-	    /* signal unsuccessful timer group creation */
-	    return -1;
-	}
-	TimerGroups = tmp;
-	nTimerGroups++;
+        if ((tmp = realloc(TimerGroups, (nTimerGroups + 1) * sizeof(*TimerGroups))) == NULL) {
+            error("Error expanding TimerGroups");
+            /* signal unsuccessful timer group creation */
+            return -1;
+        }
+        TimerGroups = tmp;
+        nTimerGroups++;
 
-	if ((TimerGroups[group].interval = malloc(sizeof(int))) == NULL) {
-	    /* signal unsuccessful timer group creation */
-	    return -1;
-	}
+        if ((TimerGroups[group].interval = malloc(sizeof(int))) == NULL) {
+            /* signal unsuccessful timer group creation */
+            return -1;
+        }
     }
 
     /* initialize timer group's interval */
@@ -237,47 +237,47 @@ int timer_remove_group(const int interval)
        is being removed */
     info("Removing timer group (%d ms)", interval);
 
-    int group;			/* current timer group's ID */
-    int widget;			/* current widget's ID */
+    int group;                  /* current timer group's ID */
+    int widget;                 /* current widget's ID */
 
     /* loop through the widget slots to look for remaining widgets
        with the specified update interval */
     for (widget = 0; widget < nTimerGroupWidgets; widget++) {
-	/* skip inactive (i.e. deleted) widget slots */
-	if (TimerGroupWidgets[widget].active == TIMER_INACTIVE)
-	    continue;
+        /* skip inactive (i.e. deleted) widget slots */
+        if (TimerGroupWidgets[widget].active == TIMER_INACTIVE)
+            continue;
 
-	if (TimerGroupWidgets[widget].interval == interval) {
-	    /* we have found a matching widget slot, so mark it as being
-	       inactive; we will not actually delete the slot, so its
-	       allocated memory may be re-used */
-	    TimerGroupWidgets[widget].active = TIMER_INACTIVE;
-	}
+        if (TimerGroupWidgets[widget].interval == interval) {
+            /* we have found a matching widget slot, so mark it as being
+               inactive; we will not actually delete the slot, so its
+               allocated memory may be re-used */
+            TimerGroupWidgets[widget].active = TIMER_INACTIVE;
+        }
     }
 
     /* loop through timer group slots and try to find the specified
        timer group slot by looking for its settings */
     for (group = 0; group < nTimerGroups; group++) {
-	/* skip inactive (i.e. deleted) timer groups */
-	if (TimerGroups[group].active == TIMER_INACTIVE)
-	    continue;
+        /* skip inactive (i.e. deleted) timer groups */
+        if (TimerGroups[group].active == TIMER_INACTIVE)
+            continue;
 
-	if (*TimerGroups[group].interval == interval) {
-	    /* we have found the timer group slot, so mark it as being
-	       inactive; we will not actually delete the slot, so its
-	       allocated memory may be re-used */
-	    TimerGroups[group].active = TIMER_INACTIVE;
+        if (*TimerGroups[group].interval == interval) {
+            /* we have found the timer group slot, so mark it as being
+               inactive; we will not actually delete the slot, so its
+               allocated memory may be re-used */
+            TimerGroups[group].active = TIMER_INACTIVE;
 
-	    /* remove the generic timer that calls this group */
-	    if (timer_remove(timer_process_group, &TimerGroups[group].interval)) {
-		/* signal successful removal of timer group */
-		return 0;
-	    } else {
-		/* an error occurred on generic timer removal, so signal
-		   failure by returning a value of -1 */
-		return -1;
-	    }
-	}
+            /* remove the generic timer that calls this group */
+            if (timer_remove(timer_process_group, &TimerGroups[group].interval)) {
+                /* signal successful removal of timer group */
+                return 0;
+            } else {
+                /* an error occurred on generic timer removal, so signal
+                   failure by returning a value of -1 */
+                return -1;
+            }
+        }
     }
 
     /* we have NOT found the timer group slot, so signal failure by
@@ -296,19 +296,19 @@ int timer_remove_empty_group(const int interval)
 	processing; otherwise returns a value of -1
 */
 {
-    int widget;			/* current widget's ID */
+    int widget;                 /* current widget's ID */
 
     /* loop through the widget slots to look for widgets with the
        specified update interval */
     for (widget = 0; widget < nTimerGroupWidgets; widget++) {
-	/* skip inactive (i.e. deleted) widget slots */
-	if (TimerGroupWidgets[widget].active == TIMER_INACTIVE)
-	    continue;
+        /* skip inactive (i.e. deleted) widget slots */
+        if (TimerGroupWidgets[widget].active == TIMER_INACTIVE)
+            continue;
 
-	/* at least one other widget with specified update interval
-	   exists, so signal success by returning a value of 0 */
-	if (TimerGroupWidgets[widget].interval == interval)
-	    return 0;
+        /* at least one other widget with specified update interval
+           exists, so signal success by returning a value of 0 */
+        if (TimerGroupWidgets[widget].interval == interval)
+            return 0;
     }
 
     /* no other widgets with specified update interval exist, so
@@ -329,7 +329,7 @@ void timer_process_group(void *data)
 	return value: void
 */
 {
-    int widget;			/* current widget's ID */
+    int widget;                 /* current widget's ID */
 
     /* convert callback data to integer (triggering interval in
        milliseconds) */
@@ -338,47 +338,47 @@ void timer_process_group(void *data)
     /* sanity check; by now, at least one timer group should be
        instantiated */
     if (nTimerGroups <= 0) {
-	/* otherwise, print an error and return early */
-	error("Huh? Not even a single timer group to process? Dazed and confused...");
-	return;
+        /* otherwise, print an error and return early */
+        error("Huh? Not even a single timer group to process? Dazed and confused...");
+        return;
     }
 
     /* sanity check; by now, at least one widget slot should be
        instantiated */
     if (nTimerGroupWidgets <= 0) {
-	/* otherwise, print an error and return early */
-	error("Huh? Not even a single widget slot to process? Dazed and confused...");
-	return;
+        /* otherwise, print an error and return early */
+        error("Huh? Not even a single widget slot to process? Dazed and confused...");
+        return;
     }
 
     /* loop through widgets and search for those matching the timer
        group's update interval */
     for (widget = 0; widget < nTimerGroupWidgets; widget++) {
-	/* skip inactive (i.e. deleted) widgets */
-	if (TimerGroupWidgets[widget].active == TIMER_INACTIVE)
-	    continue;
+        /* skip inactive (i.e. deleted) widgets */
+        if (TimerGroupWidgets[widget].active == TIMER_INACTIVE)
+            continue;
 
-	/* the current widget belongs to the specified timer group */
-	if (TimerGroupWidgets[widget].interval == interval) {
-	    /* if the widget's callback function has been set, call it and
-	       pass the corresponding data */
-	    if (TimerGroupWidgets[widget].callback != NULL)
-		TimerGroupWidgets[widget].callback(TimerGroupWidgets[widget].data);
+        /* the current widget belongs to the specified timer group */
+        if (TimerGroupWidgets[widget].interval == interval) {
+            /* if the widget's callback function has been set, call it and
+               pass the corresponding data */
+            if (TimerGroupWidgets[widget].callback != NULL)
+                TimerGroupWidgets[widget].callback(TimerGroupWidgets[widget].data);
 
-	    /* mark one-shot widget as inactive (which means the it has
-	       been deleted and its allocated memory may be re-used) */
-	    if (TimerGroupWidgets[widget].one_shot) {
-		TimerGroupWidgets[widget].active = TIMER_INACTIVE;
+            /* mark one-shot widget as inactive (which means the it has
+               been deleted and its allocated memory may be re-used) */
+            if (TimerGroupWidgets[widget].one_shot) {
+                TimerGroupWidgets[widget].active = TIMER_INACTIVE;
 
-		/* also remove the corresponding timer group if it is empty */
-		timer_remove_empty_group(interval);
-	    }
-	}
+                /* also remove the corresponding timer group if it is empty */
+                timer_remove_empty_group(interval);
+            }
+        }
     }
 }
 
 
-int timer_add_widget(void (*callback) (void *data), void *data, const int interval, const int one_shot)
+int timer_add_widget(void (*callback)(void *data), void *data, const int interval, const int one_shot)
 /*  Add widget to timer group of the specified update interval
     (also creates a new timer group if necessary).
 
@@ -401,37 +401,37 @@ int timer_add_widget(void (*callback) (void *data), void *data, const int interv
 	addition; otherwise returns a value of -1
 */
 {
-    int widget;			/* current widget's ID */
+    int widget;                 /* current widget's ID */
 
     /* if no timer group for update interval exists, create one */
     if (!timer_group_exists(interval)) {
-	/* creation of new timer group failed, so signal failure by
-	   returning a value of -1 */
-	if (timer_add_group(interval) != 0)
-	    return -1;
+        /* creation of new timer group failed, so signal failure by
+           returning a value of -1 */
+        if (timer_add_group(interval) != 0)
+            return -1;
     }
 
     /* try to minimize memory usage by looping through the widget
        slots and looking for an inactive widget slot */
     for (widget = 0; widget < nTimerGroupWidgets; widget++) {
-	if (TimerGroupWidgets[widget].active == TIMER_INACTIVE) {
-	    /* we've just found one, so let's reuse it ("widget" holds its
-	       ID) by breaking the loop */
-	    break;
-	}
+        if (TimerGroupWidgets[widget].active == TIMER_INACTIVE) {
+            /* we've just found one, so let's reuse it ("widget" holds its
+               ID) by breaking the loop */
+            break;
+        }
     }
 
     /* no inactive widget slots (or none at all) found, so we have to
        add a new widget slot */
     if (widget == nTimerGroupWidgets) {
-	TIMER_GROUP_WIDGET *tmp;
+        TIMER_GROUP_WIDGET *tmp;
 
-	if ((tmp = realloc(TimerGroupWidgets, (nTimerGroupWidgets + 1) * sizeof(*TimerGroupWidgets))) == NULL) {
-	    /* signal unsuccessful creation of widget slot */
-	    return -1;
-	}
-	TimerGroupWidgets = tmp;
-	nTimerGroupWidgets++;
+        if ((tmp = realloc(TimerGroupWidgets, (nTimerGroupWidgets + 1) * sizeof(*TimerGroupWidgets))) == NULL) {
+            /* signal unsuccessful creation of widget slot */
+            return -1;
+        }
+        TimerGroupWidgets = tmp;
+        nTimerGroupWidgets++;
     }
 
     /* initialize widget slot */
@@ -449,7 +449,7 @@ int timer_add_widget(void (*callback) (void *data), void *data, const int interv
 }
 
 
-int timer_remove_widget(void (*callback) (void *data), void *data)
+int timer_remove_widget(void (*callback)(void *data), void *data)
 /*  Remove widget from the timer group with the specified update
     interval (also removes corresponding timer group if empty).
 
@@ -463,34 +463,34 @@ int timer_remove_widget(void (*callback) (void *data), void *data)
 	removal; otherwise returns a value of -1
 */
 {
-    int widget;			/* current widget's ID */
-    int interval = -1;		/* specified widget's triggering interval in
-				   milliseconds */
+    int widget;                 /* current widget's ID */
+    int interval = -1;          /* specified widget's triggering interval in
+                                   milliseconds */
 
     /* loop through the widget slots and try to find the specified
        widget slot by looking for its settings */
     for (widget = 0; widget < nTimerGroupWidgets; widget++) {
-	/* skip inactive (i.e. deleted) widget slots */
-	if (TimerGroupWidgets[widget].active == TIMER_INACTIVE)
-	    continue;
+        /* skip inactive (i.e. deleted) widget slots */
+        if (TimerGroupWidgets[widget].active == TIMER_INACTIVE)
+            continue;
 
-	if (TimerGroupWidgets[widget].callback == callback && TimerGroupWidgets[widget].data == data) {
-	    /* we have found the widget slot, so mark it as being
-	       inactive; we will not actually delete the slot, so its
-	       allocated memory may be re-used */
-	    TimerGroupWidgets[widget].active = TIMER_INACTIVE;
+        if (TimerGroupWidgets[widget].callback == callback && TimerGroupWidgets[widget].data == data) {
+            /* we have found the widget slot, so mark it as being
+               inactive; we will not actually delete the slot, so its
+               allocated memory may be re-used */
+            TimerGroupWidgets[widget].active = TIMER_INACTIVE;
 
-	    /* store the widget's triggering interval for later use and
-	       break the loop */
-	    interval = TimerGroupWidgets[widget].interval;
-	    break;
-	}
+            /* store the widget's triggering interval for later use and
+               break the loop */
+            interval = TimerGroupWidgets[widget].interval;
+            break;
+        }
     }
 
     /* if no matching widget was found, signal an error by returning
        a value of -1 */
     if (interval < 0)
-	return -1;
+        return -1;
 
     /* if no other widgets with specified update interval exist,
        remove corresponding timer group and signal success or
@@ -506,16 +506,16 @@ void timer_exit_group(void)
 	return value: void
 */
 {
-    int group;			/* current timer group's ID */
+    int group;                  /* current timer group's ID */
 
     /* loop through all timer groups and remove them one by one */
     for (group = 0; group < nTimerGroups; group++) {
-	/* remove generic timer */
-	timer_remove(timer_process_group, TimerGroups[group].interval);
+        /* remove generic timer */
+        timer_remove(timer_process_group, TimerGroups[group].interval);
 
-	/* free memory allocated for callback data (i.e. the group's
-	   triggering interval in milliseconds) */
-	free(TimerGroups[group].interval);
+        /* free memory allocated for callback data (i.e. the group's
+           triggering interval in milliseconds) */
+        free(TimerGroups[group].interval);
     }
 
     /* reset number of allocated timer groups */
@@ -523,8 +523,8 @@ void timer_exit_group(void)
 
     /* free allocated memory containing the timer group slots */
     if (TimerGroups != NULL) {
-	free(TimerGroups);
-	TimerGroups = NULL;
+        free(TimerGroups);
+        TimerGroups = NULL;
     }
 
     /* reset number of allocated widget slots */
@@ -532,7 +532,7 @@ void timer_exit_group(void)
 
     /* free allocated memory containing the widget slots */
     if (TimerGroupWidgets != NULL) {
-	free(TimerGroupWidgets);
-	TimerGroupWidgets = NULL;
+        free(TimerGroupWidgets);
+        TimerGroupWidgets = NULL;
     }
 }

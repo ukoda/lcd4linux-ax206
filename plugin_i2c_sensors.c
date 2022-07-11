@@ -74,7 +74,7 @@
 #include "cfg.h"
 #include "hash.h"
 #include "qprintf.h"
-#include "evaluator.h"		// if strndup() is not available
+#include "evaluator.h"          // if strndup() is not available
 
 #ifdef WITH_DMALLOC
 #include <dmalloc.h>
@@ -84,15 +84,15 @@ static char *path = NULL;
 static HASH I2Csensors;
 
 static const char *procfs_tokens[4][3] = {
-    {"temp_hyst", "temp_max", "temp_input"},	/* for temp# */
-    {"in_min", "in_max", "in_input"},	/* for in# */
-    {"fan_div1", "fan_div2", "fan_div3"},	/* for fan_div */
-    {"fan_min", "fan_input", ""}	/* for fan# */
+    { "temp_hyst", "temp_max", "temp_input" },  /* for temp# */
+    { "in_min", "in_max", "in_input" }, /* for in# */
+    { "fan_div1", "fan_div2", "fan_div3" },     /* for fan_div */
+    { "fan_min", "fan_input", "" }      /* for fan# */
 };
 
-static int (*parse_i2c_sensors) (const char *key);
+static int (*parse_i2c_sensors)(const char *key);
 
-	/***********************************************\
+        /***********************************************\
 	* Parsing for new 2.6 kernels 'sysfs' interface *
 	\***********************************************/
 
@@ -108,26 +108,26 @@ static int parse_i2c_sensors_sysfs(const char *key)
 
     stream = fopen(file, "r");
     if (stream == NULL) {
-	error("i2c_sensors: fopen(%s) failed: %s", file, strerror(errno));
-	return -1;
+        error("i2c_sensors: fopen(%s) failed: %s", file, strerror(errno));
+        return -1;
     }
     fgets(buffer, sizeof(buffer), stream);
     fclose(stream);
 
     if (buffer[0] == '\0') {
-	error("i2c_sensors: %s empty ?!", file);
-	return -1;
+        error("i2c_sensors: %s empty ?!", file);
+        return -1;
     }
 
     /* now the formating stuff, depending on the file : */
     /* Some values must be divided by 1000, the others */
     /* are parsed directly (we just remove the \n). */
     if (!strncmp(key, "temp", 4) || !strncmp(key, "curr", 4) || !strncmp(key, "in", 2) || !strncmp(key, "vid", 3)) {
-	snprintf(val, sizeof(val), "%f", strtod(buffer, NULL) / 1000.0);
+        snprintf(val, sizeof(val), "%f", strtod(buffer, NULL) / 1000.0);
     } else {
-	qprintf(val, sizeof(val), "%s", buffer);
-	/* we supress this nasty \n at the end */
-	val[strlen(val) - 1] = '\0';
+        qprintf(val, sizeof(val), "%s", buffer);
+        /* we supress this nasty \n at the end */
+        val[strlen(val) - 1] = '\0';
     }
 
     hash_put(&I2Csensors, key, val);
@@ -136,7 +136,7 @@ static int parse_i2c_sensors_sysfs(const char *key)
 
 }
 
-	/************************************************\
+        /************************************************\
 	* Parsing for old 2.4 kernels 'procfs' interface *
 	\************************************************/
 
@@ -157,57 +157,57 @@ static int parse_i2c_sensors_procfs(const char *key)
     strcpy(file, path);
 
     if (!strncmp(key, "temp_", 5)) {
-	tokens_index = 0;
-	strcat(file, "temp");
-	strcat(file, number);
+        tokens_index = 0;
+        strcat(file, "temp");
+        strcat(file, number);
     } else if (!strncmp(key, "in_", 3)) {
-	tokens_index = 1;
-	strcat(file, "in");
-	strcat(file, number);
+        tokens_index = 1;
+        strcat(file, "in");
+        strcat(file, number);
     } else if (!strncmp(key, "fan_div", 7)) {
-	tokens_index = 2;
-	strcat(file, "fan_div");
-	number = "";
+        tokens_index = 2;
+        strcat(file, "fan_div");
+        number = "";
     } else if (!strncmp(key, "fan_", 4)) {
-	tokens_index = 3;
-	strcat(file, "fan");
-	strcat(file, number);
+        tokens_index = 3;
+        strcat(file, "fan");
+        strcat(file, number);
     } else {
-	return -1;
+        return -1;
     }
 
     stream = fopen(file, "r");
     if (stream == NULL) {
-	error("i2c_sensors: fopen(%s) failed: %s", file, strerror(errno));
-	return -1;
+        error("i2c_sensors: fopen(%s) failed: %s", file, strerror(errno));
+        return -1;
     }
     fgets(buffer, sizeof(buffer), stream);
     fclose(stream);
 
     if (buffer[0] == '\0') {
-	error("i2c_sensors: %s empty ?!", file);
-	return -1;
+        error("i2c_sensors: %s empty ?!", file);
+        return -1;
     }
 
     running = strndup(buffer, sizeof(buffer));
     while (1) {
-	value = strsep(&running, delim);
-	/* debug("%s pos %i -> %s", file, pos , value); */
-	if (!value || !strcmp(value, "")) {
-	    /* debug("%s pos %i -> BREAK", file, pos); */
-	    break;
-	} else {
-	    qprintf(final_key, sizeof(final_key), "%s%s", procfs_tokens[tokens_index][pos], number);
-	    /* debug ("%s -> %s", final_key, value); */
-	    hash_put(&I2Csensors, final_key, value);
-	    pos++;
-	}
+        value = strsep(&running, delim);
+        /* debug("%s pos %i -> %s", file, pos , value); */
+        if (!value || !strcmp(value, "")) {
+            /* debug("%s pos %i -> BREAK", file, pos); */
+            break;
+        } else {
+            qprintf(final_key, sizeof(final_key), "%s%s", procfs_tokens[tokens_index][pos], number);
+            /* debug ("%s -> %s", final_key, value); */
+            hash_put(&I2Csensors, final_key, value);
+            pos++;
+        }
     }
     free(running);
     return 0;
 }
 
-	/*****************************************\
+        /*****************************************\
 	* Common functions (path search and init) *
 	\*****************************************/
 
@@ -223,58 +223,58 @@ static void my_i2c_sensors_path(const char *method)
     int done;
 
     if (!strcmp(method, "sysfs")) {
-	base = "/sys/class/hwmon/";
+        base = "/sys/class/hwmon/";
     } else if (!strcmp(method, "sysfs-old")) {
-	base = "/sys/bus/i2c/devices/";
+        base = "/sys/bus/i2c/devices/";
     } else if (!strcmp(method, "procfs")) {
-	base = "/proc/sys/dev/sensors/";
-	/*base="/sensors_2.4/";             // fake dir to test without rebooting 2.4 ;) */
+        base = "/proc/sys/dev/sensors/";
+        /*base="/sensors_2.4/";             // fake dir to test without rebooting 2.4 ;) */
     } else {
-	return;
+        return;
     }
 
     fd1 = opendir(base);
     if (!fd1) {
-	return;
+        return;
     }
 
     while ((dir = readdir(fd1))) {
-	/* Skip non-directories and '.' and '..' */
-	if ((dir->d_type != DT_DIR && dir->d_type != DT_LNK) || strcmp(dir->d_name, ".") == 0
-	    || strcmp(dir->d_name, "..") == 0) {
-	    continue;
-	}
+        /* Skip non-directories and '.' and '..' */
+        if ((dir->d_type != DT_DIR && dir->d_type != DT_LNK) || strcmp(dir->d_name, ".") == 0
+            || strcmp(dir->d_name, "..") == 0) {
+            continue;
+        }
 
-	/* dname is the absolute path */
-	strcpy(dname, base);
-	strcat(dname, dir->d_name);
-	strcat(dname, "/");
+        /* dname is the absolute path */
+        strcpy(dname, base);
+        strcat(dname, dir->d_name);
+        strcat(dname, "/");
 
-	fd2 = opendir(dname);
-	done = 0;
-	while ((file = readdir(fd2))) {
-	    /* FIXME : do all sensors have a temp_input1 ? */
-	    if (!strcmp(file->d_name, "temp_input1") || !strcmp(file->d_name, "temp1_input")
-		|| !strcmp(file->d_name, "temp1")) {
-		path = realloc(path, strlen(dname) + 1);
-		strcpy(path, dname);
-		done = 1;
-		break;
-	    }
-	    if (!strcmp(file->d_name, "device")) {
-		char fname[PATH_MAX];
-		snprintf(fname, PATH_MAX, "%sdevice/temp1_input", dname);
-		if (access(fname, R_OK) == 0) {
-		    path = realloc(path, strlen(dname) + 7);
-		    sprintf(path, "%sdevice/", dname);
-		    done = 1;
-		    break;
-		}
-	    }
-	}
-	closedir(fd2);
-	if (done)
-	    break;
+        fd2 = opendir(dname);
+        done = 0;
+        while ((file = readdir(fd2))) {
+            /* FIXME : do all sensors have a temp_input1 ? */
+            if (!strcmp(file->d_name, "temp_input1") || !strcmp(file->d_name, "temp1_input")
+                || !strcmp(file->d_name, "temp1")) {
+                path = realloc(path, strlen(dname) + 1);
+                strcpy(path, dname);
+                done = 1;
+                break;
+            }
+            if (!strcmp(file->d_name, "device")) {
+                char fname[PATH_MAX];
+                snprintf(fname, PATH_MAX, "%sdevice/temp1_input", dname);
+                if (access(fname, R_OK) == 0) {
+                    path = realloc(path, strlen(dname) + 7);
+                    sprintf(path, "%sdevice/", dname);
+                    done = 1;
+                    break;
+                }
+            }
+        }
+        closedir(fd2);
+        if (done)
+            break;
     }
     closedir(fd1);
 }
@@ -286,48 +286,48 @@ static int configure_i2c_sensors(void)
     char *path_cfg;
 
     if (configured != 0)
-	return configured;
+        return configured;
 
     path_cfg = cfg_get(NULL, "i2c_sensors-path", "");
     if (path_cfg == NULL || *path_cfg == '\0') {
-	/* debug("No path to i2c sensors found in the conf, calling my_i2c_sensors_path()"); */
-	my_i2c_sensors_path("sysfs");
-	if (!path)
-	    my_i2c_sensors_path("sysfs-old");
-	if (!path)
-	    my_i2c_sensors_path("procfs");
+        /* debug("No path to i2c sensors found in the conf, calling my_i2c_sensors_path()"); */
+        my_i2c_sensors_path("sysfs");
+        if (!path)
+            my_i2c_sensors_path("sysfs-old");
+        if (!path)
+            my_i2c_sensors_path("procfs");
 
-	if (!path) {
-	    error("i2c_sensors: unable to autodetect i2c sensors!");
-	    configured = -1;
-	    return configured;
-	}
+        if (!path) {
+            error("i2c_sensors: unable to autodetect i2c sensors!");
+            configured = -1;
+            return configured;
+        }
 
-	debug("using i2c sensors at %s (autodetected)", path);
+        debug("using i2c sensors at %s (autodetected)", path);
 
     } else {
-	if (path_cfg[strlen(path_cfg) - 1] != '/') {
-	    /* the headless user forgot the trailing slash :/ */
-	    error("i2c_sensors: please add a trailing slash to %s from %s", path_cfg, cfg_source());
-	    path_cfg = realloc(path_cfg, strlen(path_cfg) + 2);
-	    strcat(path_cfg, "/");
-	}
-	debug("using i2c sensors at %s (from %s)", path_cfg, cfg_source());
-	path = realloc(path, strlen(path_cfg) + 1);
-	strcpy(path, path_cfg);
+        if (path_cfg[strlen(path_cfg) - 1] != '/') {
+            /* the headless user forgot the trailing slash :/ */
+            error("i2c_sensors: please add a trailing slash to %s from %s", path_cfg, cfg_source());
+            path_cfg = realloc(path_cfg, strlen(path_cfg) + 2);
+            strcat(path_cfg, "/");
+        }
+        debug("using i2c sensors at %s (from %s)", path_cfg, cfg_source());
+        path = realloc(path, strlen(path_cfg) + 1);
+        strcpy(path, path_cfg);
     }
     if (path_cfg)
-	free(path_cfg);
+        free(path_cfg);
 
     /* we activate the function only if there's a possibly path found */
     if (strncmp(path, "/sys", 4) == 0) {
-	parse_i2c_sensors = parse_i2c_sensors_sysfs;
+        parse_i2c_sensors = parse_i2c_sensors_sysfs;
     } else if (strncmp(path, "/proc", 5) == 0) {
-	parse_i2c_sensors = parse_i2c_sensors_procfs;
+        parse_i2c_sensors = parse_i2c_sensors_procfs;
     } else {
-	error("i2c_sensors: unknown path %s, should start with /sys or /proc", path);
-	configured = -1;
-	return configured;
+        error("i2c_sensors: unknown path %s, should start with /sys or /proc", path);
+        configured = -1;
+        return configured;
     }
 
     hash_create(&I2Csensors);
@@ -344,20 +344,20 @@ void my_i2c_sensors(RESULT * result, RESULT * arg)
     char *val;
 
     if (configure_i2c_sensors() < 0) {
-	SetResult(&result, R_STRING, "??");
-	return;
+        SetResult(&result, R_STRING, "??");
+        return;
     }
 
     key = R2S(arg);
     age = hash_age(&I2Csensors, key);
     if (age < 0 || age > 250) {
-	parse_i2c_sensors(key);
+        parse_i2c_sensors(key);
     }
     val = hash_get(&I2Csensors, key, NULL);
     if (val) {
-	SetResult(&result, R_STRING, val);
+        SetResult(&result, R_STRING, val);
     } else {
-	SetResult(&result, R_STRING, "??");
+        SetResult(&result, R_STRING, "??");
     }
 }
 

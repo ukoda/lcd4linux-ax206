@@ -271,9 +271,9 @@ int plugin_list(void)
     printf("available plugins:\n  ");
 
     for (i = 0; Plugins[i]; i++) {
-	printf("%s", Plugins[i]);
-	if (Plugins[i + 1])
-	    printf(", ");
+        printf("%s", Plugins[i]);
+        if (Plugins[i + 1])
+            printf(", ");
     }
     printf("\n");
     return 0;

@@ -88,8 +88,8 @@ static int GPO[MAX_GPOS];
 int GPOS = 0;
 int GPIS = 0;
 
-int (*drv_generic_gpio_real_set) () = NULL;
-int (*drv_generic_gpio_real_get) () = NULL;
+int (*drv_generic_gpio_real_set)() = NULL;
+int (*drv_generic_gpio_real_get)() = NULL;
 
 
 static void drv_generic_gpio_plugin_gpi(RESULT * result, RESULT * arg1)
@@ -100,9 +100,9 @@ static void drv_generic_gpio_plugin_gpi(RESULT * result, RESULT * arg1)
     num = R2N(arg1);
 
     if (num <= 0 || num > GPIS) {
-	error("%s::GPI(%d): GPI out of range (1..%d)", Driver, num, GPIS);
-	SetResult(&result, R_STRING, "");
-	return;
+        error("%s::GPI(%d): GPI out of range (1..%d)", Driver, num, GPIS);
+        SetResult(&result, R_STRING, "");
+        return;
     }
 
     val = drv_generic_gpio_get(num - 1);
@@ -117,33 +117,33 @@ static void drv_generic_gpio_plugin_gpo(RESULT * result, const int argc, RESULT 
 
     switch (argc) {
     case 1:
-	num = R2N(argv[0]);
-	if (num <= 0 || num > GPOS) {
-	    error("%s::GPO(%d): GPO out of range (1..%d)", Driver, num, GPOS);
-	    SetResult(&result, R_STRING, "");
-	    return;
-	}
-	gpo = GPO[num - 1];
-	SetResult(&result, R_NUMBER, &gpo);
-	break;
+        num = R2N(argv[0]);
+        if (num <= 0 || num > GPOS) {
+            error("%s::GPO(%d): GPO out of range (1..%d)", Driver, num, GPOS);
+            SetResult(&result, R_STRING, "");
+            return;
+        }
+        gpo = GPO[num - 1];
+        SetResult(&result, R_NUMBER, &gpo);
+        break;
     case 2:
-	num = R2N(argv[0]);
-	val = R2N(argv[1]);
-	if (num <= 0 || num > GPOS) {
-	    error("%s::GPO(%d): GPO out of range (1..%d)", Driver, num, GPOS);
-	    SetResult(&result, R_STRING, "");
-	    return;
-	}
-	if (GPO[num - 1] != val) {
-	    if (drv_generic_gpio_real_set)
-		GPO[num - 1] = drv_generic_gpio_real_set(num - 1, val);
-	}
-	gpo = GPO[num - 1];
-	SetResult(&result, R_NUMBER, &gpo);
-	break;
+        num = R2N(argv[0]);
+        val = R2N(argv[1]);
+        if (num <= 0 || num > GPOS) {
+            error("%s::GPO(%d): GPO out of range (1..%d)", Driver, num, GPOS);
+            SetResult(&result, R_STRING, "");
+            return;
+        }
+        if (GPO[num - 1] != val) {
+            if (drv_generic_gpio_real_set)
+                GPO[num - 1] = drv_generic_gpio_real_set(num - 1, val);
+        }
+        gpo = GPO[num - 1];
+        SetResult(&result, R_NUMBER, &gpo);
+        break;
     default:
-	error("%s::GPO(): wrong number of parameters", Driver);
-	SetResult(&result, R_STRING, "");
+        error("%s::GPO(): wrong number of parameters", Driver);
+        SetResult(&result, R_STRING, "");
     }
 }
 
@@ -179,18 +179,18 @@ int drv_generic_gpio_clear(void)
 
     /* clear GPI buffer */
     for (i = 0; i < MAX_GPIS; i++) {
-	GPI[i] = 0;
+        GPI[i] = 0;
     }
 
     /* clear GPO buffer */
     for (i = 0; i < MAX_GPOS; i++) {
-	GPO[i] = 0;
+        GPO[i] = 0;
     }
 
     /* really clear GPO's */
     for (i = 0; i < GPOS; i++) {
-	if (drv_generic_gpio_real_set)
-	    GPO[i] = drv_generic_gpio_real_set(i, 0);
+        if (drv_generic_gpio_real_set)
+            GPO[i] = drv_generic_gpio_real_set(i, 0);
 
     }
 
@@ -203,12 +203,12 @@ int drv_generic_gpio_get(const int num)
     int val = 0;
 
     if (num < 0 || num >= GPIS) {
-	error("%s: gpio_get(%d): GPI out of range (0..%d)", Driver, num + 1, GPIS);
-	return -1;
+        error("%s: gpio_get(%d): GPI out of range (0..%d)", Driver, num + 1, GPIS);
+        return -1;
     }
 
     if (drv_generic_gpio_real_get)
-	val = drv_generic_gpio_real_get(num);
+        val = drv_generic_gpio_real_get(num);
 
     GPI[num] = val;
 
@@ -225,13 +225,13 @@ int drv_generic_gpio_draw(WIDGET * W)
     val = P2N(&gpo->expression);
 
     if (num < 0 || num >= GPOS) {
-	error("%s: gpio_draw(%d): GPO out of range (0..%d)", Driver, num + 1, GPOS);
-	return -1;
+        error("%s: gpio_draw(%d): GPO out of range (0..%d)", Driver, num + 1, GPOS);
+        return -1;
     }
 
     if (GPO[num] != val) {
-	if (drv_generic_gpio_real_set)
-	    GPO[num] = drv_generic_gpio_real_set(num, val);
+        if (drv_generic_gpio_real_set)
+            GPO[num] = drv_generic_gpio_real_set(num, val);
     }
 
     return 0;

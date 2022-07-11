@@ -50,17 +50,17 @@
 
 /* these values are chars (text displays) or pixels (graphic displays) */
 
-int LROWS = 0;			/* layout size: rows */
-int LCOLS = 0;			/* layout size: columns */
+int LROWS = 0;                  /* layout size: rows */
+int LCOLS = 0;                  /* layout size: columns */
 
-int DROWS = 4;			/* display size:  rows */
-int DCOLS = 20;			/* display size: columns */
+int DROWS = 4;                  /* display size:  rows */
+int DCOLS = 20;                 /* display size: columns */
 
-int XRES = 6;			/* pixel widtht of one char */
-int YRES = 8;			/* pixel height of one char */
+int XRES = 6;                   /* pixel widtht of one char */
+int YRES = 8;                   /* pixel height of one char */
 
 
-void (*drv_generic_blit) () = NULL;
+void (*drv_generic_blit)() = NULL;
 
 
 static void my_drows(RESULT * result)

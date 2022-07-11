@@ -157,12 +157,12 @@ typedef struct {
 
 
 static MODEL Models[] = {
-    {0x01, "generic", CAP_PARPORT | CAP_I2C | CAP_GPO | CAP_GPI | CAP_BACKLIGHT},
-    {0x02, "Noritake", CAP_PARPORT | CAP_I2C | CAP_GPO | CAP_BRIGHTNESS},
-    {0x03, "Soekris", CAP_PARPORT | CAP_BUSY4BIT},
-    {0x04, "HD66712", CAP_PARPORT | CAP_I2C | CAP_GPO | CAP_BACKLIGHT | CAP_HD66712},
-    {0x05, "LCM-162", CAP_PARPORT | CAP_LCM162},
-    {0xff, "Unknown", 0}
+    { 0x01, "generic", CAP_PARPORT | CAP_I2C | CAP_GPO | CAP_GPI | CAP_BACKLIGHT },
+    { 0x02, "Noritake", CAP_PARPORT | CAP_I2C | CAP_GPO | CAP_BRIGHTNESS },
+    { 0x03, "Soekris", CAP_PARPORT | CAP_BUSY4BIT },
+    { 0x04, "HD66712", CAP_PARPORT | CAP_I2C | CAP_GPO | CAP_BACKLIGHT | CAP_HD66712 },
+    { 0x05, "LCM-162", CAP_PARPORT | CAP_LCM162 },
+    { 0xff, "Unknown", 0 }
 };
 
 
@@ -170,11 +170,11 @@ static MODEL Models[] = {
 /***  generic functions               ***/
 /****************************************/
 
-static int (*drv_HD_load) (const char *section);
-static void (*drv_HD_command) (const unsigned char controller, const unsigned char cmd, const unsigned long delay);
-static void (*drv_HD_data) (const unsigned char controller, const char *string, const int len,
-			    const unsigned long delay);
-static void (*drv_HD_stop) (void);
+static int (*drv_HD_load)(const char *section);
+static void (*drv_HD_command)(const unsigned char controller, const unsigned char cmd, const unsigned long delay);
+static void (*drv_HD_data)(const unsigned char controller, const char *string, const int len,
+                           const unsigned long delay);
+static void (*drv_HD_stop)(void);
 
 
 
@@ -195,112 +195,112 @@ static void drv_HD_PP_busy(const int controller)
     unsigned int counter;
 
     if (Bits == 8) {
-	busymask = 0x80;
+        busymask = 0x80;
     } else {
-	/* Since in 4-Bit mode DB0 on the parport is mapped to DB4 on the LCD
-	 * (and consequently, DB3 on the partport is mapped to DB7 on the LCD)
-	 * we need to listen for DB3 on the parport to go low
-	 */
-	busymask = 0x08;
+        /* Since in 4-Bit mode DB0 on the parport is mapped to DB4 on the LCD
+         * (and consequently, DB3 on the partport is mapped to DB7 on the LCD)
+         * we need to listen for DB3 on the parport to go low
+         */
+        busymask = 0x08;
     }
 
     ctrlmask = 0x08;
     while (ctrlmask > 0) {
 
-	if (controller & ctrlmask) {
+        if (controller & ctrlmask) {
 
-	    enable = 0;
-	    if (ctrlmask & 0x01)
-		enable = SIGNAL_ENABLE;
-	    else if (ctrlmask & 0x02)
-		enable = SIGNAL_ENABLE2;
-	    else if (ctrlmask & 0x04)
-		enable = SIGNAL_ENABLE3;
-	    else if (ctrlmask & 0x08)
-		enable = SIGNAL_ENABLE4;
+            enable = 0;
+            if (ctrlmask & 0x01)
+                enable = SIGNAL_ENABLE;
+            else if (ctrlmask & 0x02)
+                enable = SIGNAL_ENABLE2;
+            else if (ctrlmask & 0x04)
+                enable = SIGNAL_ENABLE3;
+            else if (ctrlmask & 0x08)
+                enable = SIGNAL_ENABLE4;
 
-	    /* set data-lines to input */
-	    drv_generic_parport_direction(1);
+            /* set data-lines to input */
+            drv_generic_parport_direction(1);
 
-	    if (Bits == 8) {
-		/* Set RW, clear RS */
-		drv_generic_parport_control(SIGNAL_RW | SIGNAL_RS, SIGNAL_RW);
-	    } else {
-		drv_generic_parport_data(SIGNAL_RW ^ invert_data_bits);
-	    }
+            if (Bits == 8) {
+                /* Set RW, clear RS */
+                drv_generic_parport_control(SIGNAL_RW | SIGNAL_RS, SIGNAL_RW);
+            } else {
+                drv_generic_parport_data(SIGNAL_RW ^ invert_data_bits);
+            }
 
-	    /* Address set-up time */
-	    ndelay(T_AS);
+            /* Address set-up time */
+            ndelay(T_AS);
 
-	    /* rise ENABLE */
-	    if (Bits == 8) {
-		drv_generic_parport_control(enable, enable);
-	    } else {
-		drv_generic_parport_data((SIGNAL_RW | enable) ^ invert_data_bits);
-	    }
+            /* rise ENABLE */
+            if (Bits == 8) {
+                drv_generic_parport_control(enable, enable);
+            } else {
+                drv_generic_parport_data((SIGNAL_RW | enable) ^ invert_data_bits);
+            }
 
-	    counter = 0;
-	    while (1) {
-		/* read the busy flag */
-		data = drv_generic_parport_read();
-		if ((data & busymask) == 0) {
-		    errors = 0;
-		    break;
-		}
+            counter = 0;
+            while (1) {
+                /* read the busy flag */
+                data = drv_generic_parport_read();
+                if ((data & busymask) == 0) {
+                    errors = 0;
+                    break;
+                }
 
-		/* make sure we don't wait forever
-		 * - but only check after 5 iterations
-		 * that way, we won't slow down normal mode
-		 * (where we don't need the timeout anyway) 
-		 */
-		counter++;
+                /* make sure we don't wait forever
+                 * - but only check after 5 iterations
+                 * that way, we won't slow down normal mode
+                 * (where we don't need the timeout anyway) 
+                 */
+                counter++;
 
-		if (counter >= 5) {
-		    struct timeval now, end;
+                if (counter >= 5) {
+                    struct timeval now, end;
 
-		    if (counter == 5) {
-			/* determine the time when the timeout has expired */
-			gettimeofday(&end, NULL);
-			end.tv_usec += MAX_BUSYFLAG_WAIT;
-			while (end.tv_usec > 1000000) {
-			    end.tv_usec -= 1000000;
-			    end.tv_sec++;
-			}
-		    }
+                    if (counter == 5) {
+                        /* determine the time when the timeout has expired */
+                        gettimeofday(&end, NULL);
+                        end.tv_usec += MAX_BUSYFLAG_WAIT;
+                        while (end.tv_usec > 1000000) {
+                            end.tv_usec -= 1000000;
+                            end.tv_sec++;
+                        }
+                    }
 
-		    /* get the current time */
-		    gettimeofday(&now, NULL);
-		    if (now.tv_sec == end.tv_sec ? now.tv_usec >= end.tv_usec : now.tv_sec >= end.tv_sec) {
-			error("%s: timeout waiting for busy flag on controller %x (0x%02x)", Name, ctrlmask, data);
-			if (++errors >= MAX_BUSYFLAG_ERRORS) {
-			    error("%s: too many busy flag failures, turning off busy flag checking.", Name);
-			    UseBusy = 0;
-			}
-			break;
-		    }
-		}
-	    }
+                    /* get the current time */
+                    gettimeofday(&now, NULL);
+                    if (now.tv_sec == end.tv_sec ? now.tv_usec >= end.tv_usec : now.tv_sec >= end.tv_sec) {
+                        error("%s: timeout waiting for busy flag on controller %x (0x%02x)", Name, ctrlmask, data);
+                        if (++errors >= MAX_BUSYFLAG_ERRORS) {
+                            error("%s: too many busy flag failures, turning off busy flag checking.", Name);
+                            UseBusy = 0;
+                        }
+                        break;
+                    }
+                }
+            }
 
-	    /* RS=low, RW=low, EN=low */
-	    if (Bits == 8) {
-		/* Lower EN */
-		drv_generic_parport_control(enable, 0);
+            /* RS=low, RW=low, EN=low */
+            if (Bits == 8) {
+                /* Lower EN */
+                drv_generic_parport_control(enable, 0);
 
-		/* Address hold time */
-		ndelay(T_AH);
+                /* Address hold time */
+                ndelay(T_AH);
 
-		drv_generic_parport_control(SIGNAL_RW | SIGNAL_RS, 0);
-	    } else {
-		/* Lower EN */
-		drv_generic_parport_data(SIGNAL_RW ^ invert_data_bits);
-		ndelay(T_AH);
-		drv_generic_parport_data(0 ^ invert_data_bits);
-	    }
+                drv_generic_parport_control(SIGNAL_RW | SIGNAL_RS, 0);
+            } else {
+                /* Lower EN */
+                drv_generic_parport_data(SIGNAL_RW ^ invert_data_bits);
+                ndelay(T_AH);
+                drv_generic_parport_data(0 ^ invert_data_bits);
+            }
 
-	    /* set data-lines to output */
-	    drv_generic_parport_direction(0);
-	}
-	ctrlmask >>= 1;
+            /* set data-lines to output */
+            drv_generic_parport_direction(0);
+        }
+        ctrlmask >>= 1;
     }
 }
 
@@ -314,13 +314,13 @@ static void drv_HD_PP_nibble(const unsigned char controller, const unsigned char
     /* so we can send a byte to more controllers at the same time! */
     enable = 0;
     if (controller & 0x01)
-	enable |= SIGNAL_ENABLE;
+        enable |= SIGNAL_ENABLE;
     if (controller & 0x02)
-	enable |= SIGNAL_ENABLE2;
+        enable |= SIGNAL_ENABLE2;
     if (controller & 0x04)
-	enable |= SIGNAL_ENABLE3;
+        enable |= SIGNAL_ENABLE3;
     if (controller & 0x08)
-	enable |= SIGNAL_ENABLE4;
+        enable |= SIGNAL_ENABLE4;
 
     /* clear ENABLE */
     /* put data on DB1..DB4 */
@@ -359,44 +359,44 @@ static void drv_HD_PP_command(const unsigned char controller, const unsigned cha
     unsigned char enable;
 
     if (UseBusy)
-	drv_HD_PP_busy(controller);
+        drv_HD_PP_busy(controller);
 
     if (Bits == 8) {
 
-	/* enable signal: 'controller' is a bitmask */
-	/* bit n .. send to controller #n */
-	/* so we can send a byte to more controllers at the same time! */
-	enable = 0;
-	if (controller & 0x01)
-	    enable |= SIGNAL_ENABLE;
-	if (controller & 0x02)
-	    enable |= SIGNAL_ENABLE2;
-	if (controller & 0x04)
-	    enable |= SIGNAL_ENABLE3;
-	if (controller & 0x08)
-	    enable |= SIGNAL_ENABLE4;
+        /* enable signal: 'controller' is a bitmask */
+        /* bit n .. send to controller #n */
+        /* so we can send a byte to more controllers at the same time! */
+        enable = 0;
+        if (controller & 0x01)
+            enable |= SIGNAL_ENABLE;
+        if (controller & 0x02)
+            enable |= SIGNAL_ENABLE2;
+        if (controller & 0x04)
+            enable |= SIGNAL_ENABLE3;
+        if (controller & 0x08)
+            enable |= SIGNAL_ENABLE4;
 
-	/* put data on DB1..DB8 */
-	drv_generic_parport_data(cmd ^ invert_data_bits);
+        /* put data on DB1..DB8 */
+        drv_generic_parport_data(cmd ^ invert_data_bits);
 
-	/* clear RW and RS */
-	drv_generic_parport_control(SIGNAL_RW | SIGNAL_RS, 0);
+        /* clear RW and RS */
+        drv_generic_parport_control(SIGNAL_RW | SIGNAL_RS, 0);
 
-	/* Address set-up time */
-	ndelay(T_AS);
+        /* Address set-up time */
+        ndelay(T_AS);
 
-	/* send command */
-	drv_generic_parport_toggle(enable, 1, T_PW);
+        /* send command */
+        drv_generic_parport_toggle(enable, 1, T_PW);
 
     } else {
 
-	drv_HD_PP_byte(controller, cmd, 0);
+        drv_HD_PP_byte(controller, cmd, 0);
 
     }
 
     /* wait for command completion */
     if (!UseBusy)
-	udelay(delay);
+        udelay(delay);
 
 }
 
@@ -408,64 +408,64 @@ static void drv_HD_PP_data(const unsigned char controller, const char *string, c
 
     /* sanity check */
     if (len <= 0)
-	return;
+        return;
 
     if (Bits == 8) {
 
-	/* enable signal: 'controller' is a bitmask */
-	/* bit n .. send to controller #n */
-	/* so we can send a byte to more controllers at the same time! */
-	enable = 0;
-	if (controller & 0x01)
-	    enable |= SIGNAL_ENABLE;
-	if (controller & 0x02)
-	    enable |= SIGNAL_ENABLE2;
-	if (controller & 0x04)
-	    enable |= SIGNAL_ENABLE3;
-	if (controller & 0x08)
-	    enable |= SIGNAL_ENABLE4;
+        /* enable signal: 'controller' is a bitmask */
+        /* bit n .. send to controller #n */
+        /* so we can send a byte to more controllers at the same time! */
+        enable = 0;
+        if (controller & 0x01)
+            enable |= SIGNAL_ENABLE;
+        if (controller & 0x02)
+            enable |= SIGNAL_ENABLE2;
+        if (controller & 0x04)
+            enable |= SIGNAL_ENABLE3;
+        if (controller & 0x08)
+            enable |= SIGNAL_ENABLE4;
 
-	if (!UseBusy) {
-	    /* clear RW, set RS */
-	    drv_generic_parport_control(SIGNAL_RW | SIGNAL_RS, SIGNAL_RS);
-	    /* Address set-up time */
-	    ndelay(T_AS);
-	}
+        if (!UseBusy) {
+            /* clear RW, set RS */
+            drv_generic_parport_control(SIGNAL_RW | SIGNAL_RS, SIGNAL_RS);
+            /* Address set-up time */
+            ndelay(T_AS);
+        }
 
-	while (l--) {
+        while (l--) {
 
-	    if (UseBusy) {
-		drv_HD_PP_busy(controller);
-		/* clear RW, set RS */
-		drv_generic_parport_control(SIGNAL_RW | SIGNAL_RS, SIGNAL_RS);
-		/* Address set-up time */
-		ndelay(T_AS);
-	    }
+            if (UseBusy) {
+                drv_HD_PP_busy(controller);
+                /* clear RW, set RS */
+                drv_generic_parport_control(SIGNAL_RW | SIGNAL_RS, SIGNAL_RS);
+                /* Address set-up time */
+                ndelay(T_AS);
+            }
 
-	    /* put data on DB1..DB8 */
-	    drv_generic_parport_data((*(string++)) ^ invert_data_bits);
+            /* put data on DB1..DB8 */
+            drv_generic_parport_data((*(string++)) ^ invert_data_bits);
 
-	    /* send command */
-	    drv_generic_parport_toggle(enable, 1, T_PW);
+            /* send command */
+            drv_generic_parport_toggle(enable, 1, T_PW);
 
-	    /* wait for command completion */
-	    if (!UseBusy)
-		udelay(delay);
-	}
+            /* wait for command completion */
+            if (!UseBusy)
+                udelay(delay);
+        }
 
-    } else {			/* 4 bit mode */
+    } else {                    /* 4 bit mode */
 
-	while (l--) {
-	    if (UseBusy)
-		drv_HD_PP_busy(controller);
+        while (l--) {
+            if (UseBusy)
+                drv_HD_PP_busy(controller);
 
-	    /* send data with RS enabled */
-	    drv_HD_PP_byte(controller, *(string++), SIGNAL_RS);
+            /* send data with RS enabled */
+            drv_HD_PP_byte(controller, *(string++), SIGNAL_RS);
 
-	    /* wait for command completion */
-	    if (!UseBusy)
-		udelay(delay);
-	}
+            /* wait for command completion */
+            if (!UseBusy)
+                udelay(delay);
+        }
     }
 }
 
@@ -473,94 +473,94 @@ static void drv_HD_PP_data(const unsigned char controller, const char *string, c
 static int drv_HD_PP_load(const char *section)
 {
     if (cfg_number(section, "Bits", 8, 4, 8, &Bits) < 0)
-	return -1;
+        return -1;
 
     if (Bits != 4 && Bits != 8) {
-	error("%s: bad %s.Bits '%d' from %s, should be '4' or '8'", Name, section, Bits, cfg_source());
-	return -1;
+        error("%s: bad %s.Bits '%d' from %s, should be '4' or '8'", Name, section, Bits, cfg_source());
+        return -1;
     }
 
     /* LCM-162 only supports 8-bit-mode */
     if (Capabilities & CAP_LCM162 && Bits != 8) {
-	error("%s: Model '%s' does not support %d bit mode!", Name, Models[Model].name, Bits);
-	Bits = 8;
+        error("%s: Model '%s' does not support %d bit mode!", Name, Models[Model].name, Bits);
+        Bits = 8;
     }
     info("%s: using %d bit mode", Name, Bits);
 
     if (drv_generic_parport_open(section, Name) != 0) {
-	error("%s: could not initialize parallel port!", Name);
-	return -1;
+        error("%s: could not initialize parallel port!", Name);
+        return -1;
     }
 
     /* Soft-Wiring */
     if (Capabilities & CAP_LCM162) {
-	/* the LCM-162 is hardwired */
-	if ((SIGNAL_RS = drv_generic_parport_hardwire_ctrl("RS", "SLCTIN")) == 0xff)
-	    return -1;
-	if ((SIGNAL_RW = drv_generic_parport_hardwire_ctrl("RW", "INIT")) == 0xff)
-	    return -1;
-	if ((SIGNAL_ENABLE = drv_generic_parport_hardwire_ctrl("ENABLE", "AUTOFD")) == 0xff)
-	    return -1;
-	if ((SIGNAL_ENABLE2 = drv_generic_parport_hardwire_ctrl("ENABLE2", "GND")) == 0xff)
-	    return -1;
-	if ((SIGNAL_ENABLE3 = drv_generic_parport_hardwire_ctrl("ENABLE3", "GND")) == 0xff)
-	    return -1;
-	if ((SIGNAL_ENABLE4 = drv_generic_parport_hardwire_ctrl("ENABLE4", "GND")) == 0xff)
-	    return -1;
-	if ((SIGNAL_BACKLIGHT = drv_generic_parport_hardwire_ctrl("BACKLIGHT", "GND")) == 0xff)
-	    return -1;
-	if ((SIGNAL_GPO = drv_generic_parport_hardwire_ctrl("GPO", "GND")) == 0xff)
-	    return -1;
-	if ((SIGNAL_POWER = drv_generic_parport_hardwire_ctrl("POWER", "GND")) == 0xff)
-	    return -1;
+        /* the LCM-162 is hardwired */
+        if ((SIGNAL_RS = drv_generic_parport_hardwire_ctrl("RS", "SLCTIN")) == 0xff)
+            return -1;
+        if ((SIGNAL_RW = drv_generic_parport_hardwire_ctrl("RW", "INIT")) == 0xff)
+            return -1;
+        if ((SIGNAL_ENABLE = drv_generic_parport_hardwire_ctrl("ENABLE", "AUTOFD")) == 0xff)
+            return -1;
+        if ((SIGNAL_ENABLE2 = drv_generic_parport_hardwire_ctrl("ENABLE2", "GND")) == 0xff)
+            return -1;
+        if ((SIGNAL_ENABLE3 = drv_generic_parport_hardwire_ctrl("ENABLE3", "GND")) == 0xff)
+            return -1;
+        if ((SIGNAL_ENABLE4 = drv_generic_parport_hardwire_ctrl("ENABLE4", "GND")) == 0xff)
+            return -1;
+        if ((SIGNAL_BACKLIGHT = drv_generic_parport_hardwire_ctrl("BACKLIGHT", "GND")) == 0xff)
+            return -1;
+        if ((SIGNAL_GPO = drv_generic_parport_hardwire_ctrl("GPO", "GND")) == 0xff)
+            return -1;
+        if ((SIGNAL_POWER = drv_generic_parport_hardwire_ctrl("POWER", "GND")) == 0xff)
+            return -1;
     } else {
-	if (Bits == 8) {
-	    if ((SIGNAL_RS = drv_generic_parport_wire_ctrl("RS", "AUTOFD")) == 0xff)
-		return -1;
-	    if ((SIGNAL_RW = drv_generic_parport_wire_ctrl("RW", "GND")) == 0xff)
-		return -1;
-	    if ((SIGNAL_ENABLE = drv_generic_parport_wire_ctrl("ENABLE", "STROBE")) == 0xff)
-		return -1;
-	    if ((SIGNAL_ENABLE2 = drv_generic_parport_wire_ctrl("ENABLE2", "GND")) == 0xff)
-		return -1;
-	    if ((SIGNAL_ENABLE3 = drv_generic_parport_wire_ctrl("ENABLE3", "GND")) == 0xff)
-		return -1;
-	    if ((SIGNAL_ENABLE4 = drv_generic_parport_wire_ctrl("ENABLE4", "GND")) == 0xff)
-		return -1;
-	} else {
-	    if ((SIGNAL_RS = drv_generic_parport_wire_data("RS", "DB4")) == 0xff)
-		return -1;
-	    if ((SIGNAL_RW = drv_generic_parport_wire_data("RW", "DB5")) == 0xff)
-		return -1;
-	    if ((SIGNAL_ENABLE = drv_generic_parport_wire_data("ENABLE", "DB6")) == 0xff)
-		return -1;
-	    if ((SIGNAL_ENABLE2 = drv_generic_parport_wire_data("ENABLE2", "GND")) == 0xff)
-		return -1;
-	    if ((SIGNAL_ENABLE3 = drv_generic_parport_wire_data("ENABLE3", "GND")) == 0xff)
-		return -1;
-	    if ((SIGNAL_ENABLE4 = drv_generic_parport_wire_data("ENABLE4", "GND")) == 0xff)
-		return -1;
-	}
-	/* backlight GPO and power are always control signals */
-	if ((SIGNAL_BACKLIGHT = drv_generic_parport_wire_ctrl("BACKLIGHT", "GND")) == 0xff)
-	    return -1;
-	if ((SIGNAL_GPO = drv_generic_parport_wire_ctrl("GPO", "GND")) == 0xff)
-	    return -1;
-	if ((SIGNAL_GPI = drv_generic_parport_wire_ctrl("GPI", "GND")) == 0xff)
-	    return -1;
-	if ((SIGNAL_POWER = drv_generic_parport_wire_ctrl("POWER", "GND")) == 0xff)
-	    return -1;
+        if (Bits == 8) {
+            if ((SIGNAL_RS = drv_generic_parport_wire_ctrl("RS", "AUTOFD")) == 0xff)
+                return -1;
+            if ((SIGNAL_RW = drv_generic_parport_wire_ctrl("RW", "GND")) == 0xff)
+                return -1;
+            if ((SIGNAL_ENABLE = drv_generic_parport_wire_ctrl("ENABLE", "STROBE")) == 0xff)
+                return -1;
+            if ((SIGNAL_ENABLE2 = drv_generic_parport_wire_ctrl("ENABLE2", "GND")) == 0xff)
+                return -1;
+            if ((SIGNAL_ENABLE3 = drv_generic_parport_wire_ctrl("ENABLE3", "GND")) == 0xff)
+                return -1;
+            if ((SIGNAL_ENABLE4 = drv_generic_parport_wire_ctrl("ENABLE4", "GND")) == 0xff)
+                return -1;
+        } else {
+            if ((SIGNAL_RS = drv_generic_parport_wire_data("RS", "DB4")) == 0xff)
+                return -1;
+            if ((SIGNAL_RW = drv_generic_parport_wire_data("RW", "DB5")) == 0xff)
+                return -1;
+            if ((SIGNAL_ENABLE = drv_generic_parport_wire_data("ENABLE", "DB6")) == 0xff)
+                return -1;
+            if ((SIGNAL_ENABLE2 = drv_generic_parport_wire_data("ENABLE2", "GND")) == 0xff)
+                return -1;
+            if ((SIGNAL_ENABLE3 = drv_generic_parport_wire_data("ENABLE3", "GND")) == 0xff)
+                return -1;
+            if ((SIGNAL_ENABLE4 = drv_generic_parport_wire_data("ENABLE4", "GND")) == 0xff)
+                return -1;
+        }
+        /* backlight GPO and power are always control signals */
+        if ((SIGNAL_BACKLIGHT = drv_generic_parport_wire_ctrl("BACKLIGHT", "GND")) == 0xff)
+            return -1;
+        if ((SIGNAL_GPO = drv_generic_parport_wire_ctrl("GPO", "GND")) == 0xff)
+            return -1;
+        if ((SIGNAL_GPI = drv_generic_parport_wire_ctrl("GPI", "GND")) == 0xff)
+            return -1;
+        if ((SIGNAL_POWER = drv_generic_parport_wire_ctrl("POWER", "GND")) == 0xff)
+            return -1;
     }
 
     /* clear capabilities if corresponding signal is GND */
     if (SIGNAL_BACKLIGHT == 0) {
-	Capabilities &= ~CAP_BACKLIGHT;
+        Capabilities &= ~CAP_BACKLIGHT;
     }
     if (SIGNAL_GPO == 0) {
-	Capabilities &= ~CAP_GPO;
+        Capabilities &= ~CAP_GPO;
     }
     if (SIGNAL_GPI == 0) {
-	Capabilities &= ~CAP_GPI;
+        Capabilities &= ~CAP_GPI;
     }
 
     /* Timings */
@@ -570,18 +570,18 @@ static int drv_HD_PP_load(const char *section)
      * we use the worst-case default values, but allow
      * modification from the config file.
      */
-    T_CY = timing(Name, section, "CY", 1000, "ns");	/* Enable cycle time */
-    T_PW = timing(Name, section, "PW", 450, "ns");	/* Enable pulse width */
-    T_AS = timing(Name, section, "AS", 140, "ns");	/* Address setup time */
-    T_AH = timing(Name, section, "AH", 20, "ns");	/* Address hold time */
+    T_CY = timing(Name, section, "CY", 1000, "ns");     /* Enable cycle time */
+    T_PW = timing(Name, section, "PW", 450, "ns");      /* Enable pulse width */
+    T_AS = timing(Name, section, "AS", 140, "ns");      /* Address setup time */
+    T_AH = timing(Name, section, "AH", 20, "ns");       /* Address hold time */
 
     /* GPO timing */
     if (SIGNAL_GPO != 0) {
-	T_GPO_ST = timing(Name, section, "GPO_ST", 20, "ns");	/* 74HCT573 set-up time */
-	T_GPO_PW = timing(Name, section, "GPO_PW", 230, "ns");	/* 74HCT573 enable pulse width */
+        T_GPO_ST = timing(Name, section, "GPO_ST", 20, "ns");   /* 74HCT573 set-up time */
+        T_GPO_PW = timing(Name, section, "GPO_PW", 230, "ns");  /* 74HCT573 enable pulse width */
     } else {
-	T_GPO_ST = 0;
-	T_GPO_PW = 0;
+        T_GPO_ST = 0;
+        T_GPO_PW = 0;
     }
 
     /* HD44780 execution timings [microseconds]
@@ -589,29 +589,29 @@ static int drv_HD_PP_load(const char *section)
      * we use the worst-case default values, but allow
      * modification from the config file.
      */
-    T_INIT1 = timing(Name, section, "INIT1", 4100, "us");	/* first init sequence: 4.1 msec */
-    T_INIT2 = timing(Name, section, "INIT2", 100, "us");	/* second init sequence: 100 usec */
-    T_EXEC = timing(Name, section, "EXEC", 80, "us");	/* normal execution time */
-    T_WRCG = timing(Name, section, "WRCG", 120, "us");	/* CG RAM Write */
-    T_CLEAR = timing(Name, section, "CLEAR", 2250, "us");	/* Clear Display */
-    T_HOME = timing(Name, section, "HOME", 2250, "us");	/* Return Cursor Home */
-    T_ONOFF = timing(Name, section, "ONOFF", 2250, "us");	/* Display On/Off Control */
+    T_INIT1 = timing(Name, section, "INIT1", 4100, "us");       /* first init sequence: 4.1 msec */
+    T_INIT2 = timing(Name, section, "INIT2", 100, "us");        /* second init sequence: 100 usec */
+    T_EXEC = timing(Name, section, "EXEC", 80, "us");   /* normal execution time */
+    T_WRCG = timing(Name, section, "WRCG", 120, "us");  /* CG RAM Write */
+    T_CLEAR = timing(Name, section, "CLEAR", 2250, "us");       /* Clear Display */
+    T_HOME = timing(Name, section, "HOME", 2250, "us"); /* Return Cursor Home */
+    T_ONOFF = timing(Name, section, "ONOFF", 2250, "us");       /* Display On/Off Control */
 
     /* Power-on delay */
     if (SIGNAL_POWER != 0) {
-	T_POWER = timing(Name, section, "POWER", 500, "ms");
+        T_POWER = timing(Name, section, "POWER", 500, "ms");
     } else {
-	T_POWER = 0;
+        T_POWER = 0;
     }
 
     /* clear all signals */
     if (Bits == 8) {
-	drv_generic_parport_control(SIGNAL_RS | SIGNAL_RW |
-				    SIGNAL_ENABLE | SIGNAL_ENABLE2 | SIGNAL_ENABLE3 | SIGNAL_ENABLE4 |
-				    SIGNAL_BACKLIGHT | SIGNAL_GPO | SIGNAL_POWER, 0);
+        drv_generic_parport_control(SIGNAL_RS | SIGNAL_RW |
+                                    SIGNAL_ENABLE | SIGNAL_ENABLE2 | SIGNAL_ENABLE3 | SIGNAL_ENABLE4 |
+                                    SIGNAL_BACKLIGHT | SIGNAL_GPO | SIGNAL_POWER, 0);
     } else {
-	drv_generic_parport_control(SIGNAL_BACKLIGHT | SIGNAL_GPO | SIGNAL_POWER, 0);
-	drv_generic_parport_data(0 ^ invert_data_bits);
+        drv_generic_parport_control(SIGNAL_BACKLIGHT | SIGNAL_GPO | SIGNAL_POWER, 0);
+        drv_generic_parport_data(0 ^ invert_data_bits);
     }
 
     /* set direction: write */
@@ -619,25 +619,25 @@ static int drv_HD_PP_load(const char *section)
 
     /* raise power pin */
     if (SIGNAL_POWER != 0) {
-	drv_generic_parport_control(SIGNAL_POWER, SIGNAL_POWER);
-	udelay(1000 * T_POWER);
+        drv_generic_parport_control(SIGNAL_POWER, SIGNAL_POWER);
+        udelay(1000 * T_POWER);
     }
 
     /* initialize *all* controllers */
     if (Bits == 8) {
-	drv_HD_PP_command(allControllers, 0x30, T_INIT1);	/* 8 Bit mode, wait 4.1 ms */
-	drv_HD_PP_command(allControllers, 0x30, T_INIT2);	/* 8 Bit mode, wait 100 us */
-	drv_HD_PP_command(allControllers, 0x38, T_EXEC);	/* 8 Bit mode, 1/16 duty cycle, 5x8 font */
+        drv_HD_PP_command(allControllers, 0x30, T_INIT1);       /* 8 Bit mode, wait 4.1 ms */
+        drv_HD_PP_command(allControllers, 0x30, T_INIT2);       /* 8 Bit mode, wait 100 us */
+        drv_HD_PP_command(allControllers, 0x38, T_EXEC);        /* 8 Bit mode, 1/16 duty cycle, 5x8 font */
     } else {
-	drv_HD_PP_nibble(allControllers, 0x03);
-	udelay(T_INIT1);	/* 4 Bit mode, wait 4.1 ms */
-	drv_HD_PP_nibble(allControllers, 0x03);
-	udelay(T_INIT2);	/* 4 Bit mode, wait 100 us */
-	drv_HD_PP_nibble(allControllers, 0x03);
-	udelay(T_INIT1);	/* 4 Bit mode, wait 4.1 ms */
-	drv_HD_PP_nibble(allControllers, 0x02);
-	udelay(T_INIT2);	/* 4 Bit mode, wait 100 us */
-	drv_HD_PP_command(allControllers, 0x28, T_EXEC);	/* 4 Bit mode, 1/16 duty cycle, 5x8 font */
+        drv_HD_PP_nibble(allControllers, 0x03);
+        udelay(T_INIT1);        /* 4 Bit mode, wait 4.1 ms */
+        drv_HD_PP_nibble(allControllers, 0x03);
+        udelay(T_INIT2);        /* 4 Bit mode, wait 100 us */
+        drv_HD_PP_nibble(allControllers, 0x03);
+        udelay(T_INIT1);        /* 4 Bit mode, wait 4.1 ms */
+        drv_HD_PP_nibble(allControllers, 0x02);
+        udelay(T_INIT2);        /* 4 Bit mode, wait 100 us */
+        drv_HD_PP_command(allControllers, 0x28, T_EXEC);        /* 4 Bit mode, 1/16 duty cycle, 5x8 font */
     }
 
     /* maybe use busy-flag from now on  */
@@ -646,23 +646,23 @@ static int drv_HD_PP_load(const char *section)
 
     /* make sure we don't use the busy flag with RW wired to GND */
     if (UseBusy && !SIGNAL_RW) {
-	error("%s: busy-flag checking is impossible with RW wired to GND!", Name);
-	UseBusy = 0;
+        error("%s: busy-flag checking is impossible with RW wired to GND!", Name);
+        UseBusy = 0;
     }
 
     /* make sure the display supports busy-flag checking in 4-Bit-Mode */
     /* at the moment this is inly possible with Martin Hejl's gpio driver, */
     /* which allows to use 4 bits as input and 4 bits as output */
     if (UseBusy && Bits == 4 && !(Capabilities & CAP_BUSY4BIT)) {
-	error("%s: Model '%s' does not support busy-flag checking in 4 bit mode", Name, Models[Model].name);
-	UseBusy = 0;
+        error("%s: Model '%s' does not support busy-flag checking in 4 bit mode", Name, Models[Model].name);
+        UseBusy = 0;
     }
 
     info("%s: %susing busy-flag checking", Name, UseBusy ? "" : "not ");
 
     /* The LCM-162 should really use BusyFlag checking */
     if (!UseBusy && (Capabilities & CAP_LCM162)) {
-	error("%s: Model '%s' should definitely use busy-flag checking!", Name, Models[Model].name);
+        error("%s: Model '%s' should definitely use busy-flag checking!", Name, Models[Model].name);
     }
 
     return 0;
@@ -673,12 +673,12 @@ static void drv_HD_PP_stop(void)
 {
     /* clear all signals */
     if (Bits == 8) {
-	drv_generic_parport_control(SIGNAL_RS |
-				    SIGNAL_RW | SIGNAL_ENABLE | SIGNAL_ENABLE2 | SIGNAL_ENABLE3 | SIGNAL_ENABLE4 |
-				    SIGNAL_BACKLIGHT | SIGNAL_GPO, 0);
+        drv_generic_parport_control(SIGNAL_RS |
+                                    SIGNAL_RW | SIGNAL_ENABLE | SIGNAL_ENABLE2 | SIGNAL_ENABLE3 | SIGNAL_ENABLE4 |
+                                    SIGNAL_BACKLIGHT | SIGNAL_GPO, 0);
     } else {
-	drv_generic_parport_data(0 ^ invert_data_bits);
-	drv_generic_parport_control(SIGNAL_BACKLIGHT | SIGNAL_GPO | SIGNAL_POWER, 0);
+        drv_generic_parport_data(0 ^ invert_data_bits);
+        drv_generic_parport_control(SIGNAL_BACKLIGHT | SIGNAL_GPO | SIGNAL_POWER, 0);
     }
 
     drv_generic_parport_close();
@@ -709,20 +709,20 @@ static void drv_HD_PP_stop(void)
 static void drv_HD_I2C(unsigned char controller, unsigned char byte, int rs, int rw)
 {
     unsigned char enable;
-    unsigned char command = 0;	/* this is actually the first data byte on the PCF8574 */
+    unsigned char command = 0;  /* this is actually the first data byte on the PCF8574 */
     unsigned char data_block[2];
     /* enable signal: 'controller' is a bitmask */
     /* bit n .. send to controller #n */
     /* so we can send a byte to more controllers at the same time! */
     enable = 0;
     if (controller & 0x01)
-	enable |= SIGNAL_ENABLE;
+        enable |= SIGNAL_ENABLE;
     if (controller & 0x02)
-	enable |= SIGNAL_ENABLE2;
+        enable |= SIGNAL_ENABLE2;
     if (controller & 0x04)
-	enable |= SIGNAL_ENABLE3;
+        enable |= SIGNAL_ENABLE3;
     if (controller & 0x08)
-	enable |= SIGNAL_ENABLE4;
+        enable |= SIGNAL_ENABLE4;
 
     /*
        The new method Paul Kamphuis has concocted places the 3 needed writes to the I2C device
@@ -739,22 +739,22 @@ static void drv_HD_I2C(unsigned char controller, unsigned char byte, int rs, int
      */
 
     if (Bits == 4) {
-	if (rw)
-	    byte |= SIGNAL_RW;
-	if (rs)
-	    byte |= SIGNAL_RS;
-	command = byte;
-	data_block[0] = byte | enable;
-	data_block[1] = byte;
+        if (rw)
+            byte |= SIGNAL_RW;
+        if (rs)
+            byte |= SIGNAL_RS;
+        command = byte;
+        data_block[0] = byte | enable;
+        data_block[1] = byte;
 
     } else if (Bits == 8) {
-	if (rw)
-	    command |= SIGNAL_RW;
-	if (rs)
-	    command |= SIGNAL_RS;
+        if (rw)
+            command |= SIGNAL_RW;
+        if (rs)
+            command |= SIGNAL_RS;
 
-	data_block[0] = byte;
-	data_block[1] = enable;
+        data_block[0] = byte;
+        data_block[1] = enable;
     }
 
     drv_generic_i2c_command(command, data_block, 2, Bits);
@@ -765,37 +765,37 @@ static void drv_HD_I2C_byte(const unsigned char controller, const unsigned char 
 {
     /* send data with RS enabled */
     if (Bits == 4) {
-	drv_HD_I2C(controller, ((data >> 4) & 0x0f), 1, 0);
-	drv_HD_I2C(controller, (data & 0x0f), 1, 0);
+        drv_HD_I2C(controller, ((data >> 4) & 0x0f), 1, 0);
+        drv_HD_I2C(controller, (data & 0x0f), 1, 0);
     } else if (Bits == 8) {
-	drv_HD_I2C(controller, data, 1, 0);
+        drv_HD_I2C(controller, data, 1, 0);
     }
 }
 
 
-static void drv_HD_I2C_command(const unsigned char controller, const unsigned char cmd, __attribute__ ((unused))
-			       const unsigned long delay)
+static void drv_HD_I2C_command(const unsigned char controller, const unsigned char cmd, __attribute__((unused))
+                               const unsigned long delay)
 {
     /* send command data with RS disabled */
     if (Bits == 4) {
-	drv_HD_I2C(controller, ((cmd >> 4) & 0x0f), 0, 0);
-	drv_HD_I2C(controller, ((cmd) & 0x0f), 0, 0);
+        drv_HD_I2C(controller, ((cmd >> 4) & 0x0f), 0, 0);
+        drv_HD_I2C(controller, ((cmd) & 0x0f), 0, 0);
     } else if (Bits == 8) {
-	drv_HD_I2C(controller, cmd, 0, 0);
+        drv_HD_I2C(controller, cmd, 0, 0);
     }
 }
 
-static void drv_HD_I2C_data(const unsigned char controller, const char *string, const int len, __attribute__ ((unused))
-			    const unsigned long delay)
+static void drv_HD_I2C_data(const unsigned char controller, const char *string, const int len, __attribute__((unused))
+                            const unsigned long delay)
 {
     int l = len;
 
     /* sanity check */
     if (len <= 0)
-	return;
+        return;
 
     while (l--) {
-	drv_HD_I2C_byte(controller, *(string++));
+        drv_HD_I2C_byte(controller, *(string++));
     }
 }
 
@@ -803,48 +803,48 @@ static void drv_HD_I2C_data(const unsigned char controller, const char *string, 
 static int drv_HD_I2C_load(const char *section)
 {
     if (cfg_number(section, "Bits", 8, 4, 8, &Bits) < 0)
-	return -1;
+        return -1;
 
     info("%s: using %d bit mode", Name, Bits);
 
     if (Bits != 4 && Bits != 8) {
-	error("%s: bad %s.Bits '%d' from %s, should be '4' or '8'", Name, section, Bits, cfg_source());
-	return -1;
+        error("%s: bad %s.Bits '%d' from %s, should be '4' or '8'", Name, section, Bits, cfg_source());
+        return -1;
     }
 
     if (drv_generic_i2c_open(section, Name) != 0) {
-	error("%s: could not initialize i2c attached device!", Name);
-	return -1;
+        error("%s: could not initialize i2c attached device!", Name);
+        return -1;
     }
 
     if ((SIGNAL_RS = drv_generic_i2c_wire("RS", "DB4")) == 0xff)
-	return -1;
+        return -1;
     if ((SIGNAL_RW = drv_generic_i2c_wire("RW", "DB5")) == 0xff)
-	return -1;
+        return -1;
     if ((SIGNAL_ENABLE = drv_generic_i2c_wire("ENABLE", "DB6")) == 0xff)
-	return -1;
+        return -1;
     if ((SIGNAL_ENABLE2 = drv_generic_i2c_wire("ENABLE2", "GND")) == 0xff)
-	return -1;
+        return -1;
     if ((SIGNAL_GPO = drv_generic_i2c_wire("GPO", "GND")) == 0xff)
-	return -1;
+        return -1;
 
     if (Bits == 4) {
-	/* initialize display */
-	drv_HD_I2C(allControllers, 0x02, 0, 0);
-	udelay(T_INIT1);	/* 4 Bit mode, wait 4.1 ms */
-	drv_HD_I2C(allControllers, 0x03, 0, 0);
-	udelay(T_INIT2);	/* 4 Bit mode, wait 100 us */
-	drv_HD_I2C(allControllers, 0x03, 0, 0);
-	udelay(T_INIT1);	/* 4 Bit mode, wait 4.1 ms */
-	drv_HD_I2C(allControllers, 0x02, 0, 0);
-	udelay(T_INIT2);	/* 4 Bit mode, wait 100 us */
-	drv_HD_I2C_command(allControllers, 0x28, T_EXEC);	/* 4 Bit mode, 1/16 duty cycle, 5x8 font */
+        /* initialize display */
+        drv_HD_I2C(allControllers, 0x02, 0, 0);
+        udelay(T_INIT1);        /* 4 Bit mode, wait 4.1 ms */
+        drv_HD_I2C(allControllers, 0x03, 0, 0);
+        udelay(T_INIT2);        /* 4 Bit mode, wait 100 us */
+        drv_HD_I2C(allControllers, 0x03, 0, 0);
+        udelay(T_INIT1);        /* 4 Bit mode, wait 4.1 ms */
+        drv_HD_I2C(allControllers, 0x02, 0, 0);
+        udelay(T_INIT2);        /* 4 Bit mode, wait 100 us */
+        drv_HD_I2C_command(allControllers, 0x28, T_EXEC);       /* 4 Bit mode, 1/16 duty cycle, 5x8 font */
     } else if (Bits == 8) {
-	drv_HD_I2C(allControllers, 0x30, 0, 0);	/* 8 Bit mode, wait 4.1 ms */
-	udelay(T_INIT1);	/* 8 Bit mode, wait 4.1 ms */
-	drv_HD_I2C(allControllers, 0x30, 0, 0);	/* 8 Bit mode, wait 100 us */
-	udelay(T_INIT2);	/* 8 Bit mode, wait 4.1 ms */
-	drv_HD_I2C_command(allControllers, 0x38, T_EXEC);	/* 8 Bit mode, 1/16 duty cycle, 5x8 font */
+        drv_HD_I2C(allControllers, 0x30, 0, 0); /* 8 Bit mode, wait 4.1 ms */
+        udelay(T_INIT1);        /* 8 Bit mode, wait 4.1 ms */
+        drv_HD_I2C(allControllers, 0x30, 0, 0); /* 8 Bit mode, wait 100 us */
+        udelay(T_INIT2);        /* 8 Bit mode, wait 4.1 ms */
+        drv_HD_I2C_command(allControllers, 0x38, T_EXEC);       /* 8 Bit mode, 1/16 duty cycle, 5x8 font */
     }
 
     info("%s: I2C initialization done", Name);
@@ -864,7 +864,7 @@ static void drv_HD_I2C_stop(void)
 
 /* END OF DISCLAIMER */
 
-#endif				/* WITH_I2C */
+#endif                          /* WITH_I2C */
 
 
 /****************************************/
@@ -873,7 +873,7 @@ static void drv_HD_I2C_stop(void)
 
 static void drv_HD_clear(void)
 {
-    drv_HD_command(allControllers, 0x01, T_CLEAR);	/* clear *all* displays */
+    drv_HD_command(allControllers, 0x01, T_CLEAR);      /* clear *all* displays */
 }
 
 
@@ -883,39 +883,39 @@ static int drv_HD_goto(int row, int col)
 
     /* handle multiple controllers */
     for (pos = 0, controller = 0; controller < numControllers; controller++) {
-	pos += CROWS[controller];
-	if (row < pos) {
-	    currController = (1 << controller);
-	    break;
-	}
-	row -= CROWS[controller];
+        pos += CROWS[controller];
+        if (row < pos) {
+            currController = (1 << controller);
+            break;
+        }
+        row -= CROWS[controller];
     }
 
     /* column outside of current display's width */
     if (col >= CCOLS[controller])
-	return -1;
+        return -1;
 
     if (0) {
-	debug("goto: [%d,%d] mask=%d, controller=%d, size:%dx%d", row, col, currController, controller,
-	      CROWS[controller], CCOLS[controller]);
+        debug("goto: [%d,%d] mask=%d, controller=%d, size:%dx%d", row, col, currController, controller,
+              CROWS[controller], CCOLS[controller]);
     }
 
     /* 16x1 Displays are organized as 8x2 :-( */
     if (CCOLS[controller] == 16 && CROWS[controller] == 1 && col > 7) {
-	row++;
-	col -= 8;
+        row++;
+        col -= 8;
     }
 
     if (Capabilities & CAP_HD66712) {
-	/* the HD66712 doesn't have a braindamadged RAM layout */
-	pos = row * 32 + col;
+        /* the HD66712 doesn't have a braindamadged RAM layout */
+        pos = row * 32 + col;
     } else {
-	/* 16x4 Controllers use a slightly different layout */
-	if (CCOLS[controller] == 16 && CROWS[controller] == 4) {
-	    pos = (row % 2) * 64 + (row / 2) * 16 + col;
-	} else {
-	    pos = (row % 2) * 64 + (row / 2) * 20 + col;
-	}
+        /* 16x4 Controllers use a slightly different layout */
+        if (CCOLS[controller] == 16 && CROWS[controller] == 4) {
+            pos = (row % 2) * 64 + (row / 2) * 16 + col;
+        } else {
+            pos = (row % 2) * 64 + (row / 2) * 20 + col;
+        }
     }
     drv_HD_command(currController, (0x80 | pos), T_EXEC);
 
@@ -929,7 +929,7 @@ static void drv_HD_write(const int row, const int col, const char *data, const i
 {
     int space = drv_HD_goto(row, col);
     if (space > 0) {
-	drv_HD_data(currController, data, len > space ? space : len, T_EXEC);
+        drv_HD_data(currController, data, len > space ? space : len, T_EXEC);
     }
 }
 
@@ -940,7 +940,7 @@ static void drv_HD_defchar(const int ascii, const unsigned char *matrix)
     char buffer[8];
 
     for (i = 0; i < 8; i++) {
-	buffer[i] = matrix[i] & 0x1f;
+        buffer[i] = matrix[i] & 0x1f;
     }
 
     /* define chars on *all* controllers! */
@@ -954,12 +954,12 @@ static void drv_HD_defchar(const int ascii, const unsigned char *matrix)
 static int drv_HD_backlight(int backlight)
 {
     if (!(Capabilities & CAP_BACKLIGHT))
-	return -1;
+        return -1;
 
     if (backlight < 0)
-	backlight = 0;
+        backlight = 0;
     if (backlight > 1)
-	backlight = 1;
+        backlight = 1;
 
     drv_generic_parport_control(SIGNAL_BACKLIGHT, backlight ? SIGNAL_BACKLIGHT : 0);
 
@@ -974,17 +974,17 @@ static int drv_HD_brightness(int brightness)
     char cmd;
 
     if (!(Capabilities & CAP_BRIGHTNESS))
-	return -1;
+        return -1;
 
     if (brightness < 0)
-	brightness = 0;
+        brightness = 0;
     if (brightness > 3)
-	brightness = 3;
+        brightness = 3;
 
     cmd = '0' + brightness;
 
-    drv_HD_command(allControllers, 0x38, T_EXEC);	/* enable function */
-    drv_HD_data(allControllers, &cmd, 1, T_WRCG);	/* set brightness */
+    drv_HD_command(allControllers, 0x38, T_EXEC);       /* enable function */
+    drv_HD_data(allControllers, &cmd, 1, T_WRCG);       /* set brightness */
 
     return brightness;
 }
@@ -997,13 +997,13 @@ static int drv_HD_GPO(const int num, const int val)
     int v;
 
     if (val > 0) {
-	/* set bit */
-	v = 1;
-	GPO |= 1 << num;
+        /* set bit */
+        v = 1;
+        GPO |= 1 << num;
     } else {
-	/* clear bit */
-	v = 0;
-	GPO &= ~(1 << num);
+        /* clear bit */
+        v = 0;
+        GPO &= ~(1 << num);
     }
 
     /* put data on DB1..DB8 */
@@ -1051,7 +1051,7 @@ static int drv_HD_LCM162_keypad_handler(const int num)
     return num;
 }
 
-static void drv_HD_LCM162_timer(void __attribute__ ((unused)) * notused)
+static void drv_HD_LCM162_timer(void __attribute__((unused)) * notused)
 {
     static unsigned char data = 0x00;
 
@@ -1070,32 +1070,32 @@ static void drv_HD_LCM162_timer(void __attribute__ ((unused)) * notused)
     temp = drv_generic_parport_status() & mask;
 
     if (data != temp) {
-	data = temp;
+        data = temp;
 
-	int KEYPAD_VAL = 0;
-	keynum = (data & mask3 ? 1 : 0) + (data & mask5 ? 2 : 0);
-	switch (keynum) {
-	default:
-	case 0:
-	    KEYPAD_VAL = WIDGET_KEY_CANCEL;
-	    break;
-	case 1:
-	    KEYPAD_VAL = WIDGET_KEY_UP;
-	    break;
-	case 2:
-	    KEYPAD_VAL = WIDGET_KEY_CONFIRM;
-	    break;
-	case 3:
-	    KEYPAD_VAL = WIDGET_KEY_DOWN;
-	    break;
-	}
+        int KEYPAD_VAL = 0;
+        keynum = (data & mask3 ? 1 : 0) + (data & mask5 ? 2 : 0);
+        switch (keynum) {
+        default:
+        case 0:
+            KEYPAD_VAL = WIDGET_KEY_CANCEL;
+            break;
+        case 1:
+            KEYPAD_VAL = WIDGET_KEY_UP;
+            break;
+        case 2:
+            KEYPAD_VAL = WIDGET_KEY_CONFIRM;
+            break;
+        case 3:
+            KEYPAD_VAL = WIDGET_KEY_DOWN;
+            break;
+        }
 
-	updown = (data & mask6 ? 1 : 0);
-	KEYPAD_VAL += updown ? WIDGET_KEY_PRESSED : WIDGET_KEY_RELEASED;
+        updown = (data & mask6 ? 1 : 0);
+        KEYPAD_VAL += updown ? WIDGET_KEY_PRESSED : WIDGET_KEY_RELEASED;
 
-	drv_generic_keypad_press(KEYPAD_VAL);
+        drv_generic_keypad_press(KEYPAD_VAL);
 
-	debug("key %d press %d", keynum, updown);
+        debug("key %d press %d", keynum, updown);
     }
 }
 
@@ -1111,80 +1111,80 @@ static int drv_HD_start(const char *section, const int quiet)
 
     model = cfg_get(section, "Model", "generic");
     if (model != NULL && *model != '\0') {
-	int i;
-	for (i = 0; Models[i].type != 0xff; i++) {
-	    if (strcasecmp(Models[i].name, model) == 0)
-		break;
-	}
-	if (Models[i].type == 0xff) {
-	    error("%s: %s.Model '%s' is unknown from %s", Name, section, model, cfg_source());
-	    return -1;
-	}
-	Model = i;
-	Capabilities = Models[Model].capabilities;
-	info("%s: using model '%s'", Name, Models[Model].name);
+        int i;
+        for (i = 0; Models[i].type != 0xff; i++) {
+            if (strcasecmp(Models[i].name, model) == 0)
+                break;
+        }
+        if (Models[i].type == 0xff) {
+            error("%s: %s.Model '%s' is unknown from %s", Name, section, model, cfg_source());
+            return -1;
+        }
+        Model = i;
+        Capabilities = Models[Model].capabilities;
+        info("%s: using model '%s'", Name, Models[Model].name);
     } else {
-	error("%s: empty '%s.Model' entry from %s", Name, section, cfg_source());
-	free(model);
-	return -1;
+        error("%s: empty '%s.Model' entry from %s", Name, section, cfg_source());
+        free(model);
+        return -1;
     }
     free(model);
 
     bus = cfg_get(section, "Bus", "parport");
     if (bus == NULL && *bus == '\0') {
-	error("%s: empty '%s.Bus' entry from %s", Name, section, cfg_source());
-	free(bus);
-	return -1;
+        error("%s: empty '%s.Bus' entry from %s", Name, section, cfg_source());
+        free(bus);
+        return -1;
     }
 
     if (strcasecmp(bus, "parport") == 0) {
 
 #ifdef WITH_PARPORT
-	info("%s: using parallel port", Name);
-	Bus = BUS_PP;
-	drv_HD_load = drv_HD_PP_load;
-	drv_HD_command = drv_HD_PP_command;
-	drv_HD_data = drv_HD_PP_data;
-	drv_HD_stop = drv_HD_PP_stop;
+        info("%s: using parallel port", Name);
+        Bus = BUS_PP;
+        drv_HD_load = drv_HD_PP_load;
+        drv_HD_command = drv_HD_PP_command;
+        drv_HD_data = drv_HD_PP_data;
+        drv_HD_stop = drv_HD_PP_stop;
 #else
-	error("%s: %s.Bus '%s' from %s not available:", Name, section, bus, cfg_source());
-	error("%s: lcd4linux was compiled without parport support!", Name);
-	free(bus);
-	return -1;
+        error("%s: %s.Bus '%s' from %s not available:", Name, section, bus, cfg_source());
+        error("%s: lcd4linux was compiled without parport support!", Name);
+        free(bus);
+        return -1;
 #endif
 
     } else if (strcasecmp(bus, "i2c") == 0) {
 
 #ifdef WITH_I2C
-	info("%s: using I2C bus", Name);
-	Bus = BUS_I2C;
-	drv_HD_load = drv_HD_I2C_load;
-	drv_HD_command = drv_HD_I2C_command;
-	drv_HD_data = drv_HD_I2C_data;
-	drv_HD_stop = drv_HD_I2C_stop;
+        info("%s: using I2C bus", Name);
+        Bus = BUS_I2C;
+        drv_HD_load = drv_HD_I2C_load;
+        drv_HD_command = drv_HD_I2C_command;
+        drv_HD_data = drv_HD_I2C_data;
+        drv_HD_stop = drv_HD_I2C_stop;
 #else
-	error("%s: %s.Bus '%s' from %s not available:", Name, section, bus, cfg_source());
-	error("%s: lcd4linux was compiled without i2c support!", Name);
-	free(bus);
-	return -1;
+        error("%s: %s.Bus '%s' from %s not available:", Name, section, bus, cfg_source());
+        error("%s: lcd4linux was compiled without i2c support!", Name);
+        free(bus);
+        return -1;
 #endif
 
     } else {
-	error("%s: bad %s.Bus '%s' from %s, should be 'parport' or 'i2c'", Name, section, bus, cfg_source());
-	free(bus);
-	return -1;
+        error("%s: bad %s.Bus '%s' from %s, should be 'parport' or 'i2c'", Name, section, bus, cfg_source());
+        free(bus);
+        return -1;
     }
 
     /* sanity check: Model can use bus */
     if (!(Capabilities & Bus)) {
-	error("%s: Model '%s' cannot be used on the %s bus!", Name, Models[Model].name, bus);
-	free(bus);
-	return -1;
+        error("%s: Model '%s' cannot be used on the %s bus!", Name, Models[Model].name, bus);
+        free(bus);
+        return -1;
     }
     free(bus);
 
     if (cfg_number(section, "Controllers", 1, 1, 4, (int *) &numControllers) < 0)
-	return -1;
+        return -1;
     info("%s: using %d Controller(s)", Name, numControllers);
 
     /* current Controller */
@@ -1198,140 +1198,140 @@ static int drv_HD_start(const char *section, const int quiet)
     DROWS = 0;
 
     for (i = 0; i < numControllers; i++) {
-	char key[6];
-	qprintf(key, sizeof(key), "Size%d", i + 1);
-	size = cfg_get(section, key, NULL);
-	if (size == NULL || *size == '\0') {
-	    size_missing++;
-	    free(size);
-	    continue;
-	}
-	if (sscanf(size, "%dx%d", &cols, &rows) != 2 || rows < 1 || cols < 1) {
-	    error("%s: bad %s.%s '%s' from %s", Name, section, key, size, cfg_source());
-	    free(size);
-	    return -1;
-	}
-	free(size);
-	CCOLS[i] = cols;
-	CROWS[i] = rows;
-	size_defined++;
-	info("%s: Controller %d: %dx%d", Name, i + 1, cols, rows);
-	/* grow the size */
-	if (cols > DCOLS)
-	    DCOLS = cols;
-	DROWS += rows;
+        char key[6];
+        qprintf(key, sizeof(key), "Size%d", i + 1);
+        size = cfg_get(section, key, NULL);
+        if (size == NULL || *size == '\0') {
+            size_missing++;
+            free(size);
+            continue;
+        }
+        if (sscanf(size, "%dx%d", &cols, &rows) != 2 || rows < 1 || cols < 1) {
+            error("%s: bad %s.%s '%s' from %s", Name, section, key, size, cfg_source());
+            free(size);
+            return -1;
+        }
+        free(size);
+        CCOLS[i] = cols;
+        CROWS[i] = rows;
+        size_defined++;
+        info("%s: Controller %d: %dx%d", Name, i + 1, cols, rows);
+        /* grow the size */
+        if (cols > DCOLS)
+            DCOLS = cols;
+        DROWS += rows;
     }
     if (size_defined && size_missing) {
-	error("%s: bad %s.Size* definition in %s:", Name, section, cfg_source());
-	error("%s: either you specify the size for *all* controllers or for none.", Name);
-	return -1;
+        error("%s: bad %s.Size* definition in %s:", Name, section, cfg_source());
+        error("%s: either you specify the size for *all* controllers or for none.", Name);
+        return -1;
     }
 
     size = cfg_get(section, "Size", NULL);
     if (size != NULL && *size != '\0') {
-	if (sscanf(size, "%dx%d", &cols, &rows) != 2 || rows < 1 || cols < 1) {
-	    error("%s: bad %s.Size '%s' from %s", Name, section, size, cfg_source());
-	    free(size);
-	    return -1;
-	}
-	if (DCOLS == 0 && DROWS == 0) {
-	    for (i = 0; i < numControllers; i++) {
-		CCOLS[i] = cols;
-		CROWS[i] = rows / numControllers;
-		DCOLS = CCOLS[i];
-		DROWS += CROWS[i];
-	    }
-	}
-	if (rows != DROWS || cols != DCOLS) {
-	    error("%s: bad %s.Size definition in %s:", Name, section, cfg_source());
-	    error("%s: Size %dx%d should be %dx%d", Name, cols, rows, DCOLS, DROWS);
-	    return -1;
-	}
+        if (sscanf(size, "%dx%d", &cols, &rows) != 2 || rows < 1 || cols < 1) {
+            error("%s: bad %s.Size '%s' from %s", Name, section, size, cfg_source());
+            free(size);
+            return -1;
+        }
+        if (DCOLS == 0 && DROWS == 0) {
+            for (i = 0; i < numControllers; i++) {
+                CCOLS[i] = cols;
+                CROWS[i] = rows / numControllers;
+                DCOLS = CCOLS[i];
+                DROWS += CROWS[i];
+            }
+        }
+        if (rows != DROWS || cols != DCOLS) {
+            error("%s: bad %s.Size definition in %s:", Name, section, cfg_source());
+            error("%s: Size %dx%d should be %dx%d", Name, cols, rows, DCOLS, DROWS);
+            return -1;
+        }
     }
     free(size);
 
 
     if (cfg_number(section, "GPOs", 0, 0, 8, &gpos) < 0)
-	return -1;
+        return -1;
     if (gpos > 0 && !(Capabilities & CAP_GPO)) {
-	error("%s: Model '%s' does not support GPO's!", Name, Models[Model].name);
-	gpos = 0;
+        error("%s: Model '%s' does not support GPO's!", Name, Models[Model].name);
+        gpos = 0;
     }
     GPOS = gpos;
     if (GPOS > 0) {
-	info("%s: using %d GPO's", Name, GPOS);
+        info("%s: using %d GPO's", Name, GPOS);
     }
 
     if (cfg_number(section, "GPIs", 0, 0, 8, &gpis) < 0)
-	return -1;
+        return -1;
     if (gpis > 0 && !(Capabilities & CAP_GPI)) {
-	error("%s: Model '%s' does not support GPI's!", Name, Models[Model].name);
-	gpis = 0;
+        error("%s: Model '%s' does not support GPI's!", Name, Models[Model].name);
+        gpis = 0;
     }
     GPIS = gpis;
     if (GPIS > 0) {
-	info("%s: using %d GPI's", Name, GPIS);
+        info("%s: using %d GPI's", Name, GPIS);
     }
 
     if (cfg_number(section, "InvertDataBits", 0, 0, 256, &invert_data_bits) < 0)
-	return -1;
+        return -1;
     if (invert_data_bits) {
-	info("%s: inverting data bits (mask %02X)", Name, invert_data_bits);
+        info("%s: inverting data bits (mask %02X)", Name, invert_data_bits);
     }
 
     if (drv_HD_load(section) < 0) {
-	error("%s: start display failed!", Name);
-	return -1;
+        error("%s: start display failed!", Name);
+        return -1;
     }
 
-    drv_HD_command(allControllers, 0x08, T_EXEC);	/* Controller off, cursor off, blink off */
-    drv_HD_command(allControllers, 0x0c, T_ONOFF);	/* Display on, cursor off, blink off, wait 1.64 ms */
-    drv_HD_command(allControllers, 0x06, T_EXEC);	/* curser moves to right, no shift */
+    drv_HD_command(allControllers, 0x08, T_EXEC);       /* Controller off, cursor off, blink off */
+    drv_HD_command(allControllers, 0x0c, T_ONOFF);      /* Display on, cursor off, blink off, wait 1.64 ms */
+    drv_HD_command(allControllers, 0x06, T_EXEC);       /* curser moves to right, no shift */
 
     if ((Capabilities & CAP_HD66712) && DROWS > 2) {
-	drv_HD_command(allControllers, Bits == 8 ? 0x3c : 0x2c, T_EXEC);	/* set extended register enable bit */
-	drv_HD_command(allControllers, 0x09, T_EXEC);	/* set 4-line mode */
-	drv_HD_command(allControllers, Bits == 8 ? 0x38 : 0x28, T_EXEC);	/* clear extended register enable bit */
+        drv_HD_command(allControllers, Bits == 8 ? 0x3c : 0x2c, T_EXEC);        /* set extended register enable bit */
+        drv_HD_command(allControllers, 0x09, T_EXEC);   /* set 4-line mode */
+        drv_HD_command(allControllers, Bits == 8 ? 0x38 : 0x28, T_EXEC);        /* clear extended register enable bit */
     }
 
-    drv_HD_clear();		/* clear *all* displays */
-    drv_HD_command(allControllers, 0x03, T_HOME);	/* return home */
+    drv_HD_clear();             /* clear *all* displays */
+    drv_HD_command(allControllers, 0x03, T_HOME);       /* return home */
 
     /* maybe set backlight */
 #ifdef WITH_PARPORT
     if (Capabilities & CAP_BACKLIGHT) {
-	int backlight;
-	if (cfg_number(section, "Backlight", 0, 0, 1, &backlight) > 0) {
-	    info("%s: backlight %s", Name, backlight ? "enabled" : "disabled");
-	    drv_HD_backlight(backlight);
-	}
+        int backlight;
+        if (cfg_number(section, "Backlight", 0, 0, 1, &backlight) > 0) {
+            info("%s: backlight %s", Name, backlight ? "enabled" : "disabled");
+            drv_HD_backlight(backlight);
+        }
     }
 #endif
 
     /* maybe set brightness */
     if (Capabilities & CAP_BRIGHTNESS) {
-	int brightness;
-	if (cfg_number(section, "Brightness", 0, 0, 3, &brightness) > 0) {
-	    info("%s: brightness level %d", Name, brightness);
-	    drv_HD_brightness(brightness);
-	}
+        int brightness;
+        if (cfg_number(section, "Brightness", 0, 0, 3, &brightness) > 0) {
+            info("%s: brightness level %d", Name, brightness);
+            drv_HD_brightness(brightness);
+        }
     }
 
     /* install keypad polling timer for LCM-162 */
 #ifdef WITH_PARPORT
     if (Capabilities & CAP_LCM162) {
-	timer_add(drv_HD_LCM162_timer, NULL, 10, 0);
-	drv_generic_keypad_real_press = drv_HD_LCM162_keypad_handler;
+        timer_add(drv_HD_LCM162_timer, NULL, 10, 0);
+        drv_generic_keypad_real_press = drv_HD_LCM162_keypad_handler;
     }
 #endif
 
     if (!quiet) {
-	char buffer[40];
-	qprintf(buffer, sizeof(buffer), "%s %dx%d", Name, DCOLS, DROWS);
-	if (drv_generic_text_greet(buffer, NULL)) {
-	    sleep(3);
-	    drv_HD_clear();
-	}
+        char buffer[40];
+        qprintf(buffer, sizeof(buffer), "%s %dx%d", Name, DCOLS, DROWS);
+        if (drv_generic_text_greet(buffer, NULL)) {
+            sleep(3);
+            drv_HD_clear();
+        }
     }
 
     return 0;
@@ -1384,7 +1384,7 @@ int drv_HD_list(void)
     int i;
 
     for (i = 0; Models[i].type != 0xff; i++) {
-	printf("%s ", Models[i].name);
+        printf("%s ", Models[i].name);
     }
     return 0;
 }
@@ -1400,11 +1400,11 @@ int drv_HD_init(const char *section, const int quiet)
     info("%s: %s", Name, "$Rev$");
 
     /* display preferences */
-    XRES = 5;			/* pixel width of one char  */
-    YRES = 8;			/* pixel height of one char  */
-    CHARS = 8;			/* number of user-defineable characters */
-    CHAR0 = 0;			/* ASCII of first user-defineable char */
-    GOTO_COST = 1;		/* number of bytes a goto command requires */
+    XRES = 5;                   /* pixel width of one char  */
+    YRES = 8;                   /* pixel height of one char  */
+    CHARS = 8;                  /* number of user-defineable characters */
+    CHAR0 = 0;                  /* ASCII of first user-defineable char */
+    GOTO_COST = 1;              /* number of bytes a goto command requires */
 
     /* real worker functions */
     drv_generic_text_real_write = drv_HD_write;
@@ -1416,36 +1416,36 @@ int drv_HD_init(const char *section, const int quiet)
 
     /* start display */
     if ((ret = drv_HD_start(section, quiet)) != 0)
-	return ret;
+        return ret;
 
     /* initialize generic text driver */
     if ((ret = drv_generic_text_init(section, Name)) != 0)
-	return ret;
+        return ret;
 
     /* initialize generic icon driver */
     if ((ret = drv_generic_text_icon_init()) != 0)
-	return ret;
+        return ret;
 
     /* initialize generic bar driver */
     if ((ret = drv_generic_text_bar_init(0)) != 0)
-	return ret;
+        return ret;
 
     /* add fixed chars to the bar driver */
     /* most displays have a full block on ascii 255, but some have kind of  */
     /* an 'inverted P'. If you specify 'asc255bug 1 in the config, this */
     /* char will not be used, but rendered by the bar driver */
     cfg_number(section, "asc255bug", 0, 0, 1, &asc255bug);
-    drv_generic_text_bar_add_segment(0, 0, 255, 32);	/* ASCII  32 = blank */
+    drv_generic_text_bar_add_segment(0, 0, 255, 32);    /* ASCII  32 = blank */
     if (!asc255bug)
-	drv_generic_text_bar_add_segment(255, 255, 255, 255);	/* ASCII 255 = block */
+        drv_generic_text_bar_add_segment(255, 255, 255, 255);   /* ASCII 255 = block */
 
     /* initialize generic GPIO driver */
     if ((ret = drv_generic_gpio_init(section, Name)) != 0)
-	return ret;
+        return ret;
 
 #ifdef WITH_PARPORT
     if ((ret = drv_generic_keypad_init(section, Name)) != 0)
-	return ret;
+        return ret;
 #endif
     /* register text widget */
     wc = Widget_Text;
@@ -1465,11 +1465,11 @@ int drv_HD_init(const char *section, const int quiet)
     /* register plugins */
 #ifdef WITH_PARPORT
     if (Capabilities & CAP_BACKLIGHT) {
-	AddFunction("LCD::backlight", 1, plugin_backlight);
+        AddFunction("LCD::backlight", 1, plugin_backlight);
     }
 #endif
     if (Capabilities & CAP_BRIGHTNESS) {
-	AddFunction("LCD::brightness", 1, plugin_brightness);
+        AddFunction("LCD::brightness", 1, plugin_brightness);
     }
 
     return 0;
@@ -1490,7 +1490,7 @@ int drv_HD_quit(const int quiet)
 
     /* say goodbye... */
     if (!quiet) {
-	drv_generic_text_greet("goodbye!", NULL);
+        drv_generic_text_greet("goodbye!", NULL);
     }
 
     drv_HD_stop();

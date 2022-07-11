@@ -60,70 +60,70 @@ static int parse_netdev(void)
     /* reread every 10 msec only */
     age = hash_age(&NetDev, NULL);
     if (age > 0 && age <= 10)
-	return 0;
+        return 0;
 
     if (Stream == NULL)
-	Stream = fopen("/proc/net/dev", "r");
+        Stream = fopen("/proc/net/dev", "r");
     if (Stream == NULL) {
-	error("fopen(/proc/net/dev) failed: %s", strerror(errno));
-	return -1;
+        error("fopen(/proc/net/dev) failed: %s", strerror(errno));
+        return -1;
     }
 
     rewind(Stream);
     row = 0;
 
     while (!feof(Stream)) {
-	char buffer[256];
-	char dev[16];
-	char *beg, *end;
-	unsigned int len;
+        char buffer[256];
+        char dev[16];
+        char *beg, *end;
+        unsigned int len;
 
-	if (fgets(buffer, sizeof(buffer), Stream) == NULL)
-	    break;
+        if (fgets(buffer, sizeof(buffer), Stream) == NULL)
+            break;
 
-	switch (++row) {
+        switch (++row) {
 
-	case 1:
-	    /* skip row 1 */
-	    continue;
+        case 1:
+            /* skip row 1 */
+            continue;
 
-	case 2:
-	    /* row 2 used for headers */
-	    if (first_time) {
-		char *RxTx = strrchr(buffer, '|');
-		first_time = 0;
-		col = 0;
-		beg = buffer;
-		while (beg) {
-		    char key[32];
+        case 2:
+            /* row 2 used for headers */
+            if (first_time) {
+                char *RxTx = strrchr(buffer, '|');
+                first_time = 0;
+                col = 0;
+                beg = buffer;
+                while (beg) {
+                    char key[32];
 
-		    while (strchr(DELIMITER, *beg))
-			beg++;
-		    if ((end = strpbrk(beg, DELIMITER)) != NULL)
-			*end = '\0';
-		    qprintf(key, sizeof(key), "%s_%s", beg < RxTx ? "Rx" : "Tx", beg);
-		    hash_set_column(&NetDev, col++, key);
-		    beg = end ? end + 1 : NULL;
-		}
-	    }
-	    continue;
+                    while (strchr(DELIMITER, *beg))
+                        beg++;
+                    if ((end = strpbrk(beg, DELIMITER)) != NULL)
+                        *end = '\0';
+                    qprintf(key, sizeof(key), "%s_%s", beg < RxTx ? "Rx" : "Tx", beg);
+                    hash_set_column(&NetDev, col++, key);
+                    beg = end ? end + 1 : NULL;
+                }
+            }
+            continue;
 
-	default:
-	    /* fetch interface name (1st column) as key */
-	    beg = buffer;
-	    while (*beg && *beg == ' ')
-		beg++;
-	    end = beg + 1;
-	    while (*end && *end != ':')
-		end++;
-	    len = end - beg;
-	    if (len >= sizeof(dev))
-		len = sizeof(dev) - 1;
-	    strncpy(dev, beg, len);
-	    dev[len] = '\0';
+        default:
+            /* fetch interface name (1st column) as key */
+            beg = buffer;
+            while (*beg && *beg == ' ')
+                beg++;
+            end = beg + 1;
+            while (*end && *end != ':')
+                end++;
+            len = end - beg;
+            if (len >= sizeof(dev))
+                len = sizeof(dev) - 1;
+            strncpy(dev, beg, len);
+            dev[len] = '\0';
 
-	    hash_put_delta(&NetDev, dev, buffer);
-	}
+            hash_put_delta(&NetDev, dev, buffer);
+        }
     }
 
     return 0;
@@ -136,8 +136,8 @@ static void my_netdev(RESULT * result, RESULT * arg1, RESULT * arg2, RESULT * ar
     double value;
 
     if (parse_netdev() < 0) {
-	SetResult(&result, R_STRING, "");
-	return;
+        SetResult(&result, R_STRING, "");
+        return;
     }
 
     dev = R2S(arg1);
@@ -156,8 +156,8 @@ static void my_netdev_fast(RESULT * result, RESULT * arg1, RESULT * arg2, RESULT
     double value;
 
     if (parse_netdev() < 0) {
-	SetResult(&result, R_STRING, "");
-	return;
+        SetResult(&result, R_STRING, "");
+        return;
     }
 
     dev = R2S(arg1);
@@ -183,8 +183,8 @@ int plugin_init_netdev(void)
 void plugin_exit_netdev(void)
 {
     if (Stream != NULL) {
-	fclose(Stream);
-	Stream = NULL;
+        fclose(Stream);
+        Stream = NULL;
     }
     hash_destroy(&NetDev);
 }

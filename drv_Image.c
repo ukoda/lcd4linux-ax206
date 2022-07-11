@@ -82,13 +82,13 @@ static char Name[] = "Image";
 
 static enum { NIL, PPM, PNG } Format;
 
-static int pixel = -1;		/* pointsize in pixel */
-static int pgap = 0;		/* gap between points */
-static int rgap = 0;		/* row gap between lines */
-static int cgap = 0;		/* column gap between characters */
-static int border = 0;		/* window border */
+static int pixel = -1;          /* pointsize in pixel */
+static int pgap = 0;            /* gap between points */
+static int rgap = 0;            /* row gap between lines */
+static int cgap = 0;            /* column gap between characters */
+static int border = 0;          /* window border */
 
-static int dimx, dimy;		/* total window dimension in pixel */
+static int dimx, dimy;          /* total window dimension in pixel */
 
 static RGBA BC;
 static RGBA *drv_IMG_FB = NULL;
@@ -113,32 +113,32 @@ static int drv_IMG_flush_PPM(void)
     ysize = 2 * border + (DROWS / YRES - 1) * rgap + DROWS * pixel + (DROWS - 1) * pgap;
 
     if (bitbuf == NULL) {
-	if ((bitbuf = malloc(xsize * ysize * sizeof(*bitbuf))) == NULL) {
-	    error("%s: malloc() failed: %s", Name, strerror(errno));
-	    return -1;
-	}
+        if ((bitbuf = malloc(xsize * ysize * sizeof(*bitbuf))) == NULL) {
+            error("%s: malloc() failed: %s", Name, strerror(errno));
+            return -1;
+        }
     }
 
     if (rowbuf == NULL) {
-	if ((rowbuf = malloc(3 * xsize * sizeof(*rowbuf))) == NULL) {
-	    error("Raster: malloc() failed: %s", strerror(errno));
-	    return -1;
-	}
+        if ((rowbuf = malloc(3 * xsize * sizeof(*rowbuf))) == NULL) {
+            error("Raster: malloc() failed: %s", strerror(errno));
+            return -1;
+        }
     }
 
     for (i = 0; i < xsize * ysize; i++) {
-	bitbuf[i] = BC;
+        bitbuf[i] = BC;
     }
 
     for (row = 0; row < DROWS; row++) {
-	int y = border + (row / YRES) * rgap + row * (pixel + pgap);
-	for (col = 0; col < DCOLS; col++) {
-	    int x = border + (col / XRES) * cgap + col * (pixel + pgap);
-	    int a, b;
-	    for (a = 0; a < pixel; a++)
-		for (b = 0; b < pixel; b++)
-		    bitbuf[y * xsize + x + a * xsize + b] = drv_IMG_FB[row * DCOLS + col];
-	}
+        int y = border + (row / YRES) * rgap + row * (pixel + pgap);
+        for (col = 0; col < DCOLS; col++) {
+            int x = border + (col / XRES) * cgap + col * (pixel + pgap);
+            int a, b;
+            for (a = 0; a < pixel; a++)
+                for (b = 0; b < pixel; b++)
+                    bitbuf[y * xsize + x + a * xsize + b] = drv_IMG_FB[row * DCOLS + col];
+        }
     }
 
     snprintf(path, sizeof(path), output, seq++);
@@ -151,37 +151,37 @@ static int drv_IMG_flush_PPM(void)
     /* open it with O_EXCL will fail if the file exists.  */
     /* This should not happen because we just unlinked it. */
     if ((fd = open(tmp, O_WRONLY | O_CREAT | O_EXCL, 0644)) < 0) {
-	error("%s: open(%s) failed: %s", Name, tmp, strerror(errno));
-	return -1;
+        error("%s: open(%s) failed: %s", Name, tmp, strerror(errno));
+        return -1;
     }
 
     qprintf(buffer, sizeof(buffer), "P6\n%d %d\n255\n", xsize, ysize);
     if (write(fd, buffer, strlen(buffer)) < 0) {
-	error("%s: write(%s) failed: %s", Name, tmp, strerror(errno));
-	return -1;
+        error("%s: write(%s) failed: %s", Name, tmp, strerror(errno));
+        return -1;
     }
 
     for (row = 0; row < ysize; row++) {
-	int c = 0;
-	for (col = 0; col < xsize; col++) {
-	    RGBA p = bitbuf[row * xsize + col];
-	    rowbuf[c++] = p.R;
-	    rowbuf[c++] = p.G;
-	    rowbuf[c++] = p.B;
-	}
-	if (write(fd, rowbuf, c) < 0) {
-	    error("%s: write(%s) failed: %s", Name, tmp, strerror(errno));
-	    break;
-	}
+        int c = 0;
+        for (col = 0; col < xsize; col++) {
+            RGBA p = bitbuf[row * xsize + col];
+            rowbuf[c++] = p.R;
+            rowbuf[c++] = p.G;
+            rowbuf[c++] = p.B;
+        }
+        if (write(fd, rowbuf, c) < 0) {
+            error("%s: write(%s) failed: %s", Name, tmp, strerror(errno));
+            break;
+        }
     }
 
     if (close(fd) < 0) {
-	error("%s: close(%s) failed: %s", Name, tmp, strerror(errno));
-	return -1;
+        error("%s: close(%s) failed: %s", Name, tmp, strerror(errno));
+        return -1;
     }
     if (rename(tmp, path) < 0) {
-	error("%s: rename(%s) failed: %s", Name, tmp, strerror(errno));
-	return -1;
+        error("%s: rename(%s) failed: %s", Name, tmp, strerror(errno));
+        return -1;
     }
 
     return 0;
@@ -205,13 +205,13 @@ static int drv_IMG_flush_PNG(void)
     gdImageFilledRectangle(im, 0, 0, xsize, ysize, gdTrueColor(BC.R, BC.G, BC.B));
 
     for (row = 0; row < DROWS; row++) {
-	int y = border + (row / YRES) * rgap + row * (pixel + pgap);
-	for (col = 0; col < DCOLS; col++) {
-	    int x = border + (col / XRES) * cgap + col * (pixel + pgap);
-	    RGBA p = drv_IMG_FB[row * DCOLS + col];
-	    int c = gdTrueColor(p.R, p.G, p.B);
-	    gdImageFilledRectangle(im, x, y, x + pixel - 1, y + pixel - 1, c);
-	}
+        int y = border + (row / YRES) * rgap + row * (pixel + pgap);
+        for (col = 0; col < DCOLS; col++) {
+            int x = border + (col / XRES) * cgap + col * (pixel + pgap);
+            RGBA p = drv_IMG_FB[row * DCOLS + col];
+            int c = gdTrueColor(p.R, p.G, p.B);
+            gdImageFilledRectangle(im, x, y, x + pixel - 1, y + pixel - 1, c);
+        }
     }
 
     snprintf(path, sizeof(path), output, seq++);
@@ -224,14 +224,14 @@ static int drv_IMG_flush_PNG(void)
     /* open it with O_EXCL will fail if the file exists.  */
     /* This should not happen because we just unlinked it. */
     if ((fd = open(tmp, O_WRONLY | O_CREAT | O_EXCL, 0644)) < 0) {
-	error("%s: open(%s) failed: %s", Name, tmp, strerror(errno));
-	return -1;
+        error("%s: open(%s) failed: %s", Name, tmp, strerror(errno));
+        return -1;
     }
 
     if ((fp = fdopen(fd, "w")) == NULL) {
-	error("%s: fdopen(%s) failed: %s\n", Name, tmp, strerror(errno));
-	close(fd);
-	return -1;
+        error("%s: fdopen(%s) failed: %s\n", Name, tmp, strerror(errno));
+        close(fd);
+        return -1;
     }
 
     gdImagePng(im, fp);
@@ -239,13 +239,13 @@ static int drv_IMG_flush_PNG(void)
 
 
     if (fclose(fp) != 0) {
-	error("%s: fclose(%s) failed: %s\n", Name, tmp, strerror(errno));
-	return -1;
+        error("%s: fclose(%s) failed: %s\n", Name, tmp, strerror(errno));
+        return -1;
     }
 
     if (rename(tmp, path) < 0) {
-	error("%s: rename(%s) failed: %s\n", Name, tmp, strerror(errno));
-	return -1;
+        error("%s: rename(%s) failed: %s\n", Name, tmp, strerror(errno));
+        return -1;
     }
 
     return 0;
@@ -258,26 +258,26 @@ static void drv_IMG_flush(void)
     switch (Format) {
     case PPM:
 #ifdef WITH_PPM
-	drv_IMG_flush_PPM();
+        drv_IMG_flush_PPM();
 #endif
-	break;
+        break;
     case PNG:
 #ifdef WITH_PNG
-	drv_IMG_flush_PNG();
+        drv_IMG_flush_PNG();
 #endif
-	break;
+        break;
     default:
-	break;
+        break;
     }
 }
 
 
-static void drv_IMG_timer( __attribute__ ((unused))
-			  void *notused)
+static void drv_IMG_timer( __attribute__((unused))
+                          void *notused)
 {
     if (dirty) {
-	drv_IMG_flush();
-	dirty = 0;
+        drv_IMG_flush();
+        dirty = 0;
     }
 }
 
@@ -287,14 +287,14 @@ static void drv_IMG_blit(const int row, const int col, const int height, const i
     int r, c;
 
     for (r = row; r < row + height; r++) {
-	for (c = col; c < col + width; c++) {
-	    RGBA p1 = drv_IMG_FB[r * DCOLS + c];
-	    RGBA p2 = drv_generic_graphic_rgb(r, c);
-	    if (p1.R != p2.R || p1.G != p2.G || p1.B != p2.B) {
-		drv_IMG_FB[r * DCOLS + c] = p2;
-		dirty = 1;
-	    }
-	}
+        for (c = col; c < col + width; c++) {
+            RGBA p1 = drv_IMG_FB[r * DCOLS + c];
+            RGBA p2 = drv_generic_graphic_rgb(r, c);
+            if (p1.R != p2.R || p1.G != p2.G || p1.B != p2.B) {
+                drv_IMG_FB[r * DCOLS + c] = p2;
+                dirty = 1;
+            }
+        }
     }
 }
 
@@ -305,90 +305,90 @@ static int drv_IMG_start(const char *section)
     char *s;
 
     if (output == NULL || *output == '\0') {
-	error("%s: no output file specified (use -o switch)", Name);
-	return -1;
+        error("%s: no output file specified (use -o switch)", Name);
+        return -1;
     }
 
     /* read file format from config */
     s = cfg_get(section, "Format", NULL);
     if (s == NULL || *s == '\0') {
-	error("%s: no '%s.Format' entry from %s", Name, section, cfg_source());
-	free(s);
-	return -1;
+        error("%s: no '%s.Format' entry from %s", Name, section, cfg_source());
+        free(s);
+        return -1;
     }
 
     Format = NIL;
 
 #ifdef WITH_PPM
     if (strcmp(s, "PPM") == 0) {
-	Format = PPM;
+        Format = PPM;
     }
 #endif
 
 #ifdef WITH_PNG
     if (strcmp(s, "PNG") == 0) {
-	Format = PNG;
+        Format = PNG;
     }
 #endif
 
     if (Format == NIL) {
-	error("%s: bad %s.Format '%s' from %s", Name, section, s, cfg_source());
-	free(s);
-	return -1;
+        error("%s: bad %s.Format '%s' from %s", Name, section, s, cfg_source());
+        free(s);
+        return -1;
     }
     free(s);
 
     /* read display size from config */
     if (sscanf(s = cfg_get(section, "Size", "120x32"), "%dx%d", &DCOLS, &DROWS) != 2 || DCOLS < 1 || DROWS < 1) {
-	error("%s: bad %s.Size '%s' from %s", Name, section, s, cfg_source());
-	free(s);
-	return -1;
+        error("%s: bad %s.Size '%s' from %s", Name, section, s, cfg_source());
+        free(s);
+        return -1;
     }
     free(s);
 
     if (sscanf(s = cfg_get(section, "font", "5x8"), "%dx%d", &XRES, &YRES) != 2 || XRES < 1 || YRES < 1) {
-	error("%s: bad %s.Font '%s' from %s", Name, section, s, cfg_source());
-	free(s);
-	return -1;
+        error("%s: bad %s.Font '%s' from %s", Name, section, s, cfg_source());
+        free(s);
+        return -1;
     }
     free(s);
 
     if (sscanf(s = cfg_get(section, "pixel", "4+1"), "%d+%d", &pixel, &pgap) != 2 || pixel < 1 || pgap < 0) {
-	error("%s: bad %s.Pixel '%s' from %s", Name, section, s, cfg_source());
-	free(s);
-	return -1;
+        error("%s: bad %s.Pixel '%s' from %s", Name, section, s, cfg_source());
+        free(s);
+        return -1;
     }
     free(s);
 
     if (sscanf(s = cfg_get(section, "gap", "-1x-1"), "%dx%d", &cgap, &rgap) != 2 || cgap < -1 || rgap < -1) {
-	error("%s: bad %s.Gap '%s' from %s", Name, section, s, cfg_source());
-	free(s);
-	return -1;
+        error("%s: bad %s.Gap '%s' from %s", Name, section, s, cfg_source());
+        free(s);
+        return -1;
     }
     free(s);
 
     if (rgap < 0)
-	rgap = pixel + pgap;
+        rgap = pixel + pgap;
     if (cgap < 0)
-	cgap = pixel + pgap;
+        cgap = pixel + pgap;
 
     if (cfg_number(section, "border", 0, 0, -1, &border) < 0)
-	return -1;
+        return -1;
 
     s = cfg_get(section, "basecolor", "000000ff");
     if (color2RGBA(s, &BC) < 0) {
-	error("%s: ignoring illegal color '%s'", Name, s);
+        error("%s: ignoring illegal color '%s'", Name, s);
     }
     free(s);
 
     drv_IMG_FB = malloc(DCOLS * DROWS * sizeof(*drv_IMG_FB));
     if (drv_IMG_FB == NULL) {
-	error("%s: framebuffer could not be allocated: malloc() failed", Name);
-	return -1;
+        error("%s: framebuffer could not be allocated: malloc() failed", Name);
+        return -1;
     }
 
     for (i = 0; i < DCOLS * DROWS; i++) {
-	drv_IMG_FB[i] = BC;
+        drv_IMG_FB[i] = BC;
     }
 
     dimx = DCOLS * pixel + (DCOLS - 1) * pgap + (DCOLS / XRES - 1) * cgap;
@@ -434,8 +434,8 @@ int drv_IMG_list(void)
 
 
 /* initialize driver & display */
-int drv_IMG_init(const char *section, const __attribute__ ((unused))
-		 int quiet)
+int drv_IMG_init(const char *section, const __attribute__((unused))
+                 int quiet)
 {
     int ret;
 
@@ -446,11 +446,11 @@ int drv_IMG_init(const char *section, const __attribute__ ((unused))
 
     /* start display */
     if ((ret = drv_IMG_start(section)) != 0)
-	return ret;
+        return ret;
 
     /* initialize generic graphic driver */
     if ((ret = drv_generic_graphic_init(section, Name)) != 0)
-	return ret;
+        return ret;
 
     /* register plugins */
     /* none at the moment... */
@@ -461,16 +461,16 @@ int drv_IMG_init(const char *section, const __attribute__ ((unused))
 
 
 /* close driver & display */
-int drv_IMG_quit(const __attribute__ ((unused))
-		 int quiet)
+int drv_IMG_quit(const __attribute__((unused))
+                 int quiet)
 {
 
     info("%s: shutting down.", Name);
     drv_generic_graphic_quit();
 
     if (drv_IMG_FB) {
-	free(drv_IMG_FB);
-	drv_IMG_FB = NULL;
+        free(drv_IMG_FB);
+        drv_IMG_FB = NULL;
     }
 
     return (0);

@@ -69,25 +69,25 @@ static void my_button_exec(RESULT * result, int argc, RESULT * argv[])
     prog = R2S(argv[0]);
     info("%s", prog);
     for (i = 1; i < argc; i++) {
-	arg = R2S(argv[i]);
-	args[i] = arg;
-	info("%s", arg);
+        arg = R2S(argv[i]);
+        args[i] = arg;
+        info("%s", arg);
     }
     args[0] = prog;
     args[i] = (char *) 0;
     pid = fork();
-    if (pid == 0) {		/* child-process */
-	/* char *args[] = {"-r", "-t", "-l", (char *) 0 }; */
-	info("executing program");
-	execvp(prog, args);
-	errsv = errno;
-	info("executing program failed");
-	info("%s", strerror(errsv));
-	exit(0);
+    if (pid == 0) {             /* child-process */
+        /* char *args[] = {"-r", "-t", "-l", (char *) 0 }; */
+        info("executing program");
+        execvp(prog, args);
+        errsv = errno;
+        info("executing program failed");
+        info("%s", strerror(errsv));
+        exit(0);
     } else if (pid == -1) {
-	info("weird error has occurred. couldn't fork.");
+        info("weird error has occurred. couldn't fork.");
     } else {
-	SetResult(&result, R_STRING, "0");
+        SetResult(&result, R_STRING, "0");
     }
 }
 

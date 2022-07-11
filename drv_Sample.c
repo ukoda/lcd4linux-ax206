@@ -114,22 +114,22 @@ static int drv_Sample_open(const char *section)
     /* don't mind about device, speed and stuff, this function will take care of */
 
     if (drv_generic_serial_open(section, Name, 0) < 0)
-	return -1;
+        return -1;
 
 
     /* opening the parallel port is a bit more tricky: */
     /* you have to do all the bit-banging yourself... */
 
     if (drv_generic_parport_open(section, Name) != 0) {
-	error("%s: could not initialize parallel port!", Name);
-	return -1;
+        error("%s: could not initialize parallel port!", Name);
+        return -1;
     }
 
     /* read the wiring from config */
     if ((SIGNAL_EX = drv_generic_parport_wire_ctrl("EX", "STROBE")) == 0xff)
-	return -1;
+        return -1;
     if ((SIGNAL_RS = drv_generic_parport_wire_ctrl("RS", "INIT")) == 0xff)
-	return -1;
+        return -1;
 
     /* clear all signals */
     drv_generic_parport_control(SIGNAL_EX | SIGNAL_RS, 0);
@@ -161,7 +161,7 @@ static void drv_Sample_send(const char *data, const unsigned int len)
 
     /* sending data to the parallel port is a bit more tricky... */
     for (i = 0; i < len; i++) {
-	drv_Sample_bang(*data++);
+        drv_Sample_bang(*data++);
     }
 }
 
@@ -208,7 +208,7 @@ static void drv_Sample_defchar(const int ascii, const unsigned char *matrix)
 
     /* send bitmap to the display */
     for (i = 0; i < 8; i++) {
-	cmd[i + 2] = *matrix++;
+        cmd[i + 2] = *matrix++;
     }
     drv_Sample_send(cmd, 10);
 }
@@ -220,16 +220,16 @@ static void drv_Sample_blit(const int row, const int col, const int height, cons
     int r, c;
 
     for (r = row; r < row + height; r++) {
-	for (c = col; c < col + width; c++) {
-	    /* drv_generic_graphic_black() returns 1 if pixel is black */
-	    /* drv_generic_graphic_gray() returns a gray value 0..255 */
-	    /* drv_generic_graphic_rgb() returns a RGB color */
-	    if (drv_generic_graphic_black(r, c)) {
-		/* set bit */
-	    } else {
-		/* clear bit */
-	    }
-	}
+        for (c = col; c < col + width; c++) {
+            /* drv_generic_graphic_black() returns 1 if pixel is black */
+            /* drv_generic_graphic_gray() returns a gray value 0..255 */
+            /* drv_generic_graphic_rgb() returns a RGB color */
+            if (drv_generic_graphic_black(r, c)) {
+                /* set bit */
+            } else {
+                /* clear bit */
+            }
+        }
     }
 }
 
@@ -257,9 +257,9 @@ static int drv_Sample_contrast(int contrast)
 
     /* adjust limits according to the display */
     if (contrast < 0)
-	contrast = 0;
+        contrast = 0;
     if (contrast > 255)
-	contrast = 255;
+        contrast = 255;
 
     /* call a 'contrast' function */
     /* assume 0x04 to be the 'set contrast' command */
@@ -281,13 +281,13 @@ static int drv_Sample_start(const char *section)
 
     s = cfg_get(section, "Size", NULL);
     if (s == NULL || *s == '\0') {
-	error("%s: no '%s.Size' entry from %s", Name, section, cfg_source());
-	return -1;
+        error("%s: no '%s.Size' entry from %s", Name, section, cfg_source());
+        return -1;
     }
     if (sscanf(s, "%dx%d", &cols, &rows) != 2 || rows < 1 || cols < 1) {
-	error("%s: bad %s.Size '%s' from %s", Name, section, s, cfg_source());
-	free(s);
-	return -1;
+        error("%s: bad %s.Size '%s' from %s", Name, section, s, cfg_source());
+        free(s);
+        return -1;
     }
 
     DROWS = rows;
@@ -298,7 +298,7 @@ static int drv_Sample_start(const char *section)
 
     /* open communication with the display */
     if (drv_Sample_open(section) < 0) {
-	return -1;
+        return -1;
     }
 
     /* reset & initialize display */
@@ -307,10 +307,10 @@ static int drv_Sample_start(const char *section)
     drv_Sample_send(cmd, 0);
 
     if (cfg_number(section, "Contrast", 0, 0, 255, &contrast) > 0) {
-	drv_Sample_contrast(contrast);
+        drv_Sample_contrast(contrast);
     }
 
-    drv_Sample_clear();		/* clear display */
+    drv_Sample_clear();         /* clear display */
 
     return 0;
 }
@@ -326,41 +326,41 @@ static int drv_Sample_start2(const char *section)
     /* read display size from config */
     s = cfg_get(section, "Size", NULL);
     if (s == NULL || *s == '\0') {
-	error("%s: no '%s.Size' entry from %s", Name, section, cfg_source());
-	return -1;
+        error("%s: no '%s.Size' entry from %s", Name, section, cfg_source());
+        return -1;
     }
 
     DROWS = -1;
     DCOLS = -1;
     if (sscanf(s, "%dx%d", &DCOLS, &DROWS) != 2 || DCOLS < 1 || DROWS < 1) {
-	error("%s: bad Size '%s' from %s", Name, s, cfg_source());
-	return -1;
+        error("%s: bad Size '%s' from %s", Name, s, cfg_source());
+        return -1;
     }
 
     s = cfg_get(section, "Font", "6x8");
     if (s == NULL || *s == '\0') {
-	error("%s: no '%s.Font' entry from %s", Name, section, cfg_source());
-	return -1;
+        error("%s: no '%s.Font' entry from %s", Name, section, cfg_source());
+        return -1;
     }
 
     XRES = -1;
     YRES = -1;
     if (sscanf(s, "%dx%d", &XRES, &YRES) != 2 || XRES < 1 || YRES < 1) {
-	error("%s: bad Font '%s' from %s", Name, s, cfg_source());
-	return -1;
+        error("%s: bad Font '%s' from %s", Name, s, cfg_source());
+        return -1;
     }
 
     /* Fixme: provider other fonts someday... */
     if (XRES != 6 && YRES != 8) {
-	error("%s: bad Font '%s' from %s (only 6x8 at the moment)", Name, s, cfg_source());
-	return -1;
+        error("%s: bad Font '%s' from %s (only 6x8 at the moment)", Name, s, cfg_source());
+        return -1;
     }
 
     /* you surely want to allocate a framebuffer or something... */
 
     /* open communication with the display */
     if (drv_Sample_open(section) < 0) {
-	return -1;
+        return -1;
     }
 
     /* reset & initialize display */
@@ -369,7 +369,7 @@ static int drv_Sample_start2(const char *section)
     drv_Sample_send(cmd, 1);
 
     if (cfg_number(section, "Contrast", 0, 0, 255, &contrast) > 0) {
-	drv_Sample_contrast(contrast);
+        drv_Sample_contrast(contrast);
     }
 
     return 0;
@@ -423,11 +423,11 @@ int drv_Sample_init(const char *section, const int quiet)
     info("%s: %s", Name, "$Rev$");
 
     /* display preferences */
-    XRES = 5;			/* pixel width of one char  */
-    YRES = 8;			/* pixel height of one char  */
-    CHARS = 8;			/* number of user-defineable characters */
-    CHAR0 = 0;			/* ASCII of first user-defineable char */
-    GOTO_COST = 2;		/* number of bytes a goto command requires */
+    XRES = 5;                   /* pixel width of one char  */
+    YRES = 8;                   /* pixel height of one char  */
+    CHARS = 8;                  /* number of user-defineable characters */
+    CHAR0 = 0;                  /* ASCII of first user-defineable char */
+    GOTO_COST = 2;              /* number of bytes a goto command requires */
 
     /* real worker functions */
     drv_generic_text_real_write = drv_Sample_write;
@@ -439,37 +439,37 @@ int drv_Sample_init(const char *section, const int quiet)
 
     /* start display */
     if ((ret = drv_Sample_start(section)) != 0)
-	return ret;
+        return ret;
 
     if (!quiet) {
-	char buffer[40];
-	qprintf(buffer, sizeof(buffer), "%s %dx%d", Name, DCOLS, DROWS);
-	if (drv_generic_text_greet(buffer, "www.bwct.de")) {
-	    sleep(3);
-	    drv_Sample_clear();
-	}
+        char buffer[40];
+        qprintf(buffer, sizeof(buffer), "%s %dx%d", Name, DCOLS, DROWS);
+        if (drv_generic_text_greet(buffer, "www.bwct.de")) {
+            sleep(3);
+            drv_Sample_clear();
+        }
     }
 
     /* initialize generic text driver */
     if ((ret = drv_generic_text_init(section, Name)) != 0)
-	return ret;
+        return ret;
 
     /* initialize generic icon driver */
     if ((ret = drv_generic_text_icon_init()) != 0)
-	return ret;
+        return ret;
 
     /* initialize generic bar driver */
     if ((ret = drv_generic_text_bar_init(0)) != 0)
-	return ret;
+        return ret;
 
     /* add fixed chars to the bar driver */
-    drv_generic_text_bar_add_segment(0, 0, 255, 32);	/* ASCII  32 = blank */
+    drv_generic_text_bar_add_segment(0, 0, 255, 32);    /* ASCII  32 = blank */
 
 
     /* initialize generic GPIO driver */
     /* remove unless you have GPO's */
     if ((ret = drv_generic_gpio_init(section, Name)) != 0)
-	return ret;
+        return ret;
 
     /* register text widget */
     wc = Widget_Text;
@@ -507,19 +507,19 @@ int drv_Sample_init2(const char *section, const int quiet)
 
     /* start display */
     if ((ret = drv_Sample_start2(section)) != 0)
-	return ret;
+        return ret;
 
     /* initialize generic graphic driver */
     if ((ret = drv_generic_graphic_init(section, Name)) != 0)
-	return ret;
+        return ret;
 
     if (!quiet) {
-	char buffer[40];
-	qprintf(buffer, sizeof(buffer), "%s %dx%d", Name, DCOLS, DROWS);
-	if (drv_generic_graphic_greet(buffer, NULL)) {
-	    sleep(3);
-	    drv_generic_graphic_clear();
-	}
+        char buffer[40];
+        qprintf(buffer, sizeof(buffer), "%s %dx%d", Name, DCOLS, DROWS);
+        if (drv_generic_graphic_greet(buffer, NULL)) {
+            sleep(3);
+            drv_generic_graphic_clear();
+        }
     }
 
     /* register plugins */
@@ -547,7 +547,7 @@ int drv_Sample_quit(const int quiet)
 
     /* say goodbye... */
     if (!quiet) {
-	drv_generic_text_greet("goodbye!", NULL);
+        drv_generic_text_greet("goodbye!", NULL);
     }
 
     debug("closing connection");
@@ -571,7 +571,7 @@ int drv_Sample_quit2(const int quiet)
 
     /* say goodbye... */
     if (!quiet) {
-	drv_generic_graphic_greet("goodbye!", NULL);
+        drv_generic_graphic_greet("goodbye!", NULL);
     }
 
     drv_generic_graphic_quit();

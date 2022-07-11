@@ -87,141 +87,141 @@ static int parse_proc_stat(void)
     /* reread every 10 msec only */
     age = hash_age(&Stat, NULL);
     if (age > 0 && age <= 10)
-	return 0;
+        return 0;
 
 #ifndef __MAC_OS_X_VERSION_10_3
 
     /* Linux Kernel, /proc-filesystem */
 
     if (stream == NULL)
-	stream = fopen("/proc/stat", "r");
+        stream = fopen("/proc/stat", "r");
     if (stream == NULL) {
-	error("fopen(/proc/stat) failed: %s", strerror(errno));
-	return -1;
+        error("fopen(/proc/stat) failed: %s", strerror(errno));
+        return -1;
     }
 
     rewind(stream);
 
     while (!feof(stream)) {
-	char buffer[1024];
-	if (fgets(buffer, sizeof(buffer), stream) == NULL)
-	    break;
+        char buffer[1024];
+        if (fgets(buffer, sizeof(buffer), stream) == NULL)
+            break;
 
-	if (strncmp(buffer, "cpu", 3) == 0) {
-	    char *key[] = { "user", "nice", "system", "idle", "iow", "irq", "sirq" };
-	    char delim[] = " \t\n";
-	    char *cpu, *beg, *end;
-	    int i;
+        if (strncmp(buffer, "cpu", 3) == 0) {
+            char *key[] = { "user", "nice", "system", "idle", "iow", "irq", "sirq" };
+            char delim[] = " \t\n";
+            char *cpu, *beg, *end;
+            int i;
 
-	    cpu = buffer;
+            cpu = buffer;
 
-	    /* skip "cpu" or "cpu0" block */
-	    if ((end = strpbrk(buffer, delim)) != NULL)
-		*end = '\0';
-	    beg = end ? end + 1 : NULL;
+            /* skip "cpu" or "cpu0" block */
+            if ((end = strpbrk(buffer, delim)) != NULL)
+                *end = '\0';
+            beg = end ? end + 1 : NULL;
 
-	    for (i = 0; i < 7 && beg != NULL; i++) {
-		while (strchr(delim, *beg))
-		    beg++;
-		if ((end = strpbrk(beg, delim)))
-		    *end = '\0';
-		hash_put2(cpu, key[i], beg);
-		beg = end ? end + 1 : NULL;
-	    }
-	}
+            for (i = 0; i < 7 && beg != NULL; i++) {
+                while (strchr(delim, *beg))
+                    beg++;
+                if ((end = strpbrk(beg, delim)))
+                    *end = '\0';
+                hash_put2(cpu, key[i], beg);
+                beg = end ? end + 1 : NULL;
+            }
+        }
 
-	else if (strncmp(buffer, "page ", 5) == 0) {
-	    char *key[] = { "in", "out" };
-	    char delim[] = " \t\n";
-	    char *beg, *end;
-	    int i;
+        else if (strncmp(buffer, "page ", 5) == 0) {
+            char *key[] = { "in", "out" };
+            char delim[] = " \t\n";
+            char *beg, *end;
+            int i;
 
-	    for (i = 0, beg = buffer + 5; i < 2 && beg != NULL; i++) {
-		while (strchr(delim, *beg))
-		    beg++;
-		if ((end = strpbrk(beg, delim)))
-		    *end = '\0';
-		hash_put2("page", key[i], beg);
-		beg = end ? end + 1 : NULL;
-	    }
-	}
+            for (i = 0, beg = buffer + 5; i < 2 && beg != NULL; i++) {
+                while (strchr(delim, *beg))
+                    beg++;
+                if ((end = strpbrk(beg, delim)))
+                    *end = '\0';
+                hash_put2("page", key[i], beg);
+                beg = end ? end + 1 : NULL;
+            }
+        }
 
-	else if (strncmp(buffer, "swap ", 5) == 0) {
-	    char *key[] = { "in", "out" };
-	    char delim[] = " \t\n";
-	    char *beg, *end;
-	    int i;
+        else if (strncmp(buffer, "swap ", 5) == 0) {
+            char *key[] = { "in", "out" };
+            char delim[] = " \t\n";
+            char *beg, *end;
+            int i;
 
-	    for (i = 0, beg = buffer + 5; i < 2 && beg != NULL; i++) {
-		while (strchr(delim, *beg))
-		    beg++;
-		if ((end = strpbrk(beg, delim)))
-		    *end = '\0';
-		hash_put2("swap", key[i], beg);
-		beg = end ? end + 1 : NULL;
-	    }
-	}
+            for (i = 0, beg = buffer + 5; i < 2 && beg != NULL; i++) {
+                while (strchr(delim, *beg))
+                    beg++;
+                if ((end = strpbrk(beg, delim)))
+                    *end = '\0';
+                hash_put2("swap", key[i], beg);
+                beg = end ? end + 1 : NULL;
+            }
+        }
 
-	else if (strncmp(buffer, "intr ", 5) == 0) {
-	    char delim[] = " \t\n";
-	    char *beg, *end, num[4];
-	    int i;
+        else if (strncmp(buffer, "intr ", 5) == 0) {
+            char delim[] = " \t\n";
+            char *beg, *end, num[4];
+            int i;
 
-	    for (i = 0, beg = buffer + 5; i < 17 && beg != NULL; i++) {
-		while (strchr(delim, *beg))
-		    beg++;
-		if ((end = strpbrk(beg, delim)))
-		    *end = '\0';
-		if (i == 0)
-		    strcpy(num, "sum");
-		else
-		    qprintf(num, sizeof(num), "%d", i - 1);
-		hash_put2("intr", num, beg);
-		beg = end ? end + 1 : NULL;
-	    }
-	}
+            for (i = 0, beg = buffer + 5; i < 17 && beg != NULL; i++) {
+                while (strchr(delim, *beg))
+                    beg++;
+                if ((end = strpbrk(beg, delim)))
+                    *end = '\0';
+                if (i == 0)
+                    strcpy(num, "sum");
+                else
+                    qprintf(num, sizeof(num), "%d", i - 1);
+                hash_put2("intr", num, beg);
+                beg = end ? end + 1 : NULL;
+            }
+        }
 
-	else if (strncmp(buffer, "disk_io:", 8) == 0) {
-	    char *key[] = { "io", "rio", "rblk", "wio", "wblk" };
-	    char delim[] = " ():,\t\n";
-	    char *dev, *beg, *end, *p;
-	    int i;
+        else if (strncmp(buffer, "disk_io:", 8) == 0) {
+            char *key[] = { "io", "rio", "rblk", "wio", "wblk" };
+            char delim[] = " ():,\t\n";
+            char *dev, *beg, *end, *p;
+            int i;
 
-	    dev = buffer + 8;
-	    while (dev != NULL) {
-		while (strchr(delim, *dev))
-		    dev++;
-		if ((end = strchr(dev, ')')))
-		    *end = '\0';
-		while ((p = strchr(dev, ',')) != NULL)
-		    *p = ':';
-		beg = end ? end + 1 : NULL;
-		for (i = 0; i < 5 && beg != NULL; i++) {
-		    while (strchr(delim, *beg))
-			beg++;
-		    if ((end = strpbrk(beg, delim)))
-			*end = '\0';
-		    hash_put3("disk_io", dev, key[i], beg);
-		    beg = end ? end + 1 : NULL;
-		}
-		dev = beg;
-	    }
-	}
+            dev = buffer + 8;
+            while (dev != NULL) {
+                while (strchr(delim, *dev))
+                    dev++;
+                if ((end = strchr(dev, ')')))
+                    *end = '\0';
+                while ((p = strchr(dev, ',')) != NULL)
+                    *p = ':';
+                beg = end ? end + 1 : NULL;
+                for (i = 0; i < 5 && beg != NULL; i++) {
+                    while (strchr(delim, *beg))
+                        beg++;
+                    if ((end = strpbrk(beg, delim)))
+                        *end = '\0';
+                    hash_put3("disk_io", dev, key[i], beg);
+                    beg = end ? end + 1 : NULL;
+                }
+                dev = beg;
+            }
+        }
 
-	else {
-	    char delim[] = " \t\n";
-	    char *beg, *end;
+        else {
+            char delim[] = " \t\n";
+            char *beg, *end;
 
-	    beg = buffer;
-	    if ((end = strpbrk(beg, delim)))
-		*end = '\0';
-	    beg = end ? end + 1 : NULL;
-	    if ((end = strpbrk(beg, delim)))
-		*end = '\0';
-	    while (strchr(delim, *beg))
-		beg++;
-	    hash_put1(buffer, beg);
-	}
+            beg = buffer;
+            if ((end = strpbrk(beg, delim)))
+                *end = '\0';
+            beg = end ? end + 1 : NULL;
+            if ((end = strpbrk(beg, delim)))
+                *end = '\0';
+            while (strchr(delim, *beg))
+                beg++;
+            hash_put1(buffer, beg);
+        }
     }
 
 #else
@@ -238,8 +238,8 @@ static int parse_proc_stat(void)
     count = HOST_CPU_LOAD_INFO_COUNT;
     err = host_statistics(mach_host_self(), HOST_CPU_LOAD_INFO, r_load, &count);
     if (KERN_SUCCESS != err) {
-	error("Error getting cpu load");
-	return -1;
+        error("Error getting cpu load");
+        return -1;
     }
     snprintf(s_val, sizeof(s_val), "%d", cpu_load.cpu_ticks[CPU_STATE_USER]);
     hash_put2("cpu", "user", s_val);
@@ -262,24 +262,24 @@ static void my_proc_stat(RESULT * result, const int argc, RESULT * argv[])
     double number;
 
     if (parse_proc_stat() < 0) {
-	SetResult(&result, R_STRING, "");
-	return;
+        SetResult(&result, R_STRING, "");
+        return;
     }
 
     switch (argc) {
     case 1:
-	string = hash_get(&Stat, R2S(argv[0]), NULL);
-	if (string == NULL)
-	    string = "";
-	SetResult(&result, R_STRING, string);
-	break;
+        string = hash_get(&Stat, R2S(argv[0]), NULL);
+        if (string == NULL)
+            string = "";
+        SetResult(&result, R_STRING, string);
+        break;
     case 2:
-	number = hash_get_delta(&Stat, R2S(argv[0]), NULL, R2N(argv[1]));
-	SetResult(&result, R_NUMBER, &number);
-	break;
+        number = hash_get_delta(&Stat, R2S(argv[0]), NULL, R2N(argv[1]));
+        SetResult(&result, R_NUMBER, &number);
+        break;
     default:
-	error("proc_stat(): wrong number of parameters");
-	SetResult(&result, R_STRING, "");
+        error("proc_stat(): wrong number of parameters");
+        SetResult(&result, R_STRING, "");
     }
 }
 
@@ -293,8 +293,8 @@ static void my_cpu(RESULT * result, RESULT * arg1, RESULT * arg2)
     double cpu_iow, cpu_irq, cpu_sirq;
 
     if (parse_proc_stat() < 0) {
-	SetResult(&result, R_STRING, "");
-	return;
+        SetResult(&result, R_STRING, "");
+        return;
     }
 
     key = R2S(arg1);
@@ -315,26 +315,26 @@ static void my_cpu(RESULT * result, RESULT * arg1, RESULT * arg2)
     cpu_total = cpu_user + cpu_nice + cpu_system + cpu_idle + cpu_iow + cpu_irq + cpu_sirq;
 
     if (strcasecmp(key, "user") == 0)
-	value = cpu_user;
+        value = cpu_user;
     else if (strcasecmp(key, "nice") == 0)
-	value = cpu_nice;
+        value = cpu_nice;
     else if (strcasecmp(key, "system") == 0)
-	value = cpu_system;
+        value = cpu_system;
     else if (strcasecmp(key, "idle") == 0)
-	value = cpu_idle;
+        value = cpu_idle;
     else if (strcasecmp(key, "iowait") == 0)
-	value = cpu_iow;
+        value = cpu_iow;
     else if (strcasecmp(key, "irq") == 0)
-	value = cpu_irq;
+        value = cpu_irq;
     else if (strcasecmp(key, "softirq") == 0)
-	value = cpu_sirq;
+        value = cpu_sirq;
     else if (strcasecmp(key, "busy") == 0)
-	value = cpu_total - cpu_idle;
+        value = cpu_total - cpu_idle;
 
     if (cpu_total > 0.0)
-	value = 100 * value / cpu_total;
+        value = 100 * value / cpu_total;
     else
-	value = 0.0;
+        value = 0.0;
 
     SetResult(&result, R_NUMBER, &value);
 }
@@ -347,8 +347,8 @@ static void my_disk(RESULT * result, RESULT * arg1, RESULT * arg2, RESULT * arg3
     double value;
 
     if (parse_proc_stat() < 0) {
-	SetResult(&result, R_STRING, "");
-	return;
+        SetResult(&result, R_STRING, "");
+        return;
     }
 
     dev = R2S(arg1);
@@ -374,8 +374,8 @@ int plugin_init_proc_stat(void)
 void plugin_exit_proc_stat(void)
 {
     if (stream != NULL) {
-	fclose(stream);
-	stream = NULL;
+        fclose(stream);
+        stream = NULL;
     }
     hash_destroy(&Stat);
 }

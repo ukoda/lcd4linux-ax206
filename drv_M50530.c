@@ -95,8 +95,8 @@ typedef struct {
 } MODEL;
 
 static MODEL Models[] = {
-    {0x01, "M50530"},
-    {0xff, "Unknown"}
+    { 0x01, "M50530" },
+    { 0xff, "Unknown" }
 };
 
 
@@ -124,55 +124,55 @@ static void drv_M5_busy(void)
     counter = 0;
     while (1) {
 
-	/* rise enable */
-	drv_generic_parport_control(SIGNAL_EX, SIGNAL_EX);
+        /* rise enable */
+        drv_generic_parport_control(SIGNAL_EX, SIGNAL_EX);
 
-	/* data output delay time */
-	ndelay(T_D);
+        /* data output delay time */
+        ndelay(T_D);
 
-	/* read the busy flag */
-	data = drv_generic_parport_read();
+        /* read the busy flag */
+        data = drv_generic_parport_read();
 
-	/* lower enable */
-	/* as T_D is larger than T_W, we don't need to delay again */
-	drv_generic_parport_control(SIGNAL_EX, 0);
+        /* lower enable */
+        /* as T_D is larger than T_W, we don't need to delay again */
+        drv_generic_parport_control(SIGNAL_EX, 0);
 
-	if ((data & busymask) == 0) {
-	    errors = 0;
-	    break;
-	}
+        if ((data & busymask) == 0) {
+            errors = 0;
+            break;
+        }
 
-	/* make sure we don't wait forever
-	 * - but only check after 5 iterations
-	 * that way, we won't slow down normal mode
-	 * (where we don't need the timeout anyway) 
-	 */
-	counter++;
+        /* make sure we don't wait forever
+         * - but only check after 5 iterations
+         * that way, we won't slow down normal mode
+         * (where we don't need the timeout anyway) 
+         */
+        counter++;
 
-	if (counter >= 5) {
-	    struct timeval now, end;
+        if (counter >= 5) {
+            struct timeval now, end;
 
-	    if (counter == 5) {
-		/* determine the time when the timeout has expired */
-		gettimeofday(&end, NULL);
-		end.tv_usec += MAX_BUSYFLAG_WAIT;
-		while (end.tv_usec > 1000000) {
-		    end.tv_usec -= 1000000;
-		    end.tv_sec++;
-		}
-	    }
+            if (counter == 5) {
+                /* determine the time when the timeout has expired */
+                gettimeofday(&end, NULL);
+                end.tv_usec += MAX_BUSYFLAG_WAIT;
+                while (end.tv_usec > 1000000) {
+                    end.tv_usec -= 1000000;
+                    end.tv_sec++;
+                }
+            }
 
-	    /* get the current time */
-	    gettimeofday(&now, NULL);
-	    if (now.tv_sec == end.tv_sec ? now.tv_usec >= end.tv_usec : now.tv_sec >= end.tv_sec) {
-		error("%s: timeout waiting for busy flag (0x%02x)", Name, data);
-		if (++errors >= MAX_BUSYFLAG_ERRORS) {
-		    error("%s: too many busy flag failures, turning off busy flag checking.", Name);
-		    UseBusy = 0;
-		}
-		break;
-	    }
-	}
+            /* get the current time */
+            gettimeofday(&now, NULL);
+            if (now.tv_sec == end.tv_sec ? now.tv_usec >= end.tv_usec : now.tv_sec >= end.tv_sec) {
+                error("%s: timeout waiting for busy flag (0x%02x)", Name, data);
+                if (++errors >= MAX_BUSYFLAG_ERRORS) {
+                    error("%s: too many busy flag failures, turning off busy flag checking.", Name);
+                    UseBusy = 0;
+                }
+                break;
+            }
+        }
     }
 
     /* clear R/W */
@@ -191,7 +191,7 @@ static void drv_M5_command(const unsigned int cmd, const int delay)
 {
 
     if (UseBusy)
-	drv_M5_busy();
+        drv_M5_busy();
 
     /* put data on DB1..DB8 */
     drv_generic_parport_data(cmd & 0xff);
@@ -200,7 +200,7 @@ static void drv_M5_command(const unsigned int cmd, const int delay)
     /* set I/OC2 */
     /* clear RW */
     drv_generic_parport_control(SIGNAL_IOC1 | SIGNAL_IOC2 | SIGNAL_RW,
-				(cmd & 0x100 ? SIGNAL_IOC1 : 0) | (cmd & 0x200 ? SIGNAL_IOC2 : 0));
+                                (cmd & 0x100 ? SIGNAL_IOC1 : 0) | (cmd & 0x200 ? SIGNAL_IOC2 : 0));
 
     /* Control data setup time */
     ndelay(T_SU);
@@ -209,18 +209,18 @@ static void drv_M5_command(const unsigned int cmd, const int delay)
     drv_generic_parport_toggle(SIGNAL_EX, 1, T_W);
 
     if (UseBusy) {
-	/* honour data hold time */
-	ndelay(T_H);
+        /* honour data hold time */
+        ndelay(T_H);
     } else {
-	/* wait for command completion */
-	udelay(delay);
+        /* wait for command completion */
+        udelay(delay);
     }
 }
 
 
 static void drv_M5_clear(void)
 {
-    drv_M5_command(0x0001, T_CLEAR);	/* clear display */
+    drv_M5_command(0x0001, T_CLEAR);    /* clear display */
 }
 
 
@@ -231,16 +231,16 @@ static void drv_M5_write(const int row, const int col, const char *data, const i
     unsigned int pos;
 
     if (row < 4) {
-	pos = row * (DDRAM >> DUTY) + col;
+        pos = row * (DDRAM >> DUTY) + col;
     } else {
-	pos = (row - 4) * (DDRAM >> DUTY) + (DDRAM >> DUTY) / 2 + col;
+        pos = (row - 4) * (DDRAM >> DUTY) + (DDRAM >> DUTY) / 2 + col;
     }
 
     drv_M5_command(0x300 | pos, T_EXEC);
 
     while (l--) {
-	cmd = *(unsigned char *) data++;
-	drv_M5_command(0x200 | cmd, T_EXEC);
+        cmd = *(unsigned char *) data++;
+        drv_M5_command(0x200 | cmd, T_EXEC);
     }
 }
 
@@ -252,7 +252,7 @@ static void drv_M5_defchar(const int ascii, const unsigned char *matrix)
     drv_M5_command(0x300 + DDRAM + 8 * (ascii - CHAR0), T_EXEC);
 
     for (i = 0; i < YRES; i++) {
-	drv_M5_command(0x200 | (matrix[i] & 0x3f), T_EXEC);
+        drv_M5_command(0x200 | (matrix[i] & 0x3f), T_EXEC);
     }
 }
 
@@ -262,13 +262,13 @@ static int drv_M5_GPO(const int num, const int val)
     int v;
 
     if (val > 0) {
-	/* set bit */
-	v = 1;
-	GPO |= 1 << num;
+        /* set bit */
+        v = 1;
+        GPO |= 1 << num;
     } else {
-	/* clear bit */
-	v = 0;
-	GPO &= ~(1 << num);
+        /* clear bit */
+        v = 0;
+        GPO &= ~(1 << num);
     }
 
     /* put data on DB1..DB8 */
@@ -294,34 +294,34 @@ static int drv_M5_start(const char *section, const int quiet)
 
     s = cfg_get(section, "Model", "M50530");
     if (s != NULL && *s != '\0') {
-	int i;
-	for (i = 0; Models[i].type != 0xff; i++) {
-	    if (strcasecmp(Models[i].name, s) == 0)
-		break;
-	}
-	free(s);
-	if (Models[i].type == 0xff) {
-	    error("%s: %s.Model '%s' is unknown from %s", Name, section, s, cfg_source());
-	    return -1;
-	}
-	Model = i;
-	info("%s: using model '%s'", Name, Models[Model].name);
+        int i;
+        for (i = 0; Models[i].type != 0xff; i++) {
+            if (strcasecmp(Models[i].name, s) == 0)
+                break;
+        }
+        free(s);
+        if (Models[i].type == 0xff) {
+            error("%s: %s.Model '%s' is unknown from %s", Name, section, s, cfg_source());
+            return -1;
+        }
+        Model = i;
+        info("%s: using model '%s'", Name, Models[Model].name);
     } else {
-	error("%s: empty '%s.Model' entry from %s", Name, section, cfg_source());
-	free(s);
-	return -1;
+        error("%s: empty '%s.Model' entry from %s", Name, section, cfg_source());
+        free(s);
+        return -1;
     }
 
     s = cfg_get(section, "Size", NULL);
     if (s == NULL || *s == '\0') {
-	error("%s: no '%s.Size' entry from %s", Name, section, cfg_source());
-	free(s);
-	return -1;
+        error("%s: no '%s.Size' entry from %s", Name, section, cfg_source());
+        free(s);
+        return -1;
     }
     if (sscanf(s, "%dx%d", &cols, &rows) != 2 || rows < 1 || cols < 1) {
-	error("%s: bad %s.Size '%s' from %s", Name, section, s, cfg_source());
-	free(s);
-	return -1;
+        error("%s: bad %s.Size '%s' from %s", Name, section, s, cfg_source());
+        free(s);
+        return -1;
     }
     free(s);
     DROWS = rows;
@@ -329,72 +329,72 @@ static int drv_M5_start(const char *section, const int quiet)
 
     s = cfg_get(section, "Font", "5x7");
     if (s == NULL && *s == '\0') {
-	error("%s: empty '%s.Font' entry from %s", Name, section, cfg_source());
-	free(s);
-	return -1;
+        error("%s: empty '%s.Font' entry from %s", Name, section, cfg_source());
+        free(s);
+        return -1;
     }
     if (strcasecmp(s, "5x7") == 0) {
-	XRES = 5;
-	YRES = 7;
-	FONT5X11 = 0;
+        XRES = 5;
+        YRES = 7;
+        FONT5X11 = 0;
     } else if (strcasecmp(s, "5x11") == 0) {
-	XRES = 5;
-	YRES = 11;
-	FONT5X11 = 1;
+        XRES = 5;
+        YRES = 11;
+        FONT5X11 = 1;
     } else {
-	error("%s: bad '%s.Font' entry '%s' from %s", Name, section, s, cfg_source());
-	error("%s: should be '5x7' or '5x11'", Name);
-	free(s);
-	return -1;
+        error("%s: bad '%s.Font' entry '%s' from %s", Name, section, s, cfg_source());
+        error("%s: should be '5x7' or '5x11'", Name);
+        free(s);
+        return -1;
     }
     free(s);
 
 
     if (DCOLS * DROWS > 256) {
-	error("%s: %s.Size '%dx%d' is too big, would require %d bytes", Name, section, DCOLS, DROWS, DCOLS * DROWS);
-	return -1;
+        error("%s: %s.Size '%dx%d' is too big, would require %d bytes", Name, section, DCOLS, DROWS, DCOLS * DROWS);
+        return -1;
     } else if (DCOLS * DROWS > 224) {
-	DDRAM = 256;
-	CHARS = 0;
+        DDRAM = 256;
+        CHARS = 0;
     } else if (DCOLS * DROWS > 192) {
-	DDRAM = 224;
-	CHARS = FONT5X11 ? 2 : 4;
+        DDRAM = 224;
+        CHARS = FONT5X11 ? 2 : 4;
     } else if (DCOLS * DROWS > 160) {
-	DDRAM = 192;
-	CHARS = FONT5X11 ? 4 : 8;
+        DDRAM = 192;
+        CHARS = FONT5X11 ? 4 : 8;
     } else {
-	DDRAM = 160;
-	CHARS = FONT5X11 ? 6 : 12;
+        DDRAM = 160;
+        CHARS = FONT5X11 ? 6 : 12;
     }
     info("%s: using %d words DDRAM / %d words CGRAM (%d user chars)", Name, DDRAM, 256 - DDRAM, CHARS);
 
     if (cfg_number(section, "DUTY", 2, 0, 2, &DUTY) < 0)
-	return -1;
+        return -1;
     info("%s: using duty %d: 1/%d, %d lines x %d words", Name, DUTY, (XRES + 1) << DUTY, 1 << DUTY, DDRAM >> DUTY);
 
 
     if (cfg_number(section, "GPOs", 0, 0, 8, &n) < 0)
-	return -1;
+        return -1;
     GPOS = n;
     if (GPOS > 0) {
-	info("%s: controlling %d GPO's", Name, GPOS);
+        info("%s: controlling %d GPO's", Name, GPOS);
     }
 
     if (drv_generic_parport_open(section, Name) != 0) {
-	error("%s: could not initialize parallel port!", Name);
-	return -1;
+        error("%s: could not initialize parallel port!", Name);
+        return -1;
     }
 
     if ((SIGNAL_RW = drv_generic_parport_wire_ctrl("RW", "GND")) == 0xff)
-	return -1;
+        return -1;
     if ((SIGNAL_EX = drv_generic_parport_wire_ctrl("EX", "STROBE")) == 0xff)
-	return -1;
+        return -1;
     if ((SIGNAL_IOC1 = drv_generic_parport_wire_ctrl("IOC1", "SLCTIN")) == 0xff)
-	return -1;
+        return -1;
     if ((SIGNAL_IOC2 = drv_generic_parport_wire_ctrl("IOC2", "AUTOFD")) == 0xff)
-	return -1;
+        return -1;
     if ((SIGNAL_GPO = drv_generic_parport_wire_ctrl("GPO", "GND")) == 0xff)
-	return -1;
+        return -1;
 
     /* Timings */
 
@@ -403,18 +403,18 @@ static int drv_M5_start(const char *section, const int quiet)
      * modification from the config file.
      */
 
-    T_SU = timing(Name, section, "SU", 200, "ns");	/* control data setup time */
-    T_W = timing(Name, section, "W", 500, "ns");	/* EX signal pulse width */
-    T_D = timing(Name, section, "D", 300, "ns");	/* Data output delay time */
-    T_H = timing(Name, section, "H", 100, "ns");	/* Data hold time */
+    T_SU = timing(Name, section, "SU", 200, "ns");      /* control data setup time */
+    T_W = timing(Name, section, "W", 500, "ns");        /* EX signal pulse width */
+    T_D = timing(Name, section, "D", 300, "ns");        /* Data output delay time */
+    T_H = timing(Name, section, "H", 100, "ns");        /* Data hold time */
 
     /* GPO timing */
     if (SIGNAL_GPO != 0) {
-	T_GPO_ST = timing(Name, section, "GPO_ST", 20, "ns");	/* 74HCT573 set-up time */
-	T_GPO_PW = timing(Name, section, "GPO_PW", 230, "ns");	/* 74HCT573 enable pulse width */
+        T_GPO_ST = timing(Name, section, "GPO_ST", 20, "ns");   /* 74HCT573 set-up time */
+        T_GPO_PW = timing(Name, section, "GPO_PW", 230, "ns");  /* 74HCT573 enable pulse width */
     } else {
-	T_GPO_ST = 0;
-	T_GPO_PW = 0;
+        T_GPO_ST = 0;
+        T_GPO_PW = 0;
     }
 
     /* M50530 execution timings [microseconds]
@@ -422,9 +422,9 @@ static int drv_M5_start(const char *section, const int quiet)
      * modification from the config file.
      */
 
-    T_EXEC = timing(Name, section, "EXEC", 20, "us");	/* normal execution time */
-    T_CLEAR = timing(Name, section, "CLEAR", 1250, "us");	/* 'clear display' execution time */
-    T_INIT = timing(Name, section, "INIT", 2000, "us");	/* mysterious initialization time */
+    T_EXEC = timing(Name, section, "EXEC", 20, "us");   /* normal execution time */
+    T_CLEAR = timing(Name, section, "CLEAR", 1250, "us");       /* 'clear display' execution time */
+    T_INIT = timing(Name, section, "INIT", 2000, "us"); /* mysterious initialization time */
 
 
     /* maybe use busy-flag from now on  */
@@ -432,8 +432,8 @@ static int drv_M5_start(const char *section, const int quiet)
 
     /* make sure we don't use the busy flag with RW wired to GND */
     if (UseBusy && !SIGNAL_RW) {
-	error("%s: busy-flag checking is impossible with RW wired to GND!", Name);
-	UseBusy = 0;
+        error("%s: busy-flag checking is impossible with RW wired to GND!", Name);
+        UseBusy = 0;
     }
     info("%s: %susing busy-flag checking", Name, UseBusy ? "" : "not ");
 
@@ -476,17 +476,17 @@ static int drv_M5_start(const char *section, const int quiet)
     /* RAM layout */
     switch (DDRAM) {
     case 160:
-	SF |= 0x03;
-	break;
+        SF |= 0x03;
+        break;
     case 192:
-	SF |= 0x02;
-	break;
+        SF |= 0x02;
+        break;
     case 224:
-	SF |= 0x01;
-	break;
+        SF |= 0x01;
+        break;
     case 256:
-	SF |= 0x00;
-	break;
+        SF |= 0x00;
+        break;
     }
 
     /* Duty */
@@ -541,12 +541,12 @@ static int drv_M5_start(const char *section, const int quiet)
     drv_M5_clear();
 
     if (!quiet) {
-	char buffer[40];
-	qprintf(buffer, sizeof(buffer), "%s %dx%d", Name, DCOLS, DROWS);
-	if (drv_generic_text_greet(buffer, NULL)) {
-	    sleep(3);
-	    drv_M5_clear();
-	}
+        char buffer[40];
+        qprintf(buffer, sizeof(buffer), "%s %dx%d", Name, DCOLS, DROWS);
+        if (drv_generic_text_greet(buffer, NULL)) {
+            sleep(3);
+            drv_M5_clear();
+        }
     }
 
     return 0;
@@ -581,7 +581,7 @@ int drv_M5_list(void)
     int i;
 
     for (i = 0; Models[i].type != 0xff; i++) {
-	printf("%s ", Models[i].name);
+        printf("%s ", Models[i].name);
     }
     return 0;
 }
@@ -596,11 +596,11 @@ int drv_M5_init(const char *section, const int quiet)
     info("%s: %s", Name, "$Rev$");
 
     /* display preferences */
-    XRES = -1;			/* pixel width of one char  */
-    YRES = -1;			/* pixel height of one char  */
-    CHARS = 0;			/* number of user-defineable characters */
-    CHAR0 = 248;		/* ASCII of first user-defineable char */
-    GOTO_COST = 1;		/* number of bytes a goto command requires */
+    XRES = -1;                  /* pixel width of one char  */
+    YRES = -1;                  /* pixel height of one char  */
+    CHARS = 0;                  /* number of user-defineable characters */
+    CHAR0 = 248;                /* ASCII of first user-defineable char */
+    GOTO_COST = 1;              /* number of bytes a goto command requires */
 
     /* real worker functions */
     drv_generic_text_real_write = drv_M5_write;
@@ -610,26 +610,26 @@ int drv_M5_init(const char *section, const int quiet)
 
     /* start display */
     if ((ret = drv_M5_start(section, quiet)) != 0)
-	return ret;
+        return ret;
 
     /* initialize generic text driver */
     if ((ret = drv_generic_text_init(section, Name)) != 0)
-	return ret;
+        return ret;
 
     /* initialize generic icon driver */
     if ((ret = drv_generic_text_icon_init()) != 0)
-	return ret;
+        return ret;
 
     /* initialize generic bar driver */
     if ((ret = drv_generic_text_bar_init(0)) != 0)
-	return ret;
+        return ret;
 
     /* add fixed chars to the bar driver */
-    drv_generic_text_bar_add_segment(0, 0, 255, 32);	/* ASCII  32 = blank */
+    drv_generic_text_bar_add_segment(0, 0, 255, 32);    /* ASCII  32 = blank */
 
     /* initialize generic GPIO driver */
     if ((ret = drv_generic_gpio_init(section, Name)) != 0)
-	return ret;
+        return ret;
 
     /* register text widget */
     wc = Widget_Text;
@@ -667,7 +667,7 @@ int drv_M5_quit(const int quiet)
 
     /* say goodbye... */
     if (!quiet) {
-	drv_generic_text_greet("goodbye!", NULL);
+        drv_generic_text_greet("goodbye!", NULL);
     }
 
     /* clear all signals */

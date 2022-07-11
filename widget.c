@@ -66,15 +66,15 @@ int widget_register(WIDGET_CLASS * widget)
     /* widget has been added, because we use realloc here, and there may  */
     /* be pointers to the old memory area */
     if (widget_added) {
-	error("internal error: register_widget(%s) after add_widget()", widget->name);
-	return -1;
+        error("internal error: register_widget(%s) after add_widget()", widget->name);
+        return -1;
     }
 
     for (i = 0; i < nClasses; i++) {
-	if (strcasecmp(widget->name, Classes[i].name) == 0) {
-	    error("internal error: widget '%s' already exists!", widget->name);
-	    return -1;
-	}
+        if (strcasecmp(widget->name, Classes[i].name) == 0) {
+            error("internal error: widget '%s' already exists!", widget->name);
+            return -1;
+        }
     }
 
     nClasses++;
@@ -88,9 +88,9 @@ void widget_unregister(void)
 {
     int i;
     for (i = 0; i < nWidgets; i++) {
-	Widgets[i].class->quit(&(Widgets[i]));
-	if (Widgets[i].name)
-	    free(Widgets[i].name);
+        Widgets[i].class->quit(&(Widgets[i]));
+        if (Widgets[i].name)
+            free(Widgets[i].name);
     }
     free(Widgets);
 
@@ -112,17 +112,17 @@ int widget_color(const char *section, const char *name, const char *key, RGBA * 
     color = cfg_get(section, key, NULL);
 
     if (color == NULL)
-	return 0;
+        return 0;
 
     if (*color == '\0') {
-	free(color);
-	return 0;
+        free(color);
+        return 0;
     }
 
     if (color2RGBA(color, C) < 0) {
-	error("widget '%s': ignoring illegal %s color '%s'", name, key, color);
-	free(color);
-	return 0;
+        error("widget '%s': ignoring illegal %s color '%s'", name, key, color);
+        free(color);
+        return 0;
     }
     free(color);
     return 1;
@@ -130,12 +130,12 @@ int widget_color(const char *section, const char *name, const char *key, RGBA * 
 
 int intersect(WIDGET * w1, WIDGET * w2)
 {
-    int x1w1, y1w1, x2w1, y2w1;	/* 1st rectangle */
-    int x1w2, y1w2, x2w2, y2w2;	/* 2nd rectangle */
+    int x1w1, y1w1, x2w1, y2w1; /* 1st rectangle */
+    int x1w2, y1w2, x2w2, y2w2; /* 2nd rectangle */
 
     if (w1->x2 == NOCOORD || w1->y2 == NOCOORD || w2->x2 == NOCOORD || w2->y2 == NOCOORD) {
-	/* w1 or w2 is no display widget: no intersection */
-	return 0;
+        /* w1 or w2 is no display widget: no intersection */
+        return 0;
     }
     x1w1 = MIN(w1->col, w1->x2);
     x2w1 = MAX(w1->col, w1->x2);
@@ -147,10 +147,10 @@ int intersect(WIDGET * w1, WIDGET * w2)
     y2w2 = MAX(w2->row, w2->y2);
 
     if (x1w2 < x2w1 && x2w2 > x1w1 && y1w2 < y2w1 && y2w2 > y1w1) {
-	/* true: Intersection */
-	return 1;
+        /* true: Intersection */
+        return 1;
     } else {
-	return 0;
+        return 0;
     }
 }
 
@@ -175,11 +175,11 @@ int widget_add(const char *name, const int type, const int layer, const int row,
     /* get widget class */
     class = cfg_get(section, "class", NULL);
     if (class == NULL || *class == '\0') {
-	error("error: widget '%s' has no class!", name);
-	if (class)
-	    free(class);
-	free(section);
-	return -1;
+        error("error: widget '%s' has no class!", name);
+        if (class)
+            free(class);
+        free(section);
+        return -1;
     }
 
     /* get widget foreground color */
@@ -191,65 +191,65 @@ int widget_add(const char *name, const int type, const int layer, const int row,
     /* lookup widget class */
     Class = NULL;
     for (i = 0; i < nClasses; i++) {
-	if (strcasecmp(class, Classes[i].name) == 0) {
-	    Class = &(Classes[i]);
-	    break;
-	}
+        if (strcasecmp(class, Classes[i].name) == 0) {
+            Class = &(Classes[i]);
+            break;
+        }
     }
     if (i == nClasses) {
-	error("widget '%s': class '%s' not supported", name, class);
-	if (class)
-	    free(class);
-	return -1;
+        error("widget '%s': class '%s' not supported", name, class);
+        if (class)
+            free(class);
+        return -1;
     }
 
     /* check if widget type matches */
     if (Class->type != type) {
-	error("widget '%s': class '%s' not applicable", name, class);
-	switch (Class->type) {
-	case WIDGET_TYPE_RC:
-	    error("  Widgetclass %s is placed by Row/Column", class);
-	    break;
-	case WIDGET_TYPE_XY:
-	    error("  Widgetclass %s is placed by X/Y", class);
-	    break;
-	case WIDGET_TYPE_GPO:
-	case WIDGET_TYPE_TIMER:
-	case WIDGET_TYPE_KEYPAD:
-	default:
-	    error("  Widgetclass %s has unknown type %d", class, Class->type);
-	}
-	free(class);
-	return -1;
+        error("widget '%s': class '%s' not applicable", name, class);
+        switch (Class->type) {
+        case WIDGET_TYPE_RC:
+            error("  Widgetclass %s is placed by Row/Column", class);
+            break;
+        case WIDGET_TYPE_XY:
+            error("  Widgetclass %s is placed by X/Y", class);
+            break;
+        case WIDGET_TYPE_GPO:
+        case WIDGET_TYPE_TIMER:
+        case WIDGET_TYPE_KEYPAD:
+        default:
+            error("  Widgetclass %s has unknown type %d", class, Class->type);
+        }
+        free(class);
+        return -1;
     }
 
     if (class)
-	free(class);
+        free(class);
 
 
     /* do NOT use realloc here because there may be pointers to the old */
     /* memory area, which would point to nowhere if realloc moves the area */
     if (Widgets == NULL) {
-	Widgets = malloc(MAX_WIDGETS * sizeof(WIDGET));
-	if (Widgets == NULL) {
-	    error("internal error: allocation of widget buffer failed: %s", strerror(errno));
-	    return -1;
-	}
+        Widgets = malloc(MAX_WIDGETS * sizeof(WIDGET));
+        if (Widgets == NULL) {
+            error("internal error: allocation of widget buffer failed: %s", strerror(errno));
+            return -1;
+        }
     }
 
     /* another sanity check */
     if (nWidgets >= MAX_WIDGETS) {
-	error("internal error: widget buffer full! Tried to allocate %d widgets (max: %d)", nWidgets, MAX_WIDGETS);
-	return -1;
+        error("internal error: widget buffer full! Tried to allocate %d widgets (max: %d)", nWidgets, MAX_WIDGETS);
+        return -1;
     }
 
     /* look up parent widget (widget with the same name) */
     Parent = NULL;
     for (i = 0; i < nWidgets; i++) {
-	if (strcmp(name, Widgets[i].name) == 0) {
-	    Parent = &(Widgets[i]);
-	    break;
-	}
+        if (strcmp(name, Widgets[i].name) == 0) {
+            Parent = &(Widgets[i]);
+            break;
+        }
     }
 
     Widget = &(Widgets[nWidgets]);
@@ -267,23 +267,23 @@ int widget_add(const char *name, const int type, const int layer, const int row,
     Widget->col = col;
 
     if (Class->init != NULL) {
-	Class->init(Widget);
+        Class->init(Widget);
     }
 
     info(" widget '%s': Class '%s', Parent '%s', Layer %d, %s %d, %s %d (to %d,%d)",
-	 name, (NULL == Class) ? "<none>" : Class->name,
-	 (NULL == Parent) ? "<root>" : Parent->name,
-	 layer, (WIDGET_TYPE_XY == Class->type) ? "Y" : "Row", row, (WIDGET_TYPE_XY == Class->type) ? "X" : "Col", col,
-	 Widget->y2, Widget->x2);
+         name, (NULL == Class) ? "<none>" : Class->name,
+         (NULL == Parent) ? "<root>" : Parent->name,
+         layer, (WIDGET_TYPE_XY == Class->type) ? "Y" : "Row", row, (WIDGET_TYPE_XY == Class->type) ? "X" : "Col", col,
+         Widget->y2, Widget->x2);
 
     /* sanity check: look for overlapping widgets */
     for (i = 0; i < nWidgets - 1; i++) {
-	if (Widgets[i].layer == layer) {
-	    if (intersect(&(Widgets[i]), Widget)) {
-		info("WARNING widget %s(%i,%i) intersects with %s(%i,%i) on layer %d",
-		     Widgets[i].name, Widgets[i].row, Widgets[i].col, name, row, col, layer);
-	    }
-	}
+        if (Widgets[i].layer == layer) {
+            if (intersect(&(Widgets[i]), Widget)) {
+                info("WARNING widget %s(%i,%i) intersects with %s(%i,%i) on layer %d",
+                     Widgets[i].name, Widgets[i].row, Widgets[i].col, name, row, col, layer);
+            }
+        }
     }
 
     return 0;
@@ -296,12 +296,12 @@ WIDGET *widget_find(int type, void *needle)
     int i;
 
     for (i = 0; i < nWidgets; i++) {
-	widget = &(Widgets[i]);
-	if (widget->class->type == type) {
-	    if (widget->class->find != NULL && widget->class->find(widget, needle) == 0)
-		break;
-	}
-	widget = NULL;
+        widget = &(Widgets[i]);
+        if (widget->class->type == type) {
+            if (widget->class->find != NULL && widget->class->find(widget, needle) == 0)
+                break;
+        }
+        widget = NULL;
     }
 
     return widget;

@@ -65,8 +65,8 @@ static void drv_LT_clear(void)
 {
     char cmd[1];
 
-    cmd[0] = LCD_CLEAR;		/* clear display */
-    drv_generic_serial_write(cmd, 1);	/* clear screen */
+    cmd[0] = LCD_CLEAR;         /* clear display */
+    drv_generic_serial_write(cmd, 1);   /* clear screen */
 }
 
 
@@ -94,15 +94,15 @@ static void drv_LT_write(const int row, const int col, const char *data, int len
 
     /* 16x4 Displays use a slightly different layout */
     if (DCOLS == 16 && DROWS == 4) {
-	pos = (row % 2) * 64 + (row / 2) * 16 + col;
+        pos = (row % 2) * 64 + (row / 2) * 16 + col;
     } else {
-	pos = (row % 2) * 64 + (row / 2) * 20 + col;
+        pos = (row % 2) * 64 + (row / 2) * 20 + col;
     }
 
     drv_LT_command(0x80 | pos);
 
     while (len--) {
-	drv_LT_send(LCD_DATA, *data++);
+        drv_LT_send(LCD_DATA, *data++);
     }
 }
 
@@ -113,7 +113,7 @@ static void drv_LT_defchar(const int ascii, const unsigned char *matrix)
     drv_LT_command(0x40 | 8 * ascii);
 
     for (i = 0; i < 8; i++) {
-	drv_LT_send(LCD_DATA, *matrix++ & 0x1f);
+        drv_LT_send(LCD_DATA, *matrix++ & 0x1f);
     }
 }
 
@@ -124,37 +124,37 @@ static int drv_LT_start(const char *section, const int quiet)
     char *s;
 
     if (drv_generic_serial_open(section, Name, 0) < 0)
-	return -1;
+        return -1;
 
     s = cfg_get(section, "Size", NULL);
     if (s == NULL || *s == '\0') {
-	error("%s: no '%s.Size' entry from %s", Name, section, cfg_source());
-	return -1;
+        error("%s: no '%s.Size' entry from %s", Name, section, cfg_source());
+        return -1;
     }
     if (sscanf(s, "%dx%d", &cols, &rows) != 2 || rows < 1 || cols < 1) {
-	error("%s: bad %s.Size '%s' from %s", Name, section, s, cfg_source());
-	free(s);
-	return -1;
+        error("%s: bad %s.Size '%s' from %s", Name, section, s, cfg_source());
+        free(s);
+        return -1;
     }
 
     DROWS = rows;
     DCOLS = cols;
 
     /* initialize display */
-    drv_LT_command(0x29);	/* 8 Bit mode, 1/16 duty cycle, 5x8 font */
-    drv_LT_command(0x08);	/* Display off, cursor off, blink off */
-    drv_LT_command(0x0c);	/* Display on, cursor off, blink off */
-    drv_LT_command(0x06);	/* curser moves to right, no shift */
+    drv_LT_command(0x29);       /* 8 Bit mode, 1/16 duty cycle, 5x8 font */
+    drv_LT_command(0x08);       /* Display off, cursor off, blink off */
+    drv_LT_command(0x0c);       /* Display on, cursor off, blink off */
+    drv_LT_command(0x06);       /* curser moves to right, no shift */
 
-    drv_LT_clear();		/* clear display */
+    drv_LT_clear();             /* clear display */
 
     if (!quiet) {
-	char buffer[40];
-	qprintf(buffer, sizeof(buffer), "%s %dx%d", Name, DCOLS, DROWS);
-	if (drv_generic_text_greet(buffer, "www.bwct.de")) {
-	    sleep(3);
-	    drv_LT_clear();
-	}
+        char buffer[40];
+        qprintf(buffer, sizeof(buffer), "%s %dx%d", Name, DCOLS, DROWS);
+        if (drv_generic_text_greet(buffer, "www.bwct.de")) {
+            sleep(3);
+            drv_LT_clear();
+        }
     }
 
     return 0;
@@ -201,13 +201,13 @@ int drv_LT_init(const char *section, const int quiet)
     info("%s: %s", Name, "$Rev$");
 
     /* display preferences */
-    XRES = 5;			/* pixel width of one char  */
-    YRES = 8;			/* pixel height of one char  */
-    CHARS = 8;			/* number of user-defineable characters */
-    CHAR0 = 0;			/* ASCII of first user-defineable char */
+    XRES = 5;                   /* pixel width of one char  */
+    YRES = 8;                   /* pixel height of one char  */
+    CHARS = 8;                  /* number of user-defineable characters */
+    CHAR0 = 0;                  /* ASCII of first user-defineable char */
 
     /* Fixme: */
-    GOTO_COST = 2;		/* number of bytes a goto command requires */
+    GOTO_COST = 2;              /* number of bytes a goto command requires */
 
     /* real worker functions */
     drv_generic_text_real_write = drv_LT_write;
@@ -216,28 +216,28 @@ int drv_LT_init(const char *section, const int quiet)
 
     /* start display */
     if ((ret = drv_LT_start(section, quiet)) != 0)
-	return ret;
+        return ret;
 
     /* initialize generic text driver */
     if ((ret = drv_generic_text_init(section, Name)) != 0)
-	return ret;
+        return ret;
 
     /* initialize generic icon driver */
     if ((ret = drv_generic_text_icon_init()) != 0)
-	return ret;
+        return ret;
 
     /* initialize generic bar driver */
     if ((ret = drv_generic_text_bar_init(0)) != 0)
-	return ret;
+        return ret;
 
     /* add fixed chars to the bar driver */
     /* most displays have a full block on ascii 255, but some have kind of  */
     /* an 'inverted P'. If you specify 'asc255bug 1 in the config, this */
     /* char will not be used, but rendered by the bar driver */
     cfg_number(section, "asc255bug", 0, 0, 1, &asc255bug);
-    drv_generic_text_bar_add_segment(0, 0, 255, 32);	/* ASCII  32 = blank */
+    drv_generic_text_bar_add_segment(0, 0, 255, 32);    /* ASCII  32 = blank */
     if (!asc255bug)
-	drv_generic_text_bar_add_segment(255, 255, 255, 255);	/* ASCII 255 = block */
+        drv_generic_text_bar_add_segment(255, 255, 255, 255);   /* ASCII 255 = block */
 
     /* register text widget */
     wc = Widget_Text;
@@ -274,7 +274,7 @@ int drv_LT_quit(const int quiet)
 
     /* say goodbye... */
     if (!quiet) {
-	drv_generic_text_greet("goodbye!", NULL);
+        drv_generic_text_greet("goodbye!", NULL);
     }
 
     drv_generic_serial_close();

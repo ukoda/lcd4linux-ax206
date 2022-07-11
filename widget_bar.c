@@ -63,59 +63,59 @@ void widget_bar_update(void *Self)
     val1 = P2N(&Bar->expression1);
 
     if (property_valid(&Bar->expression2)) {
-	property_eval(&Bar->expression2);
-	val2 = P2N(&Bar->expression2);
+        property_eval(&Bar->expression2);
+        val2 = P2N(&Bar->expression2);
     } else {
-	val2 = val1;
+        val2 = val1;
     }
 
     /* minimum: if expression is empty, do auto-scaling */
     if (property_valid(&Bar->expr_min)) {
-	property_eval(&Bar->expr_min);
-	min = P2N(&Bar->expr_min);
+        property_eval(&Bar->expr_min);
+        min = P2N(&Bar->expr_min);
     } else {
-	min = Bar->min;
-	if (val1 < min) {
-	    min = val1;
-	}
-	if (val2 < min) {
-	    min = val2;
-	}
+        min = Bar->min;
+        if (val1 < min) {
+            min = val1;
+        }
+        if (val2 < min) {
+            min = val2;
+        }
     }
 
     /* maximum: if expression is empty, do auto-scaling */
     if (property_valid(&Bar->expr_max)) {
-	property_eval(&Bar->expr_max);
-	max = P2N(&Bar->expr_max);
+        property_eval(&Bar->expr_max);
+        max = P2N(&Bar->expr_max);
     } else {
-	max = Bar->max;
-	if (val1 > max) {
-	    max = val1;
-	}
-	if (val2 > max) {
-	    max = val2;
-	}
+        max = Bar->max;
+        if (val1 > max) {
+            max = val1;
+        }
+        if (val2 > max) {
+            max = val2;
+        }
     }
 
     /* debugging */
     if (Bar->min != min || Bar->max != max) {
-	debug("Bar '%s': new scale %G - %G", W->name, min, max);
+        debug("Bar '%s': new scale %G - %G", W->name, min, max);
     }
 
     /* calculate bar values */
     Bar->min = min;
     Bar->max = max;
     if (max > min) {
-	Bar->val1 = (val1 - min) / (max - min);
-	Bar->val2 = (val2 - min) / (max - min);
+        Bar->val1 = (val1 - min) / (max - min);
+        Bar->val2 = (val2 - min) / (max - min);
     } else {
-	Bar->val1 = 0.0;
-	Bar->val2 = 0.0;
+        Bar->val1 = 0.0;
+        Bar->val2 = 0.0;
     }
 
     /* finally, draw it! */
     if (W->class->draw)
-	W->class->draw(W);
+        W->class->draw(W);
 
 }
 
@@ -143,7 +143,7 @@ int widget_bar_init(WIDGET * Self)
 
     /* sanity checks */
     if (!property_valid(&Bar->expression1)) {
-	error("Warning: widget %s has no expression", section);
+        error("Warning: widget %s has no expression", section);
     }
 
     /* bar length, default 1 */
@@ -153,29 +153,29 @@ int widget_bar_init(WIDGET * Self)
     c = cfg_get(section, "direction", "E");
     switch (toupper(*c)) {
     case 'E':
-	Bar->direction = DIR_EAST;
-	Self->x2 = Self->col + Bar->length - 1;
-	Self->y2 = Self->row;
-	break;
+        Bar->direction = DIR_EAST;
+        Self->x2 = Self->col + Bar->length - 1;
+        Self->y2 = Self->row;
+        break;
     case 'W':
-	Bar->direction = DIR_WEST;
-	Self->x2 = Self->col + Bar->length - 1;
-	Self->y2 = Self->row;
-	break;
+        Bar->direction = DIR_WEST;
+        Self->x2 = Self->col + Bar->length - 1;
+        Self->y2 = Self->row;
+        break;
     case 'N':
-	Bar->direction = DIR_NORTH;
-	Self->x2 = Self->col;
-	Self->y2 = Self->row + Bar->length - 1;
-	break;
+        Bar->direction = DIR_NORTH;
+        Self->x2 = Self->col;
+        Self->y2 = Self->row + Bar->length - 1;
+        break;
     case 'S':
-	Bar->direction = DIR_SOUTH;
-	Self->x2 = Self->col;
-	Self->y2 = Self->row + Bar->length - 1;
-	break;
+        Bar->direction = DIR_SOUTH;
+        Self->x2 = Self->col;
+        Self->y2 = Self->row + Bar->length - 1;
+        break;
     default:
-	error("widget %s has unknown direction '%s'; known directions: 'E', 'W', 'N', 'S'; using 'E(ast)'", Self->name,
-	      c);
-	Bar->direction = DIR_EAST;
+        error("widget %s has unknown direction '%s'; known directions: 'E', 'W', 'N', 'S'; using 'E(ast)'", Self->name,
+              c);
+        Bar->direction = DIR_EAST;
     }
     free(c);
 
@@ -183,14 +183,14 @@ int widget_bar_init(WIDGET * Self)
     c = cfg_get(section, "style", "0");
     switch (toupper(*c)) {
     case 'H':
-	Bar->style = STYLE_HOLLOW;
-	break;
+        Bar->style = STYLE_HOLLOW;
+        break;
     case '0':
-	Bar->style = 0;
-	break;
+        Bar->style = 0;
+        break;
     default:
-	error("widget %s has unknown style '%s'; known styles: '0' or 'H'; using '0'", Self->name, c);
-	Bar->style = 0;
+        error("widget %s has unknown style '%s'; known styles: '0' or 'H'; using '0'", Self->name, c);
+        Bar->style = 0;
     }
     free(c);
 
@@ -213,15 +213,15 @@ int widget_bar_init(WIDGET * Self)
 int widget_bar_quit(WIDGET * Self)
 {
     if (Self) {
-	if (Self->data) {
-	    WIDGET_BAR *Bar = Self->data;
-	    property_free(&Bar->expression1);
-	    property_free(&Bar->expression2);
-	    property_free(&Bar->expr_min);
-	    property_free(&Bar->expr_max);
-	    free(Self->data);
-	}
-	Self->data = NULL;
+        if (Self->data) {
+            WIDGET_BAR *Bar = Self->data;
+            property_free(&Bar->expression1);
+            property_free(&Bar->expression2);
+            property_free(&Bar->expr_min);
+            property_free(&Bar->expr_max);
+            free(Self->data);
+        }
+        Self->data = NULL;
     }
 
 

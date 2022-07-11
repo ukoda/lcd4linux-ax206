@@ -80,12 +80,12 @@ void property_load(const char *section, const char *name, const char *defval, PR
     expression = cfg_get_raw(section, name, NULL);
 
     if (expression == NULL) {
-	if (defval != NULL && *defval != '\0')
-	    debug("Notice: using default value <%s> for property '%s.%s'", defval, section, name);
-	prop->expression = (char *) defval;
+        if (defval != NULL && *defval != '\0')
+            debug("Notice: using default value <%s> for property '%s.%s'", defval, section, name);
+        prop->expression = (char *) defval;
     } else {
-	prop->valid = 1;
-	prop->expression = expression;
+        prop->valid = 1;
+        prop->expression = expression;
     }
 
     /* pre-compile the expression */
@@ -117,18 +117,18 @@ int property_eval(PROPERTY * prop)
     /* check if property value has changed */
     update = 1;
     if (prop->result.type & R_NUMBER && old.type & R_NUMBER && prop->result.number == old.number) {
-	update = 0;
+        update = 0;
     }
     if (prop->result.type & R_STRING && old.type & R_STRING && prop->result.size == old.size) {
-	if (prop->result.string == NULL && old.string == NULL) {
-	    update = 0;
-	} else if (prop->result.string != NULL && old.string != NULL && strcmp(prop->result.string, old.string) == 0) {
-	    update = 0;
-	}
+        if (prop->result.string == NULL && old.string == NULL) {
+            update = 0;
+        } else if (prop->result.string != NULL && old.string != NULL && strcmp(prop->result.string, old.string) == 0) {
+            update = 0;
+        }
     }
 
     if (old.string)
-	free(old.string);
+        free(old.string);
 
     return update;
 }
@@ -137,8 +137,8 @@ int property_eval(PROPERTY * prop)
 double P2N(PROPERTY * prop)
 {
     if (prop == NULL) {
-	error("Property: internal error: NULL property");
-	return 0.0;
+        error("Property: internal error: NULL property");
+        return 0.0;
     }
     return R2N(&prop->result);
 }
@@ -147,8 +147,8 @@ double P2N(PROPERTY * prop)
 char *P2S(PROPERTY * prop)
 {
     if (prop == NULL) {
-	error("Property: internal error: NULL property");
-	return NULL;
+        error("Property: internal error: NULL property");
+        return NULL;
     }
     return R2S(&prop->result);
 }
@@ -156,18 +156,18 @@ char *P2S(PROPERTY * prop)
 void property_free(PROPERTY * prop)
 {
     if (prop->name != NULL) {
-	free(prop->name);
-	prop->name = NULL;
+        free(prop->name);
+        prop->name = NULL;
     }
 
     if (prop->expression != NULL) {
-	/* do *not* free expression */
-	prop->expression = NULL;
+        /* do *not* free expression */
+        prop->expression = NULL;
     }
 
     if (prop->compiled != NULL) {
-	free(prop->compiled);
-	prop->compiled = NULL;
+        free(prop->compiled);
+        prop->compiled = NULL;
     }
 
     DelResult(&prop->result);

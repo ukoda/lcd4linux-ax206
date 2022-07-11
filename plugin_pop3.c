@@ -96,7 +96,7 @@ static struct check *check_node_alloc(void)
     struct check *new_check;
     new_check = (struct check *) calloc(1, sizeof(struct check));
     if (new_check == NULL) {
-	error("[POP3] out of memory\n");
+        error("[POP3] out of memory\n");
     }
     return new_check;
 }
@@ -111,12 +111,12 @@ static void check_destroy(struct check **head)
 {
     struct check *iter;
     while (*head) {
-	iter = (*head)->next;
-	free((*head)->username);
-	free((*head)->password);
-	free((*head)->server);
-	free(*head);
-	*head = iter;
+        iter = (*head)->next;
+        free((*head)->username);
+        free((*head)->password);
+        free((*head)->server);
+        free(*head);
+        *head = iter;
     }
     *head = NULL;
 }
@@ -128,51 +128,51 @@ static void pop3_check_messages(struct check *hi, int verbose)
     int sockfd;
 
     if ((sockfd = tcp_connect(hi)) < 0) {
-	hi->messages = -1;
-	return;
+        hi->messages = -1;
+        return;
     }
 
-    pop3_recv_crlf_terminated(sockfd, buf, sizeof(buf));	/* server greeting */
+    pop3_recv_crlf_terminated(sockfd, buf, sizeof(buf));        /* server greeting */
     if (verbose)
-	info("[POP3] %s -> %s\n", hi->server, buf);
+        info("[POP3] %s -> %s\n", hi->server, buf);
 
     snprintf(buf, sizeof(buf), "USER %s\r\n", hi->username);
     write(sockfd, buf, strlen(buf));
     buf[strlen(buf) - 1] = '\0';
     if (verbose)
-	info("[POP3] %s <- %s\n", hi->server, buf);
-    pop3_recv_crlf_terminated(sockfd, buf, sizeof(buf));	/* response from USER command */
+        info("[POP3] %s <- %s\n", hi->server, buf);
+    pop3_recv_crlf_terminated(sockfd, buf, sizeof(buf));        /* response from USER command */
     if (verbose)
-	info("[POP3] %s -> %s\n", hi->server, buf);
+        info("[POP3] %s -> %s\n", hi->server, buf);
 
     snprintf(buf, sizeof(buf), "PASS %s\r\n", hi->password);
     write(sockfd, buf, strlen(buf));
     if (verbose)
-	info("[POP3] %s <- PASS ???\n", hi->server);
-    pop3_recv_crlf_terminated(sockfd, buf, sizeof(buf));	/* response from PASS command */
+        info("[POP3] %s <- PASS ???\n", hi->server);
+    pop3_recv_crlf_terminated(sockfd, buf, sizeof(buf));        /* response from PASS command */
     if (verbose)
-	info("[POP3] %s -> %s\n", hi->server, buf);
+        info("[POP3] %s -> %s\n", hi->server, buf);
 
     if (strncmp(buf, LOCKEDERR, strlen(LOCKEDERR)) == 0) {
-	hi->messages = -2;
-	close(sockfd);
-	return;
+        hi->messages = -2;
+        close(sockfd);
+        return;
     }
     if (strncmp(buf, POPERR, strlen(POPERR)) == 0) {
-	error("[POP3] error logging into %s\n", hi->server);
-	error("[POP3] server responded: %s\n", buf);
-	hi->messages = -1;
-	close(sockfd);
-	return;
+        error("[POP3] error logging into %s\n", hi->server);
+        error("[POP3] server responded: %s\n", buf);
+        hi->messages = -1;
+        close(sockfd);
+        return;
     }
 
     snprintf(buf, sizeof(buf), "STAT\r\n");
     write(sockfd, buf, strlen(buf));
     if (verbose)
-	info("[POP3] %s <- STAT\n", hi->server);
-    pop3_recv_crlf_terminated(sockfd, buf, sizeof(buf));	/* response from PASS command */
+        info("[POP3] %s <- STAT\n", hi->server);
+    pop3_recv_crlf_terminated(sockfd, buf, sizeof(buf));        /* response from PASS command */
     if (verbose)
-	info("[POP3] %s -> %s\n", hi->server, buf);
+        info("[POP3] %s -> %s\n", hi->server, buf);
 
     strtok(buf, " ");
     hi->messages = atoi(strtok(NULL, " "));
@@ -180,10 +180,10 @@ static void pop3_check_messages(struct check *hi, int verbose)
     snprintf(buf, sizeof(buf), "QUIT\r\n");
     write(sockfd, buf, strlen(buf));
     if (verbose)
-	info("[POP3] %s <- QUIT\n", hi->server);
-    pop3_recv_crlf_terminated(sockfd, buf, sizeof(buf));	/* response from QUIT command */
+        info("[POP3] %s <- QUIT\n", hi->server);
+    pop3_recv_crlf_terminated(sockfd, buf, sizeof(buf));        /* response from QUIT command */
     if (verbose)
-	info("[POP3] %s -> %s\n", hi->server, buf);
+        info("[POP3] %s -> %s\n", hi->server, buf);
 
     close(sockfd);
 }
@@ -195,7 +195,7 @@ static void pop3_recv_crlf_terminated(int sockfd, char *buf, int size)
     int bytes = 0;
     memset(buf, 0, size);
     while ((pos = strstr(buf, "\r\n")) == NULL)
-	bytes += read(sockfd, buf + bytes, size - bytes);
+        bytes += read(sockfd, buf + bytes, size - bytes);
     *pos = '\0';
 }
 
@@ -207,11 +207,11 @@ static int tcp_connect(struct check *hi)
     int sockfd;
 
     if (hi == NULL)
-	return -1;
+        return -1;
 
     if (!he) {
-	error("[POP3] Failed to lookup %s\n", hi->server);
-	return (-1);
+        error("[POP3] Failed to lookup %s\n", hi->server);
+        return (-1);
     }
 
     memset((char *) &addr, 0, sizeof(struct sockaddr_in));
@@ -220,14 +220,14 @@ static int tcp_connect(struct check *hi)
     addr.sin_port = htons(hi->port);
 
     if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
-	perror("socket()");
-	return (-1);
+        perror("socket()");
+        return (-1);
     }
 
     if (connect(sockfd, (struct sockaddr *) &addr, sizeof(struct sockaddr)) < 0) {
-	perror("connect()");
-	close(sockfd);
-	return (-1);
+        perror("connect()");
+        close(sockfd);
+        return (-1);
     }
 
     return (sockfd);
@@ -244,45 +244,45 @@ static int getConfig(void)
     char *port = (char *) calloc(1, sizeof("port") + sizeof(int));
 
     for (i = 1; i <= MAX_NUM_ACCOUNTS; i++) {
-	char *x;
-	sprintf(user, "user%d", i);
-	sprintf(password, "password%d", i);
-	sprintf(server, "server%d", i);
-	sprintf(port, "port%d", i);
+        char *x;
+        sprintf(user, "user%d", i);
+        sprintf(password, "password%d", i);
+        sprintf(server, "server%d", i);
+        sprintf(port, "port%d", i);
 
-	x = cfg_get(Section, server, "");
-	if (*x == '\0') {
-	    info("[POP3] No '%s.%s' entry from %s, disabling POP3 account #%d", Section, server, cfg_source(), i);
-	    free(x);
-	} else {
-	    node = check_node_alloc();
-	    node->id = i;
-	    node->server = x;
-	    node->messages = 0;
-	    node->next = NULL;
+        x = cfg_get(Section, server, "");
+        if (*x == '\0') {
+            info("[POP3] No '%s.%s' entry from %s, disabling POP3 account #%d", Section, server, cfg_source(), i);
+            free(x);
+        } else {
+            node = check_node_alloc();
+            node->id = i;
+            node->server = x;
+            node->messages = 0;
+            node->next = NULL;
 
-	    x = cfg_get(Section, user, "");
-	    if (*x == '\0') {
-		info("[POP3] No '%s.%s' entry from %s, disabling POP3 account #%d", Section, user, cfg_source(), i);
-		free(x);
-	    } else {
-		node->username = x;
-		x = cfg_get(Section, password, "");
-		if (*x == '\0') {
-		    info("[POP3] No '%s.%s' entry from %s, disabling POP3 account #%d", Section, password, cfg_source(),
-			 i);
-		    free(x);
-		} else {
-		    node->password = x;
-		    if (cfg_number(Section, port, POP3PORT, 1, 65536, &node->port) < 1) {
-			info("[POP3] No '%s.%s' entry from %s, %d will be used for account #%d", Section, port,
-			     cfg_source(), POP3PORT, i);
-		    }
-		    check_node_add(&head, node);
-		    n++;
-		}
-	    }
-	}
+            x = cfg_get(Section, user, "");
+            if (*x == '\0') {
+                info("[POP3] No '%s.%s' entry from %s, disabling POP3 account #%d", Section, user, cfg_source(), i);
+                free(x);
+            } else {
+                node->username = x;
+                x = cfg_get(Section, password, "");
+                if (*x == '\0') {
+                    info("[POP3] No '%s.%s' entry from %s, disabling POP3 account #%d", Section, password, cfg_source(),
+                         i);
+                    free(x);
+                } else {
+                    node->password = x;
+                    if (cfg_number(Section, port, POP3PORT, 1, 65536, &node->port) < 1) {
+                        info("[POP3] No '%s.%s' entry from %s, %d will be used for account #%d", Section, port,
+                             cfg_source(), POP3PORT, i);
+                    }
+                    check_node_add(&head, node);
+                    n++;
+                }
+            }
+        }
     }
     return (n);
 }
@@ -294,15 +294,15 @@ static int configure_pop3(void)
     int n;
 
     if (configured != 0)
-	return configured;
+        return configured;
 
     n = getConfig();
     /* by now, head should point to a list of all our accounts */
     if (head) {
-	info("[POP3] %d POP3 accounts have been successfully defined", n);
-	configured = 1;
+        info("[POP3] %d POP3 accounts have been successfully defined", n);
+        configured = 1;
     } else {
-	configured = -1;
+        configured = -1;
     }
     return configured;
 }
@@ -315,20 +315,20 @@ static void my_POP3check(RESULT * result, RESULT * check)
     double value;
 
     if (configure_pop3() < 0) {
-	value = -1;
-	SetResult(&result, R_NUMBER, &value);
-	return;
+        value = -1;
+        SetResult(&result, R_NUMBER, &value);
+        return;
     }
 
     for (node = head; node; node = node->next) {
-	if (node->id == param)
-	    break;
+        if (node->id == param)
+            break;
     }
-    if (node == NULL) {		/*Inexistent account */
-	value = -1;
+    if (node == NULL) {         /*Inexistent account */
+        value = -1;
     } else {
-	pop3_check_messages(node, 0);
-	value = (double) node->messages;
+        pop3_check_messages(node, 0);
+        value = (double) node->messages;
     }
     SetResult(&result, R_NUMBER, &value);
 }

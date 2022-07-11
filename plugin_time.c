@@ -75,7 +75,7 @@ static void my_stftime_tz(RESULT * result, RESULT * arg1, RESULT * arg2, RESULT 
      * duplicate it here
      */
     if (old_tz) {
-	old_tz = strdup(old_tz);
+        old_tz = strdup(old_tz);
     }
 
     setenv("TZ", tz, 1);
@@ -84,9 +84,9 @@ static void my_stftime_tz(RESULT * result, RESULT * arg1, RESULT * arg2, RESULT 
     strftime(value, sizeof(value), R2S(arg1), localtime(&t));
 
     if (old_tz) {
-	setenv("TZ", old_tz, 1);
+        setenv("TZ", old_tz, 1);
     } else {
-	unsetenv("TZ");
+        unsetenv("TZ");
     }
     tzset();
 

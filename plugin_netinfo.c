@@ -37,21 +37,21 @@
 
 #include <stdlib.h>
 #include <unistd.h>
-#include <string.h>		/* memcpy() */
+#include <string.h>             /* memcpy() */
 #include <ctype.h>
-#include <math.h>		/* rint(), log2l() */
+#include <math.h>               /* rint(), log2l() */
 
 #include "debug.h"
 #include "plugin.h"
 #include "qprintf.h"
 
-#include <sys/types.h>		/* socket() */
-#include <sys/socket.h>		/* socket() */
-#include <sys/ioctl.h>		/* SIOCGIFNAME */
-#include <net/if.h>		/* ifreq{} */
-#include <errno.h>		/* errno */
-#include <netinet/in.h>		/* inet_ntoa() */
-#include <arpa/inet.h>		/* inet_ntoa() */
+#include <sys/types.h>          /* socket() */
+#include <sys/socket.h>         /* socket() */
+#include <sys/ioctl.h>          /* SIOCGIFNAME */
+#include <net/if.h>             /* ifreq{} */
+#include <errno.h>              /* errno */
+#include <netinet/in.h>         /* inet_ntoa() */
+#include <arpa/inet.h>          /* inet_ntoa() */
 
 
 /* socket descriptor:
@@ -65,15 +65,15 @@ static int open_net(void)
 {
 
     if (socknr == -3)
-	return -1;
+        return -1;
     if (socknr == -2) {
-	socknr = socket(PF_INET, SOCK_DGRAM, 0);
+        socknr = socket(PF_INET, SOCK_DGRAM, 0);
     }
     if (socknr == -1) {
-	error("%s: socket(PF_INET, SOCK_DGRAM, 0) failed: %s", "plugin_netinfo", strerror(errno));
-	error("  deactivate plugin netinfo");
-	socknr = -3;
-	return -1;
+        error("%s: socket(PF_INET, SOCK_DGRAM, 0) failed: %s", "plugin_netinfo", strerror(errno));
+        error("  deactivate plugin netinfo");
+        socknr = -3;
+        return -1;
     }
 
     return 0;
@@ -86,27 +86,27 @@ static void my_exists(RESULT * result, RESULT * arg1)
     struct ifconf ifcnf;
     struct ifreq *ifreq;
     int len;
-    double value = 0.0;		// netdev doesn't exists
+    double value = 0.0;         // netdev doesn't exists
     char devname[80];
 
     if (socknr < 0) {
-	/* no open socket */
-	SetResult(&result, R_NUMBER, &value);
-	return;
+        /* no open socket */
+        SetResult(&result, R_NUMBER, &value);
+        return;
     }
 
     ifcnf.ifc_len = sizeof(buf);
     ifcnf.ifc_buf = buf;
     if (ioctl(socknr, SIOCGIFCONF, &ifcnf) < 0) {
-	/* error getting list of devices */
-	error("%s: ioctl(IFCONF) for %s failed: %s", "plugin_netinfo", R2S(arg1), strerror(errno));
-	SetResult(&result, R_NUMBER, &value);
-	return;
+        /* error getting list of devices */
+        error("%s: ioctl(IFCONF) for %s failed: %s", "plugin_netinfo", R2S(arg1), strerror(errno));
+        SetResult(&result, R_NUMBER, &value);
+        return;
     }
     if (0 == ifcnf.ifc_len) {
-	/* no interfaces found */
-	SetResult(&result, R_NUMBER, &value);
-	return;
+        /* no interfaces found */
+        SetResult(&result, R_NUMBER, &value);
+        return;
     }
 
     ifreq = (struct ifreq *) buf;
@@ -114,14 +114,14 @@ static void my_exists(RESULT * result, RESULT * arg1)
     strncpy(devname, R2S(arg1), sizeof(devname));
 
     while (ifreq && *((char *) ifreq) && ((char *) ifreq) < buf + ifcnf.ifc_len) {
-	if (*((char *) ifreq) && strncmp(ifreq->ifr_name, devname, sizeof(devname)) == 0) {
-	    /* found */
-	    value = 1.0;
-	    SetResult(&result, R_NUMBER, &value);
-	    return;
-	}
+        if (*((char *) ifreq) && strncmp(ifreq->ifr_name, devname, sizeof(devname)) == 0) {
+            /* found */
+            value = 1.0;
+            SetResult(&result, R_NUMBER, &value);
+            return;
+        }
 
-	(*(char **) &ifreq) += len;
+        (*(char **) &ifreq) += len;
     }
 
     /* device doesn't exists */
@@ -138,9 +138,9 @@ static void my_hwaddr(RESULT * result, RESULT * arg1)
     char value[18];
 
     if (socknr < 0) {
-	/* no open socket */
-	SetResult(&result, R_STRING, "");
-	return;
+        /* no open socket */
+        SetResult(&result, R_STRING, "");
+        return;
     }
 
     strncpy(ifreq.ifr_name, R2S(arg1), sizeof(ifreq.ifr_name));
@@ -151,13 +151,13 @@ static void my_hwaddr(RESULT * result, RESULT * arg1)
     // MacOS: get interface MAC address
     if (ioctl(socknr, SIOCGLIFPHYADDR, &ifreq) < 0) {
 #endif
-	errcount++;
-	if (1 == errcount % 1000) {
-	    error("%s: ioctl(IF_HARDW_ADDR %s) failed: %s", "plugin_netinfo", ifreq.ifr_name, strerror(errno));
-	    error("  (skip next 1000 errors)");
-	}
-	SetResult(&result, R_STRING, "");
-	return;
+        errcount++;
+        if (1 == errcount % 1000) {
+            error("%s: ioctl(IF_HARDW_ADDR %s) failed: %s", "plugin_netinfo", ifreq.ifr_name, strerror(errno));
+            error("  (skip next 1000 errors)");
+        }
+        SetResult(&result, R_STRING, "");
+        return;
     }
 #ifndef __MAC_OS_X_VERSION_10_3
     hw = (unsigned char *) ifreq.ifr_hwaddr.sa_data;
@@ -165,7 +165,7 @@ static void my_hwaddr(RESULT * result, RESULT * arg1)
     hw = (unsigned char *) ifreq.ifr_data;
 #endif
     qprintf(value, sizeof(value), "%02x:%02x:%02x:%02x:%02x:%02x",
-	    *hw, *(hw + 1), *(hw + 2), *(hw + 3), *(hw + 4), *(hw + 5));
+            *hw, *(hw + 1), *(hw + 2), *(hw + 3), *(hw + 4), *(hw + 5));
 
     SetResult(&result, R_STRING, value);
 }
@@ -180,20 +180,20 @@ static void my_ipaddr(RESULT * result, RESULT * arg1)
     char value[16];
 
     if (socknr < 0) {
-	/* no open socket */
-	SetResult(&result, R_STRING, "");
-	return;
+        /* no open socket */
+        SetResult(&result, R_STRING, "");
+        return;
     }
 
     strncpy(ifreq.ifr_name, R2S(arg1), sizeof(ifreq.ifr_name));
     if (ioctl(socknr, SIOCGIFADDR, &ifreq) < 0) {
-	errcount++;
-	if (1 == errcount % 1000) {
-	    error("%s: ioctl(IFADDR %s) failed: %s", "plugin_netinfo", ifreq.ifr_name, strerror(errno));
-	    error("  (skip next 1000 errors)");
-	}
-	SetResult(&result, R_STRING, "");
-	return;
+        errcount++;
+        if (1 == errcount % 1000) {
+            error("%s: ioctl(IFADDR %s) failed: %s", "plugin_netinfo", ifreq.ifr_name, strerror(errno));
+            error("  (skip next 1000 errors)");
+        }
+        SetResult(&result, R_STRING, "");
+        return;
     }
     sin = (struct sockaddr_in *) &ifreq.ifr_addr;
     qprintf(value, sizeof(value), "%s", inet_ntoa(sin->sin_addr));
@@ -211,12 +211,12 @@ struct sockaddr_in *get_netmask(RESULT * arg1)
 
     strncpy(ifreq.ifr_name, R2S(arg1), sizeof(ifreq.ifr_name));
     if (ioctl(socknr, SIOCGIFNETMASK, &ifreq) < 0) {
-	errcount++;
-	if (1 == errcount % 1000) {
-	    error("%s: ioctl(IFNETMASK %s) failed: %s", "plugin_netinfo", ifreq.ifr_name, strerror(errno));
-	    error("  (skip next 1000 errors)");
-	}
-	return NULL;
+        errcount++;
+        if (1 == errcount % 1000) {
+            error("%s: ioctl(IFNETMASK %s) failed: %s", "plugin_netinfo", ifreq.ifr_name, strerror(errno));
+            error("  (skip next 1000 errors)");
+        }
+        return NULL;
     }
 #ifndef __MAC_OS_X_VERSION_10_3
     sin = (struct sockaddr_in *) &ifreq.ifr_netmask;
@@ -235,9 +235,9 @@ static void my_netmask(RESULT * result, RESULT * arg1)
     struct sockaddr_in *sin;
 
     if (socknr < 0) {
-	/* no open socket */
-	SetResult(&result, R_STRING, "");
-	return;
+        /* no open socket */
+        SetResult(&result, R_STRING, "");
+        return;
     }
 
     sin = get_netmask(arg1);
@@ -256,18 +256,18 @@ static void my_netmask_short(RESULT * result, RESULT * arg1)
     long double logval = 0.0;
 
     if (socknr < 0) {
-	/* no open socket */
-	SetResult(&result, R_STRING, "");
-	return;
+        /* no open socket */
+        SetResult(&result, R_STRING, "");
+        return;
     }
 
     sin = get_netmask(arg1);
     if (NULL != sin) {
-	logval = (long double) (get_netmask(arg1)->sin_addr.s_addr);
-	netlen = (int) rint(log2f(logval) / log2f(2.0));
-	qprintf(value, sizeof(value), "/%d", netlen);
+        logval = (long double) (get_netmask(arg1)->sin_addr.s_addr);
+        netlen = (int) rint(log2f(logval) / log2f(2.0));
+        qprintf(value, sizeof(value), "/%d", netlen);
     } else {
-	qprintf(value, sizeof(value), "/?");
+        qprintf(value, sizeof(value), "/?");
     }
 
     SetResult(&result, R_STRING, value);
@@ -283,20 +283,20 @@ static void my_bcaddr(RESULT * result, RESULT * arg1)
     char value[16];
 
     if (socknr < 0) {
-	/* no open socket */
-	SetResult(&result, R_STRING, "");
-	return;
+        /* no open socket */
+        SetResult(&result, R_STRING, "");
+        return;
     }
 
     strncpy(ifreq.ifr_name, R2S(arg1), sizeof(ifreq.ifr_name));
     if (ioctl(socknr, SIOCGIFBRDADDR, &ifreq) < 0) {
-	errcount++;
-	if (1 == errcount % 1000) {
-	    error("%s: ioctl(IFBRDADDR %s) failed: %s", "plugin_netinfo", ifreq.ifr_name, strerror(errno));
-	    error("  (skip next 1000 errors)");
-	}
-	SetResult(&result, R_STRING, "");
-	return;
+        errcount++;
+        if (1 == errcount % 1000) {
+            error("%s: ioctl(IFBRDADDR %s) failed: %s", "plugin_netinfo", ifreq.ifr_name, strerror(errno));
+            error("  (skip next 1000 errors)");
+        }
+        SetResult(&result, R_STRING, "");
+        return;
     }
     sin = (struct sockaddr_in *) &ifreq.ifr_broadaddr;
     qprintf(value, sizeof(value), "%s", inet_ntoa(sin->sin_addr));

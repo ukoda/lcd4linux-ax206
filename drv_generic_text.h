@@ -33,14 +33,14 @@
 #include "widget.h"
 #include "widget_bar.h"
 
-extern int CHARS, CHAR0;	/* number of user-defineable characters, ASCII of first char */
-extern int ICONS;		/* number of user-defineable characters reserved for icons */
-extern int GOTO_COST;		/* number of bytes a goto command requires */
-extern int INVALIDATE;		/* re-send a modified userdefined char? */
+extern int CHARS, CHAR0;        /* number of user-defineable characters, ASCII of first char */
+extern int ICONS;               /* number of user-defineable characters reserved for icons */
+extern int GOTO_COST;           /* number of bytes a goto command requires */
+extern int INVALIDATE;          /* re-send a modified userdefined char? */
 
 /* these functions must be implemented by the real driver */
-extern void (*drv_generic_text_real_write) (const int row, const int col, const char *data, const int len);
-extern void (*drv_generic_text_real_defchar) (const int ascii, const unsigned char *matrix);
+extern void (*drv_generic_text_real_write)(const int row, const int col, const char *data, const int len);
+extern void (*drv_generic_text_real_defchar)(const int ascii, const unsigned char *matrix);
 
 /* generic functions and widget callbacks */
 int drv_generic_text_init(const char *section, const char *driver);

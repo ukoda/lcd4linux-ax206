@@ -129,29 +129,29 @@ static char *strip(char *s, const int strip_comments)
     char *p;
 
     while (isblank(*s))
-	s++;
+        s++;
 
     for (p = s; *p; p++) {
-	if (*p == '"')
-	    do
-		p++;
-	    while (*p && *p != '\n' && *p != '\r' && *p != '"');
-	if (*p == '\'')
-	    do
-		p++;
-	    while (*p && *p != '\n' && *p != '\r' && *p != '\'');
-	if (*p == '\n' || (strip_comments && *p == '#' && (p == s || *(p - 1) != '\\'))) {
-	    *p = '\0';
-	    break;
-	}
-	if (*p == '\r' && *(p + 1) == '\n') {
-	    /* replace <CR> from DOS <CR><LF> with blank */
-	    *p = ' ';
-	}
+        if (*p == '"')
+            do
+                p++;
+            while (*p && *p != '\n' && *p != '\r' && *p != '"');
+        if (*p == '\'')
+            do
+                p++;
+            while (*p && *p != '\n' && *p != '\r' && *p != '\'');
+        if (*p == '\n' || (strip_comments && *p == '#' && (p == s || *(p - 1) != '\\'))) {
+            *p = '\0';
+            break;
+        }
+        if (*p == '\r' && *(p + 1) == '\n') {
+            /* replace <CR> from DOS <CR><LF> with blank */
+            *p = ' ';
+        }
     }
 
     for (p--; p > s && isblank(*p); p--)
-	*p = '\0';
+        *p = '\0';
 
     return s;
 }
@@ -164,16 +164,16 @@ static int validchars(const char *string, const int numstart)
     const char *c;
 
     for (c = string; *c; c++) {
-	/* first and following chars */
-	if ((*c >= 'A' && *c <= 'Z') || (*c >= 'a' && *c <= 'z') || (*c == '_'))
-	    continue;
-	/* number as first or following char */
-	if ((numstart || c > string) && *c >= '0' && *c <= '9')
-	    continue;
-	/* only following chars */
-	if ((c > string) && ((*c == '.') || (*c == '-')))
-	    continue;
-	return 0;
+        /* first and following chars */
+        if ((*c >= 'A' && *c <= 'Z') || (*c >= 'a' && *c <= 'z') || (*c == '_'))
+            continue;
+        /* number as first or following char */
+        if ((numstart || c > string) && *c >= '0' && *c <= '9')
+            continue;
+        /* only following chars */
+        if ((c > string) && ((*c == '.') || (*c == '-')))
+            continue;
+        return 0;
     }
     return 1;
 }
@@ -190,8 +190,8 @@ static void cfg_add(const char *section, const char *key, const char *val, const
 
     /* prepare section.key */
     if (section != NULL && *section != '\0') {
-	strcpy(buffer, section);
-	strcat(buffer, ".");
+        strcpy(buffer, section);
+        strcat(buffer, ".");
     }
     strcat(buffer, key);
 
@@ -199,14 +199,14 @@ static void cfg_add(const char *section, const char *key, const char *val, const
     entry = bsearch(buffer, Config, nConfig, sizeof(ENTRY), c_lookup);
 
     if (entry != NULL) {
-	if (entry->lock > lock)
-	    return;
-	debug("Warning: key <%s>: value <%s> overwritten with <%s>", buffer, entry->val, val);
-	free(buffer);
-	if (entry->val)
-	    free(entry->val);
-	entry->val = strdup(val);
-	return;
+        if (entry->lock > lock)
+            return;
+        debug("Warning: key <%s>: value <%s> overwritten with <%s>", buffer, entry->val, val);
+        free(buffer);
+        if (entry->val)
+            free(entry->val);
+        entry->val = strdup(val);
+        return;
     }
 
     nConfig++;
@@ -228,19 +228,19 @@ int cfg_cmd(const char *arg)
     buffer = strdup(arg);
     key = strip(buffer, 0);
     for (val = key; *val; val++) {
-	if (*val == '=') {
-	    *val++ = '\0';
-	    break;
-	}
+        if (*val == '=') {
+            *val++ = '\0';
+            break;
+        }
     }
     if (*key == '\0' || *val == '\0') {
-	free(buffer);
-	return -1;
+        free(buffer);
+        return -1;
     }
 
     if (!validchars(key, 0)) {
-	free(buffer);
-	return -1;
+        free(buffer);
+        return -1;
     }
 
     cfg_add("", key, val, 1);
@@ -269,12 +269,12 @@ char *cfg_list(const char *section)
 
     /* search matching entries */
     for (i = 0; i < nConfig; i++) {
-	if (strncasecmp(Config[i].key, key, len) == 0) {
-	    list = realloc(list, strlen(list) + strlen(Config[i].key) - len + 2);
-	    if (*list != '\0')
-		strcat(list, "|");
-	    strcat(list, Config[i].key + len);
-	}
+        if (strncasecmp(Config[i].key, key, len) == 0) {
+            list = realloc(list, strlen(list) + strlen(Config[i].key) - len + 2);
+            if (*list != '\0')
+                strcat(list, "|");
+            strcat(list, Config[i].key + len);
+        }
     }
 
     free(key);
@@ -291,8 +291,8 @@ int cfg_rename(const char *section, const char *old, const char *new)
     buffer = malloc(strlen(section) + strlen(old) + 2);
     *buffer = '\0';
     if (section != NULL && *section != '\0') {
-	strcpy(buffer, section);
-	strcat(buffer, ".");
+        strcpy(buffer, section);
+        strcat(buffer, ".");
     }
     strcat(buffer, old);
 
@@ -301,16 +301,16 @@ int cfg_rename(const char *section, const char *old, const char *new)
     free(buffer);
 
     if (old_entry == NULL) {
-	error("internal error: cfg_rename(%s, %s, %s) failed: entry not found!", section, old, new);
-	return -1;
+        error("internal error: cfg_rename(%s, %s, %s) failed: entry not found!", section, old, new);
+        return -1;
     }
 
     /* prepare new section.key */
     buffer = malloc(strlen(section) + strlen(new) + 2);
     *buffer = '\0';
     if (section != NULL && *section != '\0') {
-	strcpy(buffer, section);
-	strcat(buffer, ".");
+        strcpy(buffer, section);
+        strcat(buffer, ".");
     }
     strcat(buffer, new);
 
@@ -318,9 +318,9 @@ int cfg_rename(const char *section, const char *old, const char *new)
     new_entry = bsearch(buffer, Config, nConfig, sizeof(ENTRY), c_lookup);
 
     if (new_entry != NULL) {
-	info("cfg_rename(%s, %s, %s) failed: entry already exists!", section, old, new);
-	free(buffer);
-	return -1;
+        info("cfg_rename(%s, %s, %s) failed: entry already exists!", section, old, new);
+        free(buffer);
+        return -1;
     }
 
     /* replace key */
@@ -343,7 +343,7 @@ static char *cfg_lookup(const char *section, const char *key)
     /* calculate key length */
     len = strlen(key) + 1;
     if (section != NULL)
-	len += strlen(section) + 1;
+        len += strlen(section) + 1;
 
     /* allocate buffer  */
     buffer = malloc(len);
@@ -351,8 +351,8 @@ static char *cfg_lookup(const char *section, const char *key)
 
     /* prepare section:key */
     if (section != NULL && *section != '\0') {
-	strcpy(buffer, section);
-	strcat(buffer, ".");
+        strcpy(buffer, section);
+        strcat(buffer, ".");
     }
     strcat(buffer, key);
 
@@ -363,7 +363,7 @@ static char *cfg_lookup(const char *section, const char *key)
     free(buffer);
 
     if (entry != NULL)
-	return entry->val;
+        return entry->val;
 
     return NULL;
 }
@@ -374,7 +374,7 @@ char *cfg_get_raw(const char *section, const char *key, const char *defval)
     char *val = cfg_lookup(section, key);
 
     if (val != NULL)
-	return val;
+        return val;
 
     return (char *) defval;
 }
@@ -390,19 +390,19 @@ char *cfg_get(const char *section, const char *key, const char *defval)
     expression = cfg_lookup(section, key);
 
     if (expression != NULL) {
-	if (*expression == '\0')
-	    return strdup("");
-	if (Compile(expression, &tree) == 0 && Eval(tree, &result) == 0) {
-	    retval = strdup(R2S(&result));
-	    DelTree(tree);
-	    DelResult(&result);
-	    return (retval);
-	}
-	DelTree(tree);
-	DelResult(&result);
+        if (*expression == '\0')
+            return strdup("");
+        if (Compile(expression, &tree) == 0 && Eval(tree, &result) == 0) {
+            retval = strdup(R2S(&result));
+            DelTree(tree);
+            DelResult(&result);
+            return (retval);
+        }
+        DelTree(tree);
+        DelResult(&result);
     }
     if (defval)
-	return strdup(defval);
+        return strdup(defval);
     return NULL;
 }
 
@@ -420,32 +420,32 @@ int cfg_number(const char *section, const char *key, const int defval, const int
 
     expression = cfg_get_raw(section, key, NULL);
     if (expression == NULL || *expression == '\0') {
-	return 0;
+        return 0;
     }
 
     if (Compile(expression, &tree) != 0) {
-	DelTree(tree);
-	return -1;
+        DelTree(tree);
+        return -1;
     }
     if (Eval(tree, &result) != 0) {
-	DelTree(tree);
-	DelResult(&result);
-	return -1;
+        DelTree(tree);
+        DelResult(&result);
+        return -1;
     }
     *value = R2N(&result);
     DelTree(tree);
     DelResult(&result);
 
     if (*value < min) {
-	error("bad '%s.%s' value '%d' in %s, minimum is %d", section, key, *value, cfg_source(), min);
-	*value = min;
-	return -1;
+        error("bad '%s.%s' value '%d' in %s, minimum is %d", section, key, *value, cfg_source(), min);
+        *value = min;
+        return -1;
     }
 
     if (max > min && max != -1 && *value > max) {
-	error("bad '%s.%s' value '%d' in %s, maximum is %d", section, key, *value, cfg_source(), max);
-	*value = max;
-	return -1;
+        error("bad '%s.%s' value '%d' in %s, maximum is %d", section, key, *value, cfg_source(), max);
+        *value = max;
+        return -1;
     }
 
     return 1;
@@ -470,25 +470,25 @@ static int cfg_check_source(const char *file)
     gid = getegid();
 
     if (stat(file, &stbuf) == -1) {
-	error("stat(%s) failed: %s", file, strerror(errno));
-	return -1;
+        error("stat(%s) failed: %s", file, strerror(errno));
+        return -1;
     }
     if (S_ISCHR(stbuf.st_mode) && strcmp(file, "/dev/null") == 0)
-	return 0;
+        return 0;
 
     error = 0;
     if (!S_ISREG(stbuf.st_mode)) {
-	error("security error: '%s' is not a regular file", file);
-	error = -1;
+        error("security error: '%s' is not a regular file", file);
+        error = -1;
     }
     if (stbuf.st_uid != uid || stbuf.st_gid != gid) {
-	error("security error: owner and/or group of '%s' don't match", file);
-	error = -1;
+        error("security error: owner and/or group of '%s' don't match", file);
+        error = -1;
     }
 #if ! defined(__CYGWIN__)
     if (stbuf.st_mode & S_IRWXG || stbuf.st_mode & S_IRWXO) {
-	error("security error: group or other have access to '%s'", file);
-	error = -1;
+        error("security error: group or other have access to '%s'", file);
+        error = -1;
     }
 #endif
     return error;
@@ -506,8 +506,8 @@ static int cfg_read(const char *file)
 
     stream = fopen(file, "r");
     if (stream == NULL) {
-	error("open(%s) failed: %s", file, strerror(errno));
-	return -1;
+        error("open(%s) failed: %s", file, strerror(errno));
+        return -1;
     }
 
     /* start with empty section */
@@ -517,121 +517,121 @@ static int cfg_read(const char *file)
     lineno = 0;
     while ((line = fgets(buffer, 512, stream)) != NULL) {
 
-	/* increment line number */
-	lineno++;
+        /* increment line number */
+        lineno++;
 
-	/* skip empty lines */
-	if (*(line = strip(line, 1)) == '\0')
-	    continue;
+        /* skip empty lines */
+        if (*(line = strip(line, 1)) == '\0')
+            continue;
 
-	/* reset section flags */
-	section_open = 0;
-	section_close = 0;
+        /* reset section flags */
+        section_open = 0;
+        section_close = 0;
 
-	/* key is first word */
-	key = line;
+        /* key is first word */
+        key = line;
 
-	/* search first blank between key and value */
-	for (val = line; *val; val++) {
-	    if (isblank(*val)) {
-		*val++ = '\0';
-		break;
-	    }
-	}
+        /* search first blank between key and value */
+        for (val = line; *val; val++) {
+            if (isblank(*val)) {
+                *val++ = '\0';
+                break;
+            }
+        }
 
-	/* strip value */
-	val = strip(val, 1);
+        /* strip value */
+        val = strip(val, 1);
 
-	/* search end of value */
-	if (*val)
-	    for (end = val; *(end + 1); end++);
-	else
-	    end = val;
+        /* search end of value */
+        if (*val)
+            for (end = val; *(end + 1); end++);
+        else
+            end = val;
 
-	/* if last char is '{', a section has been opened */
-	if (*end == '{') {
-	    section_open = 1;
-	    *end = '\0';
-	    val = strip(val, 0);
-	}
+        /* if last char is '{', a section has been opened */
+        if (*end == '{') {
+            section_open = 1;
+            *end = '\0';
+            val = strip(val, 0);
+        }
 
-	/* provess "value" in double-quotes */
-	if (*val == '"' && *end == '"') {
-	    *end = '\0';
-	    val++;
-	}
+        /* provess "value" in double-quotes */
+        if (*val == '"' && *end == '"') {
+            *end = '\0';
+            val++;
+        }
 
-	/* if key is '}', a section has been closed */
-	if (strcmp(key, "}") == 0) {
-	    section_close = 1;
-	    *key = '\0';
-	}
+        /* if key is '}', a section has been closed */
+        if (strcmp(key, "}") == 0) {
+            section_close = 1;
+            *key = '\0';
+        }
 
-	/* sanity check: '}' should be the only char in a line */
-	if (section_close && (section_open || *val != '\0')) {
-	    error("error in config file '%s' line %d: garbage after '}'", file, lineno);
-	    error = 1;
-	    break;
-	}
+        /* sanity check: '}' should be the only char in a line */
+        if (section_close && (section_open || *val != '\0')) {
+            error("error in config file '%s' line %d: garbage after '}'", file, lineno);
+            error = 1;
+            break;
+        }
 
-	/* check key for valid chars */
-	if (!validchars(key, 0)) {
-	    error("error in config file '%s' line %d: key '%s' is invalid", file, lineno, key);
-	    error = 1;
-	    break;
-	}
+        /* check key for valid chars */
+        if (!validchars(key, 0)) {
+            error("error in config file '%s' line %d: key '%s' is invalid", file, lineno, key);
+            error = 1;
+            break;
+        }
 
-	/* on section-open, check value for valid chars */
-	if (section_open && !validchars(val, 1)) {
-	    error("error in config file '%s' line %d: section '%s' is invalid", file, lineno, val);
-	    error = 1;
-	    break;
-	}
+        /* on section-open, check value for valid chars */
+        if (section_open && !validchars(val, 1)) {
+            error("error in config file '%s' line %d: section '%s' is invalid", file, lineno, val);
+            error = 1;
+            break;
+        }
 
-	/* on section-open, append new section name */
-	if (section_open) {
-	    /* is the section[] array big enough? */
-	    if (strlen(section) + strlen(key) + 3 > sizeof(section)) {
-		error("error in config file '%s' line %d: section buffer overflow", file, lineno);
-		error = 1;
-		break;
-	    }
-	    if (*section != '\0')
-		strcat(section, ".");
-	    strcat(section, key);
-	    if (*val != '\0') {
-		strcat(section, ":");
-		strcat(section, val);
-	    }
-	    continue;
-	}
+        /* on section-open, append new section name */
+        if (section_open) {
+            /* is the section[] array big enough? */
+            if (strlen(section) + strlen(key) + 3 > sizeof(section)) {
+                error("error in config file '%s' line %d: section buffer overflow", file, lineno);
+                error = 1;
+                break;
+            }
+            if (*section != '\0')
+                strcat(section, ".");
+            strcat(section, key);
+            if (*val != '\0') {
+                strcat(section, ":");
+                strcat(section, val);
+            }
+            continue;
+        }
 
-	/* on section-close, remove last section name */
-	if (section_close) {
-	    /* sanity check: section already empty? */
-	    if (*section == '\0') {
-		error("error in config file '%s' line %d: unmatched closing brace", file, lineno);
-		error = 1;
-		break;
-	    }
+        /* on section-close, remove last section name */
+        if (section_close) {
+            /* sanity check: section already empty? */
+            if (*section == '\0') {
+                error("error in config file '%s' line %d: unmatched closing brace", file, lineno);
+                error = 1;
+                break;
+            }
 
-	    end = strrchr(section, '.');
-	    if (end == NULL)
-		*section = '\0';
-	    else
-		*end = '\0';
-	    continue;
-	}
+            end = strrchr(section, '.');
+            if (end == NULL)
+                *section = '\0';
+            else
+                *end = '\0';
+            continue;
+        }
 
-	/* finally: add key */
-	cfg_add(section, key, val, 0);
+        /* finally: add key */
+        cfg_add(section, key, val, 0);
 
     }
 
     /* sanity check: are the braces balanced? */
     if (!error && *section != '\0') {
-	error("error in config file '%s' line %d: unbalanced braces", file, lineno);
-	error = 1;
+        error("error in config file '%s' line %d: unbalanced braces", file, lineno);
+        error = 1;
     }
 
     fclose(stream);
@@ -647,14 +647,14 @@ static void cfg_dump(void)
     /* find longest key for pretty output */
     len = 1;
     for (i = 0; i < nConfig; i++) {
-	int l = strlen(Config[i].key);
-	if (l > len)
-	    len = l;
+        int l = strlen(Config[i].key);
+        if (l > len)
+            len = l;
     }
 
     info("Dump of %s:", Config_File);
     for (i = 0; i < nConfig; i++) {
-	info("  %-*s %s", len, Config[i].key, Config[i].val);
+        info("  %-*s %s", len, Config[i].key, Config[i].val);
     }
     info(" ");
 }
@@ -663,19 +663,19 @@ static void cfg_dump(void)
 int cfg_init(const char *file)
 {
 //    if (cfg_check_source(file) == -1) {
-//	return -1;
+//      return -1;
 //    }
 
     if (cfg_read(file) < 0)
-	return -1;
+        return -1;
 
     if (Config_File)
-	free(Config_File);
+        free(Config_File);
 
     Config_File = strdup(file);
 
     if (verbose_level > 1)
-	cfg_dump();
+        cfg_dump();
 
     return 0;
 }
@@ -684,9 +684,9 @@ int cfg_init(const char *file)
 char *cfg_source(void)
 {
     if (Config_File)
-	return Config_File;
+        return Config_File;
     else
-	return "";
+        return "";
 }
 
 
@@ -694,20 +694,20 @@ int cfg_exit(void)
 {
     int i;
     for (i = 0; i < nConfig; i++) {
-	if (Config[i].key)
-	    free(Config[i].key);
-	if (Config[i].val)
-	    free(Config[i].val);
+        if (Config[i].key)
+            free(Config[i].key);
+        if (Config[i].val)
+            free(Config[i].val);
     }
 
     if (Config) {
-	free(Config);
-	Config = NULL;
+        free(Config);
+        Config = NULL;
     }
 
     if (Config_File) {
-	free(Config_File);
-	Config_File = NULL;
+        free(Config_File);
+        Config_File = NULL;
     }
 
     return 0;

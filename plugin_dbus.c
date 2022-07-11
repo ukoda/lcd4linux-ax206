@@ -70,7 +70,8 @@ static struct {
     int signals;
     dbus_signal_t *a;
 } dbus_results = {
-0, NULL};
+    0, NULL
+};
 
 //free all resources for the text of a signal
 static int clear_signal_txt(const int sig);
@@ -102,8 +103,8 @@ typedef struct lcd_sig_t lcd_sig_t;
 //do not look inside, its private!
 struct lcd_sig_t {
     void *user_data;
-    void (*callback) (void *user_data, int argc, char **argv);
-    void (*user_free) (void *);
+    void (*callback)(void *user_data, int argc, char **argv);
+    void (*user_free)(void *);
     char *sender;
     char *path;
     char *interface;
@@ -121,7 +122,7 @@ static DBusConnection *sessconn;
 static DBusConnection *sysconn;
 static DBusError err;
 
-static lcd_sig_t *lcd_registered_signals[DBUS_MAX_SIGNALS];	//used mostly for freeing resources
+static lcd_sig_t *lcd_registered_signals[DBUS_MAX_SIGNALS];     //used mostly for freeing resources
 static int registered_sig_count = 0;
 
 //takes the signal, matches it against a rule, and sends the correct agrument, as a string, to the screen
@@ -147,9 +148,9 @@ static void free_handle_signal(handle_signal_t * sig);
 
 //given a signal, will add a hook so when the signal appears your callback is called
 static lcd_sig_t *lcd_register_signal(const char *sender, const char *path,
-				      const char *interface, const char *member,
-				      void (*callback) (void *user_data, int argc, char **argv), void *user_data,
-				      void (*user_free) (void *));
+                                      const char *interface, const char *member,
+                                      void (*callback)(void *user_data, int argc, char **argv), void *user_data,
+                                      void(*user_free)(void *));
 
 static void setup_dbus_events(DBusConnection * conn);
 
@@ -159,7 +160,7 @@ static void remove_watch(DBusWatch * w, void *data);
 static void toggle_watch(DBusWatch * w, void *data);
 static void watch_handle(event_flags_t f, void *data);
 
-static void dispatch_dbus(void);	//tell dbus to read something
+static void dispatch_dbus(void);        //tell dbus to read something
 
 
 //to handle timers through the main loop
@@ -169,25 +170,25 @@ static void remove_dbus_timeout(DBusTimeout * t, void *data);
 static void toggle_dbus_timeout(DBusTimeout * t, void *data);
 
 static lcd_sig_t *create_signal(const char *sender, const char *path,
-				const char *interface, const char *member,
-				void (*callback) (void *user_data, int argc, char **argv), void *user_data,
-				void (*user_free) (void *));
+                                const char *interface, const char *member,
+                                void (*callback)(void *user_data, int argc, char **argv), void *user_data,
+                                void(*user_free)(void *));
 
 static int clear_signal_txt(const int sig)
 {
     dbus_signal_t *s = get_signal_txt(sig);
     if (s == NULL) {
-	return 1;
+        return 1;
     }
     int i;
     if (s->arguments != NULL) {
-	for (i = 0; i < s->argc; i++) {
-	    if (s->arguments[i] != NULL) {
-		free(s->arguments[i]);
-	    }
-	}
-	free(s->arguments);
-	s->arguments = NULL;
+        for (i = 0; i < s->argc; i++) {
+            if (s->arguments[i] != NULL) {
+                free(s->arguments[i]);
+            }
+        }
+        free(s->arguments);
+        s->arguments = NULL;
     }
     s->argc = 0;
     return 0;
@@ -196,7 +197,7 @@ static int clear_signal_txt(const int sig)
 static dbus_signal_t *get_signal_txt(const int sig)
 {
     if (sig < 0 || sig >= dbus_results.signals) {
-	return NULL;
+        return NULL;
     }
     return &dbus_results.a[sig];
 }
@@ -205,27 +206,27 @@ static dbus_signal_t *get_signal_txt(const int sig)
 static int set_signal_txt(const int sig, const dbus_signal_t * data)
 {
     if (sig < 0 || sig >= dbus_results.signals) {
-	int new_sigs = sig + 1;
-	//allocate it
-	dbus_results.a = realloc(dbus_results.a, sizeof(dbus_signal_t) * new_sigs);
-	int i;
-	//clear anything just allocated that we are not writing to right now
-	for (i = dbus_results.signals; i < new_sigs; i++) {
-	    dbus_results.a[i].argc = 0;
-	    dbus_results.a[i].arguments = NULL;
-	}
-	dbus_results.signals = new_sigs;
+        int new_sigs = sig + 1;
+        //allocate it
+        dbus_results.a = realloc(dbus_results.a, sizeof(dbus_signal_t) * new_sigs);
+        int i;
+        //clear anything just allocated that we are not writing to right now
+        for (i = dbus_results.signals; i < new_sigs; i++) {
+            dbus_results.a[i].argc = 0;
+            dbus_results.a[i].arguments = NULL;
+        }
+        dbus_results.signals = new_sigs;
     }
     //free the old version
     if (dbus_results.a[sig].argc != 0) {
-	clear_signal_txt(sig);
+        clear_signal_txt(sig);
     }
     dbus_results.a[sig].argc = data->argc;
     //need to dup the strings
     dbus_results.a[sig].arguments = malloc(sizeof(data->arguments) * data->argc);
     int i;
     for (i = 0; i < data->argc; i++) {
-	dbus_results.a[sig].arguments[i] = strdup(data->arguments[i]);
+        dbus_results.a[sig].arguments[i] = strdup(data->arguments[i]);
     }
     return 0;
 }
@@ -245,7 +246,7 @@ static void get_argument(RESULT * result, RESULT * sig, RESULT * arg)
     dbus_signal_t *signal_value = get_signal_txt(signal);
     char *value = "";
     if (signal_value != NULL && signal_value->argc > argument && signal_value->arguments[argument] != NULL) {
-	value = signal_value->arguments[argument];
+        value = signal_value->arguments[argument];
 
     }
 
@@ -260,13 +261,13 @@ static void clear_arguments(RESULT * result, RESULT * sig)
     dbus_signal_t *signal_value = get_signal_txt(signal);
     int i;
     if (signal_value->arguments != NULL) {
-	for (i = 0; i < signal_value->argc; i++) {
-	    if (signal_value->arguments[i] != NULL) {
-		free(signal_value->arguments[i]);
-	    }
-	}
-	free(signal_value->arguments);
-	signal_value->arguments = NULL;
+        for (i = 0; i < signal_value->argc; i++) {
+            if (signal_value->arguments[i] != NULL) {
+                free(signal_value->arguments[i]);
+            }
+        }
+        free(signal_value->arguments);
+        signal_value->arguments = NULL;
     }
     signal_value->argc = 0;
 
@@ -286,46 +287,46 @@ static void load_dbus_cfg(void)
     const int max_cfg_len = 32;
     char cfg_name[max_cfg_len];
     for (i = 0; i < DBUS_MAX_SIGNALS; i++) {
-	snprintf(cfg_name, max_cfg_len - 1, sender_fmt, i);
-	sender = cfg_get(DBUS_PLUGIN_SECTION, cfg_name, "");
+        snprintf(cfg_name, max_cfg_len - 1, sender_fmt, i);
+        sender = cfg_get(DBUS_PLUGIN_SECTION, cfg_name, "");
 
-	snprintf(cfg_name, max_cfg_len - 1, path_fmt, i);
-	path = cfg_get(DBUS_PLUGIN_SECTION, cfg_name, "");
+        snprintf(cfg_name, max_cfg_len - 1, path_fmt, i);
+        path = cfg_get(DBUS_PLUGIN_SECTION, cfg_name, "");
 
-	snprintf(cfg_name, max_cfg_len - 1, interface_fmt, i);
-	interface = cfg_get(DBUS_PLUGIN_SECTION, cfg_name, "");
+        snprintf(cfg_name, max_cfg_len - 1, interface_fmt, i);
+        interface = cfg_get(DBUS_PLUGIN_SECTION, cfg_name, "");
 
-	snprintf(cfg_name, max_cfg_len - 1, member_fmt, i);
-	member = cfg_get(DBUS_PLUGIN_SECTION, cfg_name, "");
+        snprintf(cfg_name, max_cfg_len - 1, member_fmt, i);
+        member = cfg_get(DBUS_PLUGIN_SECTION, cfg_name, "");
 
-	snprintf(cfg_name, max_cfg_len - 1, eventname_fmt, i);
-	eventname = cfg_get(DBUS_PLUGIN_SECTION, cfg_name, "");
+        snprintf(cfg_name, max_cfg_len - 1, eventname_fmt, i);
+        eventname = cfg_get(DBUS_PLUGIN_SECTION, cfg_name, "");
 
-	if (*path == '\0' && *interface == '\0' && *member == '\0') {
-	    goto cleanup;
-	} else if (*path == '\0' || *interface == '\0' || *member == '\0') {
-	    error("[DBus] Incomplete configuration specified for signal%d", i);
-	    goto cleanup;
-	}
+        if (*path == '\0' && *interface == '\0' && *member == '\0') {
+            goto cleanup;
+        } else if (*path == '\0' || *interface == '\0' || *member == '\0') {
+            error("[DBus] Incomplete configuration specified for signal%d", i);
+            goto cleanup;
+        }
 
-	handle_signal_t *sig_info = malloc(sizeof(handle_signal_t));
-	sig_info->id = i;
-	if (*eventname == '\0') {
-	    sig_info->event_name = NULL;
-	} else {
-	    sig_info->event_name = strdup(eventname);
-	}
+        handle_signal_t *sig_info = malloc(sizeof(handle_signal_t));
+        sig_info->id = i;
+        if (*eventname == '\0') {
+            sig_info->event_name = NULL;
+        } else {
+            sig_info->event_name = strdup(eventname);
+        }
 
-	if (!lcd_register_signal(sender, path, interface, member, handle_inbound_signal,
-				 sig_info, (void (*)(void *)) free_handle_signal)) {
-	    error("[DBus] Error Registering signal %d", i);
-	}
+        if (!lcd_register_signal(sender, path, interface, member, handle_inbound_signal,
+                                 sig_info, (void (*)(void *)) free_handle_signal)) {
+            error("[DBus] Error Registering signal %d", i);
+        }
       cleanup:
-	free(sender);
-	free(path);
-	free(interface);
-	free(member);
-	free(eventname);
+        free(sender);
+        free(path);
+        free(interface);
+        free(member);
+        free(eventname);
     }
 }
 
@@ -333,7 +334,7 @@ static void load_dbus_cfg(void)
 static void free_handle_signal(handle_signal_t * sig)
 {
     if (sig->event_name != NULL) {
-	free(sig->event_name);
+        free(sig->event_name);
     }
     free(sig);
 }
@@ -342,8 +343,8 @@ static void free_handle_signal(handle_signal_t * sig)
 int plugin_init_dbus(void)
 {
     if (!lcd_dbus_init()) {
-	error("[DBus] Could not connect to DBus");
-	return 1;
+        error("[DBus] Could not connect to DBus");
+        return 1;
     }
     //dbus::argument(<DisplaySignal>, <Argument#>)//displays arg# for signal#
     AddFunction("dbus::argument", 2, get_argument);
@@ -360,17 +361,17 @@ void plugin_exit_dbus(void)
     int i;
     //remove all known signals
     for (i = registered_sig_count - 1; i >= 0; i--) {
-	lcd_unregister_signal(lcd_registered_signals[i]);
+        lcd_unregister_signal(lcd_registered_signals[i]);
     }
     if (sysconn != NULL) {
-	dbus_connection_unref(sysconn);
+        dbus_connection_unref(sysconn);
     }
     if (sessconn != NULL) {
-	dbus_connection_unref(sessconn);
+        dbus_connection_unref(sessconn);
     }
     //remove all knows signal results
     for (i = dbus_results.signals - 1; i >= 0; i--) {
-	clear_signal_txt(i);
+        clear_signal_txt(i);
     }
 
 #ifdef DEBUG
@@ -391,7 +392,7 @@ void plugin_exit_dbus(void)
 //watch functions
 static dbus_bool_t add_watch(DBusWatch * w, void *data)
 {
-    (void) data;		//ignore it
+    (void) data;                //ignore it
 #if (DBUS_VERSION_MAJOR == 1 && DBUS_VERSION_MINOR == 1 && DBUS_VERSION_MICRO >= 1) || (DBUS_VERSION_MAJOR == 1 && DBUS_VERSION_MINOR > 1) || (DBUS_VERSION_MAJOR > 1)
     int fd = dbus_watch_get_unix_fd(w);
 #else
@@ -405,7 +406,7 @@ static dbus_bool_t add_watch(DBusWatch * w, void *data)
 
 static void remove_watch(DBusWatch * w, void *data)
 {
-    (void) data;		//ignore it
+    (void) data;                //ignore it
 #if (DBUS_VERSION_MAJOR == 1 && DBUS_VERSION_MINOR == 1 && DBUS_VERSION_MICRO >= 1) || (DBUS_VERSION_MAJOR == 1 && DBUS_VERSION_MINOR > 1) || (DBUS_VERSION_MAJOR > 1)
     event_del(dbus_watch_get_unix_fd(w));
 #else
@@ -441,7 +442,7 @@ static void watch_handle(event_flags_t f, void *data)
 
     //tell dbus
     if (!dbus_watch_handle(w, flags)) {
-	info("[DBus] dbus_watch_handle(): Not enough memory!");
+        info("[DBus] dbus_watch_handle(): Not enough memory!");
     }
     dispatch_dbus();
 }
@@ -449,10 +450,10 @@ static void watch_handle(event_flags_t f, void *data)
 static void dispatch_dbus(void)
 {
     if (sessconn != NULL && dbus_connection_get_dispatch_status(sessconn) == DBUS_DISPATCH_DATA_REMAINS) {
-	while (DBUS_DISPATCH_DATA_REMAINS == dbus_connection_dispatch(sessconn));
+        while (DBUS_DISPATCH_DATA_REMAINS == dbus_connection_dispatch(sessconn));
     }
     if (sysconn != NULL && dbus_connection_get_dispatch_status(sysconn) == DBUS_DISPATCH_DATA_REMAINS) {
-	while (DBUS_DISPATCH_DATA_REMAINS == dbus_connection_dispatch(sysconn));
+        while (DBUS_DISPATCH_DATA_REMAINS == dbus_connection_dispatch(sysconn));
     }
 }
 
@@ -460,16 +461,16 @@ static void timeout_dbus_handle(void *data)
 {
     DBusTimeout *t = (DBusTimeout *) data;
     if (!dbus_timeout_handle(t)) {
-	info("[DBus] Not enough memory to handle timeout!");
+        info("[DBus] Not enough memory to handle timeout!");
     }
     dispatch_dbus();
 }
 
 static dbus_bool_t add_dbus_timeout(DBusTimeout * t, void *data)
 {
-    (void) data;		//ignore warning
+    (void) data;                //ignore warning
     if (!timer_add_late(timeout_dbus_handle, t, dbus_timeout_get_interval(t), 0)) {
-	return FALSE;
+        return FALSE;
     }
     return TRUE;
 }
@@ -477,7 +478,7 @@ static dbus_bool_t add_dbus_timeout(DBusTimeout * t, void *data)
 
 static void remove_dbus_timeout(DBusTimeout * t, void *data)
 {
-    (void) data;		//ignore warning
+    (void) data;                //ignore warning
     timer_remove(timeout_dbus_handle, t);
 }
 
@@ -491,11 +492,11 @@ static void toggle_dbus_timeout(DBusTimeout * t, void *data)
 static void setup_dbus_events(DBusConnection * conn)
 {
     if (!dbus_connection_set_watch_functions(conn, add_watch, remove_watch, toggle_watch, NULL, NULL)) {
-	error("[DBus] dbus_connection_set_watch_functions(): Not enough memory!");
+        error("[DBus] dbus_connection_set_watch_functions(): Not enough memory!");
     }
     if (!dbus_connection_set_timeout_functions
-	(conn, add_dbus_timeout, remove_dbus_timeout, toggle_dbus_timeout, NULL, NULL)) {
-	error("[DBus] dbus_connection_set_timeout_functions(): Not enough memory!");
+        (conn, add_dbus_timeout, remove_dbus_timeout, toggle_dbus_timeout, NULL, NULL)) {
+        error("[DBus] dbus_connection_set_timeout_functions(): Not enough memory!");
     }
 }
 
@@ -503,37 +504,37 @@ static int lcd_dbus_init(void)
 {
 
     int success = 3;
-    dbus_error_init(&err);	//dbus_error_free(&err);
+    dbus_error_init(&err);      //dbus_error_free(&err);
     sessconn = dbus_bus_get(DBUS_BUS_SESSION, &err);
     if (sessconn == NULL) {
-	info("[DBus] Error connecting to the dbus session bus: %s\n", err.message);
-	dbus_error_free(&err);
-	success &= 1;
+        info("[DBus] Error connecting to the dbus session bus: %s\n", err.message);
+        dbus_error_free(&err);
+        success &= 1;
     } else {
 #ifdef DEBUG
-	dbus_connection_set_exit_on_disconnect(sessconn, FALSE);
+        dbus_connection_set_exit_on_disconnect(sessconn, FALSE);
 #endif
-	setup_dbus_events(sessconn);
+        setup_dbus_events(sessconn);
     }
 
     sysconn = dbus_bus_get(DBUS_BUS_SYSTEM, &err);
     if (sysconn == NULL) {
-	info("[DBus] Error connecting to the dbus system bus: %s\n", err.message);
-	success &= 2;
+        info("[DBus] Error connecting to the dbus system bus: %s\n", err.message);
+        success &= 2;
     } else {
 #ifdef DEBUG
-	dbus_connection_set_exit_on_disconnect(sysconn, FALSE);
+        dbus_connection_set_exit_on_disconnect(sysconn, FALSE);
 #endif
-	setup_dbus_events(sysconn);
+        setup_dbus_events(sysconn);
     }
 
     return success;
 }
 
 static lcd_sig_t *create_signal(const char *sender, const char *path,
-				const char *interface, const char *member,
-				void (*callback) (void *user_data, int argc, char **argv), void *user_data,
-				void (*user_free) (void *))
+                                const char *interface, const char *member,
+                                void (*callback)(void *user_data, int argc, char **argv), void *user_data,
+                                void(*user_free)(void *))
 {
     lcd_sig_t *sig = malloc(sizeof(lcd_sig_t));
     sig->callback = callback;
@@ -551,17 +552,17 @@ static lcd_sig_t *create_signal(const char *sender, const char *path,
     size_t len = strlen(sender) + strlen(path) + strlen(interface) + strlen(member);
     char *format;
     if (strlen(sig->sender) == 0) {
-	format = "type='signal',path='%s',interface='%s',member='%s'";
+        format = "type='signal',path='%s',interface='%s',member='%s'";
     } else {
-	format = "type='signal',sender='%s',path='%s',interface='%s',member='%s'";
+        format = "type='signal',sender='%s',path='%s',interface='%s',member='%s'";
     }
     len += strlen(format);
     len *= sizeof(char);
     sig->rule = malloc(len);
     if (strlen(sig->sender) == 0) {
-	sprintf(sig->rule, format, path, interface, member);
+        sprintf(sig->rule, format, path, interface, member);
     } else {
-	sprintf(sig->rule, format, sender, path, interface, member);
+        sprintf(sig->rule, format, sender, path, interface, member);
     }
     assert(strlen(sig->rule) < len);
     return sig;
@@ -576,60 +577,60 @@ static void handle_inbound_signal(void *signal, int argc, char **argv)
     set_signal_txt(signal_info->id, &sig);
 
     if (signal_info->event_name != NULL) {
-	named_event_trigger(signal_info->event_name);
+        named_event_trigger(signal_info->event_name);
     }
 }
 
 static lcd_sig_t *lcd_register_signal(const char *sender, const char *path,
-				      const char *interface, const char *member,
-				      void (*callback) (void *user_data, int argc, char **argv), void *user_data,
-				      void (*user_free) (void *))
+                                      const char *interface, const char *member,
+                                      void (*callback)(void *user_data, int argc, char **argv), void *user_data,
+                                      void(*user_free)(void *))
 {
-    if (__builtin_expect(registered_sig_count >= DBUS_MAX_SIGNALS, 0)) {	//gcc >= 2.96
-	//i don't think anything will allow this to ever be hit..in fact It's impossible in the form i wrote the plugin
-	error
-	    ("[DBus] Attempted to add more than %d dus signals, if you actually need more than that edit DBUS_MAX_SIGNALS in plugin_dbus.c",
-	     DBUS_MAX_SIGNALS);
-	return NULL;
+    if(__builtin_expect(registered_sig_count >= DBUS_MAX_SIGNALS, 0)) { //gcc >= 2.96
+        //i don't think anything will allow this to ever be hit..in fact It's impossible in the form i wrote the plugin
+        error
+            ("[DBus] Attempted to add more than %d dus signals, if you actually need more than that edit DBUS_MAX_SIGNALS in plugin_dbus.c",
+             DBUS_MAX_SIGNALS);
+        return NULL;
     }
     //store everything we need in the singal struct
     lcd_sig_t *sig = create_signal(sender, path, interface, member, callback, user_data, user_free);
     int success = 3;
     if (sessconn != NULL) {
-	dbus_bus_add_match(sessconn, sig->rule, &err);
-	if (dbus_error_is_set(&err)) {
-	    info("[DBus] Error adding dbus match to the session bus: %s \n", err.message);
-	    dbus_error_free(&err);
-	    success ^= 1;
-	}
+        dbus_bus_add_match(sessconn, sig->rule, &err);
+        if (dbus_error_is_set(&err)) {
+            info("[DBus] Error adding dbus match to the session bus: %s \n", err.message);
+            dbus_error_free(&err);
+            success ^= 1;
+        }
 
 
-	if (!dbus_connection_add_filter(sessconn, lcd_sig_received, sig, NULL) && (success & 1)) {
-	    info("[DBus] Dbus signal registration failed to the session bus!\n");
-	    dbus_bus_remove_match(sessconn, sig->rule, &err);
-	    success ^= 1;
-	}
+        if (!dbus_connection_add_filter(sessconn, lcd_sig_received, sig, NULL) && (success & 1)) {
+            info("[DBus] Dbus signal registration failed to the session bus!\n");
+            dbus_bus_remove_match(sessconn, sig->rule, &err);
+            success ^= 1;
+        }
     } else {
-	success ^= 1;
+        success ^= 1;
     }
     if (sysconn != NULL) {
-	dbus_bus_add_match(sysconn, sig->rule, &err);
-	if (dbus_error_is_set(&err)) {
-	    info("[DBus] Error adding dbus match to the system bus: %s \n", err.message);
-	    success ^= 2;
-	}
+        dbus_bus_add_match(sysconn, sig->rule, &err);
+        if (dbus_error_is_set(&err)) {
+            info("[DBus] Error adding dbus match to the system bus: %s \n", err.message);
+            success ^= 2;
+        }
 
-	if (!dbus_connection_add_filter(sysconn, lcd_sig_received, sig, NULL) && (success & 2)) {
-	    info("[DBus] Dbus signal registration failed to the system bus!\n");
-	    dbus_bus_remove_match(sysconn, sig->rule, &err);
-	    success ^= 2;
-	}
+        if (!dbus_connection_add_filter(sysconn, lcd_sig_received, sig, NULL) && (success & 2)) {
+            info("[DBus] Dbus signal registration failed to the system bus!\n");
+            dbus_bus_remove_match(sysconn, sig->rule, &err);
+            success ^= 2;
+        }
     } else {
-	success ^= 2;
+        success ^= 2;
     }
     if (!success) {
-	free_signal(sig);
-	return NULL;
+        free_signal(sig);
+        return NULL;
     }
 
     lcd_registered_signals[registered_sig_count] = sig;
@@ -640,7 +641,7 @@ static lcd_sig_t *lcd_register_signal(const char *sender, const char *path,
 static void free_signal(lcd_sig_t * sig)
 {
     if (sig->user_free != NULL) {
-	sig->user_free(sig->user_data);
+        sig->user_free(sig->user_data);
     }
     free(sig->sender);
     free(sig->path);
@@ -653,16 +654,16 @@ static void free_signal(lcd_sig_t * sig)
 static void lcd_unregister_signal(lcd_sig_t * sig)
 {
     if (sig == NULL) {
-	return;
+        return;
     }
     //remove filter and match
     if (sessconn != NULL) {
-	dbus_connection_remove_filter(sessconn, lcd_sig_received, sig);
-	dbus_bus_remove_match(sessconn, sig->rule, NULL);
+        dbus_connection_remove_filter(sessconn, lcd_sig_received, sig);
+        dbus_bus_remove_match(sessconn, sig->rule, NULL);
     }
     if (sysconn != NULL) {
-	dbus_connection_remove_filter(sysconn, lcd_sig_received, sig);
-	dbus_bus_remove_match(sysconn, sig->rule, NULL);
+        dbus_connection_remove_filter(sysconn, lcd_sig_received, sig);
+        dbus_bus_remove_match(sysconn, sig->rule, NULL);
     }
     //free user data
     free_signal(sig);
@@ -670,11 +671,11 @@ static void lcd_unregister_signal(lcd_sig_t * sig)
     //drop it off the list
     int i;
     for (i = 0; i < registered_sig_count; i++) {
-	if (lcd_registered_signals[i] == sig) {
-	    registered_sig_count--;
-	    lcd_registered_signals[i] = lcd_registered_signals[registered_sig_count];
-	    break;
-	}
+        if (lcd_registered_signals[i] == sig) {
+            registered_sig_count--;
+            lcd_registered_signals[i] = lcd_registered_signals[registered_sig_count];
+            break;
+        }
     }
 }
 
@@ -693,113 +694,113 @@ static void fill_args(DBusMessage * message, int *argcount, char ***argv)
 
     //iterate over all arguments, casting all primitaves to strings
     while ((current_type = dbus_message_iter_get_arg_type(&iter)) != DBUS_TYPE_INVALID) {
-	assert(argc <= buf_size);
-	if (argc >= buf_size) {
-	    buf_size = argc * 2;
-	    if (buf_size == 0) {
-		buf_size = 1;
-	    }
-	    args = realloc(args, sizeof(char **) * buf_size);
-	}
-	if (dbus_type_is_basic(current_type)) {
-	    args[argc] = malloc(sizeof(char) * (1 + LCD_MAX_MSG_LEN));
-	    args[argc][LCD_MAX_MSG_LEN] = '\0';
-	    //determine the type
-	    switch (current_type) {
-		/* Primitive types */
-	    case DBUS_TYPE_BYTE:
-		{
-		    char value;
-		    dbus_message_iter_get_basic(&iter, &value);
-		    snprintf(args[argc], LCD_MAX_MSG_LEN, "%hhx", value);
-		}
+        assert(argc <= buf_size);
+        if (argc >= buf_size) {
+            buf_size = argc * 2;
+            if (buf_size == 0) {
+                buf_size = 1;
+            }
+            args = realloc(args, sizeof(char **) * buf_size);
+        }
+        if (dbus_type_is_basic(current_type)) {
+            args[argc] = malloc(sizeof(char) * (1 + LCD_MAX_MSG_LEN));
+            args[argc][LCD_MAX_MSG_LEN] = '\0';
+            //determine the type
+            switch (current_type) {
+                /* Primitive types */
+            case DBUS_TYPE_BYTE:
+                {
+                    char value;
+                    dbus_message_iter_get_basic(&iter, &value);
+                    snprintf(args[argc], LCD_MAX_MSG_LEN, "%hhx", value);
+                }
 
-		break;
-	    case DBUS_TYPE_BOOLEAN:
-		{
-		    dbus_bool_t value;
-		    dbus_message_iter_get_basic(&iter, &value);
-		    if (value) {
-			strcpy(args[argc], "true");
-		    } else {
-			strcpy(args[argc], "false");
-		    }
+                break;
+            case DBUS_TYPE_BOOLEAN:
+                {
+                    dbus_bool_t value;
+                    dbus_message_iter_get_basic(&iter, &value);
+                    if (value) {
+                        strcpy(args[argc], "true");
+                    } else {
+                        strcpy(args[argc], "false");
+                    }
 
-		}
-		break;
-	    case DBUS_TYPE_INT16:
-		{
-		    dbus_int16_t value;
-		    dbus_message_iter_get_basic(&iter, &value);
-		    snprintf(args[argc], LCD_MAX_MSG_LEN, "%hd", value);
-		}
-		break;
-	    case DBUS_TYPE_UINT16:
-		{
-		    dbus_uint16_t value;
-		    dbus_message_iter_get_basic(&iter, &value);
-		    snprintf(args[argc], LCD_MAX_MSG_LEN, "%hu", value);
-		}
-		break;
-	    case DBUS_TYPE_INT32:
-		{
-		    dbus_int32_t value;
-		    dbus_message_iter_get_basic(&iter, &value);
-		    snprintf(args[argc], LCD_MAX_MSG_LEN, "%d", value);
-		}
-		break;
-	    case DBUS_TYPE_UINT32:
-		{
-		    dbus_uint32_t value;
-		    dbus_message_iter_get_basic(&iter, &value);
-		    snprintf(args[argc], LCD_MAX_MSG_LEN, "%u", value);
-		}
-		break;
-	    case DBUS_TYPE_INT64:
-		{
-		    dbus_int64_t value;
-		    dbus_message_iter_get_basic(&iter, &value);
-		    snprintf(args[argc], LCD_MAX_MSG_LEN, "%jd", (intmax_t) value);
-		}
-		break;
-	    case DBUS_TYPE_UINT64:
-		{
-		    dbus_uint64_t value;
-		    dbus_message_iter_get_basic(&iter, &value);
-		    snprintf(args[argc], LCD_MAX_MSG_LEN, "%ju", (uintmax_t) value);
-		}
-		break;
-	    case DBUS_TYPE_DOUBLE:
-		{
-		    double value;
-		    dbus_message_iter_get_basic(&iter, &value);
-		    snprintf(args[argc], LCD_MAX_MSG_LEN, "%f", value);
-		}
-		break;
-	    case DBUS_TYPE_STRING:	//all strings
-	    case DBUS_TYPE_OBJECT_PATH:
-	    case DBUS_TYPE_SIGNATURE:
-		{
-		    char *value;
-		    dbus_message_iter_get_basic(&iter, &value);
-		    snprintf(args[argc], LCD_MAX_MSG_LEN, "%s", value);
-		}
-		break;
-	    case DBUS_TYPE_INVALID:
-	    default:
-		//not supported
-		free(args[argc]);
-		args[argc] = NULL;
-		assert(0);	//should never ever happen...
+                }
+                break;
+            case DBUS_TYPE_INT16:
+                {
+                    dbus_int16_t value;
+                    dbus_message_iter_get_basic(&iter, &value);
+                    snprintf(args[argc], LCD_MAX_MSG_LEN, "%hd", value);
+                }
+                break;
+            case DBUS_TYPE_UINT16:
+                {
+                    dbus_uint16_t value;
+                    dbus_message_iter_get_basic(&iter, &value);
+                    snprintf(args[argc], LCD_MAX_MSG_LEN, "%hu", value);
+                }
+                break;
+            case DBUS_TYPE_INT32:
+                {
+                    dbus_int32_t value;
+                    dbus_message_iter_get_basic(&iter, &value);
+                    snprintf(args[argc], LCD_MAX_MSG_LEN, "%d", value);
+                }
+                break;
+            case DBUS_TYPE_UINT32:
+                {
+                    dbus_uint32_t value;
+                    dbus_message_iter_get_basic(&iter, &value);
+                    snprintf(args[argc], LCD_MAX_MSG_LEN, "%u", value);
+                }
+                break;
+            case DBUS_TYPE_INT64:
+                {
+                    dbus_int64_t value;
+                    dbus_message_iter_get_basic(&iter, &value);
+                    snprintf(args[argc], LCD_MAX_MSG_LEN, "%jd", (intmax_t) value);
+                }
+                break;
+            case DBUS_TYPE_UINT64:
+                {
+                    dbus_uint64_t value;
+                    dbus_message_iter_get_basic(&iter, &value);
+                    snprintf(args[argc], LCD_MAX_MSG_LEN, "%ju", (uintmax_t) value);
+                }
+                break;
+            case DBUS_TYPE_DOUBLE:
+                {
+                    double value;
+                    dbus_message_iter_get_basic(&iter, &value);
+                    snprintf(args[argc], LCD_MAX_MSG_LEN, "%f", value);
+                }
+                break;
+            case DBUS_TYPE_STRING:     //all strings
+            case DBUS_TYPE_OBJECT_PATH:
+            case DBUS_TYPE_SIGNATURE:
+                {
+                    char *value;
+                    dbus_message_iter_get_basic(&iter, &value);
+                    snprintf(args[argc], LCD_MAX_MSG_LEN, "%s", value);
+                }
+                break;
+            case DBUS_TYPE_INVALID:
+            default:
+                //not supported
+                free(args[argc]);
+                args[argc] = NULL;
+                assert(0);      //should never ever happen...
 
-		break;
-	    }
-	} else {
-	    args[argc] = NULL;
-	}
+                break;
+            }
+        } else {
+            args[argc] = NULL;
+        }
 
-	argc++;
-	dbus_message_iter_next(&iter);
+        argc++;
+        dbus_message_iter_next(&iter);
     }
 
 
@@ -816,22 +817,22 @@ static DBusHandlerResult lcd_sig_received(DBusConnection * connection, DBusMessa
     lcd_sig_t *sig = sigv;
     //compare the signal to the one we were assigned
     if (dbus_message_get_type(msg) != DBUS_MESSAGE_TYPE_SIGNAL) {
-	dbus_message_unref(msg);
-	return DBUS_HANDLER_RESULT_NOT_YET_HANDLED;
+        dbus_message_unref(msg);
+        return DBUS_HANDLER_RESULT_NOT_YET_HANDLED;
     }
     //we don't check the sender because we (probably) asked by name, not by sender
     if (!dbus_message_has_member(msg, sig->member) ||
-	!dbus_message_has_path(msg, sig->path) || !dbus_message_has_interface(msg, sig->interface)) {
-	dbus_message_unref(msg);
-	return DBUS_HANDLER_RESULT_NOT_YET_HANDLED;
+        !dbus_message_has_path(msg, sig->path) || !dbus_message_has_interface(msg, sig->interface)) {
+        dbus_message_unref(msg);
+        return DBUS_HANDLER_RESULT_NOT_YET_HANDLED;
     }
     //call the users function
     if (sig->callback != NULL) {
-	char **args;
-	int argc;
-	fill_args(msg, &argc, &args);
-	sig->callback(sig->user_data, argc, args);
-	free_args(argc, args);
+        char **args;
+        int argc;
+        fill_args(msg, &argc, &args);
+        sig->callback(sig->user_data, argc, args);
+        free_args(argc, args);
     }
 
     dbus_message_unref(msg);
@@ -845,13 +846,13 @@ static void free_args(int argc, char **argv)
     int i;
     //free args
     for (i = 0; i < argc; i++) {
-	if (argv[i] != NULL) {
-	    free(argv[i]);
-	}
+        if (argv[i] != NULL) {
+            free(argv[i]);
+        }
     }
 
     if (argv != NULL && argc != 0) {
-	free(argv);
+        free(argv);
     }
 
 }

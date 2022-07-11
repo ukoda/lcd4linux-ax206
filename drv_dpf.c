@@ -65,8 +65,8 @@
 // See http://dpf-ax.sourceforge.net/
 //###################################################################
 
-#define DPFAXHANDLE void *	// Handle needed for dpf_ax access
-#define DPF_BPP 2		//bpp for dfp-ax is currently always 2!
+#define DPFAXHANDLE void *      // Handle needed for dpf_ax access
+#define DPF_BPP 2               //bpp for dfp-ax is currently always 2!
 
 /**
  * Open DPF device.
@@ -122,11 +122,11 @@ static char Name[] = "DPF";
  * Dpf status
  */
 static struct {
-    unsigned char *lcdBuf;	// Display data buffer
-    unsigned char *xferBuf;	// USB transfer buffer
-    DPFAXHANDLE dpfh;		// Handle for dpf access
-    int pwidth;			// Physical display width
-    int pheight;		// Physical display height
+    unsigned char *lcdBuf;      // Display data buffer
+    unsigned char *xferBuf;     // USB transfer buffer
+    DPFAXHANDLE dpfh;           // Handle for dpf access
+    int pwidth;                 // Physical display width
+    int pheight;                // Physical display height
 
     // Flags to translate logical to physical orientation
     int isPortrait;
@@ -167,42 +167,42 @@ static void drv_set_pixel(int x, int y, RGBA pix)
     int ly = y % sy;
 
     if (dpf.flip) {
-	// upside down orientation
-	lx = DCOLS - 1 - lx;
-	ly = DROWS - 1 - ly;
+        // upside down orientation
+        lx = DCOLS - 1 - lx;
+        ly = DROWS - 1 - ly;
     }
 
     if (dpf.rotate90) {
-	// wrong Orientation, rotate
-	int i = ly;
-	ly = dpf.pheight - 1 - lx;
-	lx = i;
+        // wrong Orientation, rotate
+        int i = ly;
+        ly = dpf.pheight - 1 - lx;
+        lx = i;
     }
 
     if (lx < 0 || lx >= (int) dpf.pwidth || ly < 0 || ly >= (int) dpf.pheight) {
-	error("dpf: x/y out of bounds (x=%d, y=%d, rot=%d, flip=%d, lx=%d, ly=%d)\n", x, y, dpf.rotate90, dpf.flip, lx,
-	      ly);
-	return;
+        error("dpf: x/y out of bounds (x=%d, y=%d, rot=%d, flip=%d, lx=%d, ly=%d)\n", x, y, dpf.rotate90, dpf.flip, lx,
+              ly);
+        return;
     }
 
     unsigned char c1 = _RGB565_0(pix);
     unsigned char c2 = _RGB565_1(pix);
     unsigned int i = (ly * dpf.pwidth + lx) * DPF_BPP;
     if (dpf.lcdBuf[i] != c1 || dpf.lcdBuf[i + 1] != c2) {
-	dpf.lcdBuf[i] = c1;
-	dpf.lcdBuf[i + 1] = c2;
-	changed = 1;
+        dpf.lcdBuf[i] = c1;
+        dpf.lcdBuf[i + 1] = c2;
+        changed = 1;
     }
 
     if (changed) {
-	if (lx < dpf.minx)
-	    dpf.minx = lx;
-	if (lx > dpf.maxx)
-	    dpf.maxx = lx;
-	if (ly < dpf.miny)
-	    dpf.miny = ly;
-	if (ly > dpf.maxy)
-	    dpf.maxy = ly;
+        if (lx < dpf.minx)
+            dpf.minx = lx;
+        if (lx > dpf.maxx)
+            dpf.maxx = lx;
+        if (ly < dpf.miny)
+            dpf.miny = ly;
+        if (ly > dpf.maxy)
+            dpf.maxy = ly;
     }
 }
 
@@ -216,21 +216,21 @@ static void drv_dpf_blit(const int row, const int col, const int height, const i
     // Set pixels one by one
     // Note: here is room for optimization :-)
     for (y = row; y < row + height; y++)
-	for (x = col; x < col + width; x++)
-	    drv_set_pixel(x, y, drv_generic_graphic_rgb(y, x));
+        for (x = col; x < col + width; x++)
+            drv_set_pixel(x, y, drv_generic_graphic_rgb(y, x));
 
     // If nothing has changed, skip transfer
     if (dpf.minx > dpf.maxx || dpf.miny > dpf.maxy)
-	return;
+        return;
 
     // Copy data in dirty rectangle from data buffer to temp transfer buffer
     unsigned int cpylength = (dpf.maxx - dpf.minx + 1) * DPF_BPP;
     unsigned char *ps = dpf.lcdBuf + (dpf.miny * dpf.pwidth + dpf.minx) * DPF_BPP;
     unsigned char *pd = dpf.xferBuf;
     for (y = dpf.miny; y <= dpf.maxy; y++) {
-	memcpy(pd, ps, cpylength);
-	ps += dpf.pwidth * DPF_BPP;
-	pd += cpylength;
+        memcpy(pd, ps, cpylength);
+        ps += dpf.pwidth * DPF_BPP;
+        pd += cpylength;
     }
 
     // Send the buffer
@@ -261,51 +261,51 @@ static int drv_dpf_start(const char *section)
     // Get the device
     dev = cfg_get(section, "Port", NULL);
     if (dev == NULL || *dev == '\0') {
-	error("dpf: no '%s.Port' entry from %s", section, cfg_source());
-	return -1;
+        error("dpf: no '%s.Port' entry from %s", section, cfg_source());
+        return -1;
     }
     // Get font
     s = cfg_get(section, "Font", "6x8");
     if (s == NULL || *s == '\0') {
-	error("%s: no '%s.Font' entry from %s", Name, section, cfg_source());
-	return -1;
+        error("%s: no '%s.Font' entry from %s", Name, section, cfg_source());
+        return -1;
     }
 
     XRES = -1;
     YRES = -1;
     if (sscanf(s, "%dx%d", &XRES, &YRES) != 2 || XRES < 1 || YRES < 1) {
-	error("%s: bad Font '%s' from %s", Name, s, cfg_source());
-	return -1;
+        error("%s: bad Font '%s' from %s", Name, s, cfg_source());
+        return -1;
     }
 
     /* we dont want fonts below 6 width */
     if (XRES < 6) {
-	error("%s: bad Font '%s' width '%d' using minimum of 6)", Name, s, XRES);
-	XRES = 6;
+        error("%s: bad Font '%s' width '%d' using minimum of 6)", Name, s, XRES);
+        XRES = 6;
     }
 
     /* we dont want fonts below 8 height */
     if (YRES < 8) {
-	error("%s: bad Font '%s' height '%d' using minimum of 8)", Name, s, YRES);
-	YRES = 8;
+        error("%s: bad Font '%s' height '%d' using minimum of 8)", Name, s, YRES);
+        YRES = 8;
     }
     // Get the logical orientation (0 = landscape, 1 = portrait, 2 = reverse landscape, 3 = reverse portrait)
     if (cfg_number(section, "Orientation", 0, 0, 3, &i) > 0)
-	dpf.orientation = i;
+        dpf.orientation = i;
     else
-	dpf.orientation = 0;
+        dpf.orientation = 0;
 
     // Get the backlight value (0 = off, 7 = max brightness)
     if (cfg_number(section, "Backlight", 0, 0, 7, &i) > 0)
-	dpf.backlight = i;
+        dpf.backlight = i;
     else
-	dpf.backlight = 7;
+        dpf.backlight = 7;
 
     /* open communication with the display */
     dpf.dpfh = dpf_ax_open(dev);
     if (dpf.dpfh == NULL) {
-	error("dpf: cannot open dpf device %s", dev);
-	return -1;
+        error("dpf: cannot open dpf device %s", dev);
+        return -1;
     }
     // Get dpfs physical dimensions
     dpf.pwidth = dpf_ax_getwidth(dpf.dpfh);
@@ -315,20 +315,20 @@ static int drv_dpf_start(const char *section)
     // See, if we have to rotate the display
     dpf.isPortrait = dpf.pwidth < dpf.pheight;
     if (dpf.isPortrait) {
-	if (dpf.orientation == 0 || dpf.orientation == 2)
-	    dpf.rotate90 = 1;
+        if (dpf.orientation == 0 || dpf.orientation == 2)
+            dpf.rotate90 = 1;
     } else if (dpf.orientation == 1 || dpf.orientation == 3)
-	dpf.rotate90 = 1;
-    dpf.flip = (!dpf.isPortrait && dpf.rotate90);	// adjust to make rotate por/land = physical por/land
+        dpf.rotate90 = 1;
+    dpf.flip = (!dpf.isPortrait && dpf.rotate90);       // adjust to make rotate por/land = physical por/land
     if (dpf.orientation > 1)
-	dpf.flip = !dpf.flip;
+        dpf.flip = !dpf.flip;
 
     // allocate display buffer + temp transfer buffer
     dpf.lcdBuf = malloc(dpf.pwidth * dpf.pheight * DPF_BPP);
     dpf.xferBuf = malloc(dpf.pwidth * dpf.pheight * DPF_BPP);
 
     // clear display buffer + set it to "dirty"
-    memset(dpf.lcdBuf, 0, dpf.pwidth * dpf.pheight * DPF_BPP);	//Black
+    memset(dpf.lcdBuf, 0, dpf.pwidth * dpf.pheight * DPF_BPP);  //Black
     dpf.minx = 0;
     dpf.maxx = dpf.pwidth - 1;
     dpf.miny = 0;
@@ -353,9 +353,9 @@ static void plugin_backlight(RESULT * result, RESULT * arg1)
 {
     int b = R2N(arg1);
     if (b < 0)
-	b = 0;
+        b = 0;
     if (b > 7)
-	b = 7;
+        b = 7;
 
     dpf_ax_setbacklight(dpf.dpfh, b);
     SetResult(&result, R_NUMBER, &b);
@@ -385,21 +385,21 @@ int drv_dpf_init(const char *section, const int quiet)
 
     /* start display */
     if ((ret = drv_dpf_start(section)) != 0)
-	return ret;
+        return ret;
 
     /* initialize generic graphic driver */
     if ((ret = drv_generic_graphic_init(section, Name)) != 0)
-	return ret;
+        return ret;
 
     drv_generic_graphic_clear();
 
     if (!quiet) {
-	char buffer[40];
-	qprintf(buffer, sizeof(buffer), "%s %dx%d", Name, DCOLS, DROWS);
-	if (drv_generic_graphic_greet(buffer, NULL)) {
-	    sleep(3);
-	    drv_generic_graphic_clear();
-	}
+        char buffer[40];
+        qprintf(buffer, sizeof(buffer), "%s %dx%d", Name, DCOLS, DROWS);
+        if (drv_generic_graphic_greet(buffer, NULL)) {
+            sleep(3);
+            drv_generic_graphic_clear();
+        }
     }
 
     /* register plugins */
@@ -418,41 +418,41 @@ int drv_dpf_quit(const int quiet)
     drv_generic_graphic_clear();
 
     /* say goodbye... */
-	//read goodby message from /tmp/lcd/goodbye
-	char line1[80], value[80];
-	FILE *fp;
-	int i, size;
+    //read goodby message from /tmp/lcd/goodbye
+    char line1[80], value[80];
+    FILE *fp;
+    int i, size;
 
-	fp = fopen("/tmp/lcd/goodbye", "r");
-	if (!fp) {
-		debug("couldn't open file '/tmp/lcd/goodbye'");
-		line1[0] = '\0';
-		if (!quiet) {
-			drv_generic_graphic_greet("goodbye!", NULL);
-		}
-	} else {
-		i = 0;
-		while (!feof(fp) && i++ < 1) {
-			fgets(value, sizeof(value), fp);
-			size = strcspn(value, "\r\n");
-			strncpy(line1, value, size);
-			line1[size] = '\0';
-			/* more than 80 chars, chew up rest of line */
-			while (!feof(fp) && strchr(value, '\n') == NULL) {
-				fgets(value, sizeof(value), fp);
-			}
-		}
-		fclose(fp);
-		if (i <= 1) {
-			debug("'/tmp/lcd/goodbye' seems empty");
-			line1[0] = '\0';
-		}
-		/* remove the file */
-		debug("removing '/tmp/lcd/goodbye'");
-		unlink("/tmp/lcd/goodbye");
+    fp = fopen("/tmp/lcd/goodbye", "r");
+    if (!fp) {
+        debug("couldn't open file '/tmp/lcd/goodbye'");
+        line1[0] = '\0';
+        if (!quiet) {
+            drv_generic_graphic_greet("goodbye!", NULL);
+        }
+    } else {
+        i = 0;
+        while (!feof(fp) && i++ < 1) {
+            fgets(value, sizeof(value), fp);
+            size = strcspn(value, "\r\n");
+            strncpy(line1, value, size);
+            line1[size] = '\0';
+            /* more than 80 chars, chew up rest of line */
+            while (!feof(fp) && strchr(value, '\n') == NULL) {
+                fgets(value, sizeof(value), fp);
+            }
+        }
+        fclose(fp);
+        if (i <= 1) {
+            debug("'/tmp/lcd/goodbye' seems empty");
+            line1[0] = '\0';
+        }
+        /* remove the file */
+        debug("removing '/tmp/lcd/goodbye'");
+        unlink("/tmp/lcd/goodbye");
 
-		drv_generic_graphic_greet(NULL, line1);
-	}
+        drv_generic_graphic_greet(NULL, line1);
+    }
 
     drv_generic_graphic_quit();
 
@@ -477,11 +477,11 @@ DRIVER drv_DPF = {
 
 #include <usb.h>
 
-#define AX206_VID 0x1908	// Hacked frames USB Vendor ID
-#define AX206_PID 0x0102	// Hacked frames USB Product ID
+#define AX206_VID 0x1908        // Hacked frames USB Vendor ID
+#define AX206_PID 0x0102        // Hacked frames USB Product ID
 
-#define USBCMD_SETPROPERTY  0x01	// USB command: Set property
-#define USBCMD_BLIT         0x12	// USB command: Blit to screen
+#define USBCMD_SETPROPERTY  0x01        // USB command: Set property
+#define USBCMD_BLIT         0x12        // USB command: Blit to screen
 
 /* Generic SCSI device stuff */
 
@@ -497,7 +497,7 @@ typedef
 } DPFContext;
 
 static int wrap_scsi(DPFContext * h, unsigned char *cmd, int cmdlen, char out,
-		     unsigned char *data, unsigned long block_len);
+                     unsigned char *data, unsigned long block_len);
 
 /**
  * Open DPF device.
@@ -516,11 +516,11 @@ DPFAXHANDLE dpf_ax_open(const char *dev)
     usb_dev_handle *u;
 
     if (dev && strlen(dev) == 4 && (strncmp(dev, "usb", 3) == 0 || strncmp(dev, "dpf", 3) == 0))
-	index = dev[3] - '0';
+        index = dev[3] - '0';
 
     if (index < 0 || index > 9) {
-	fprintf(stderr, "dpf_ax_open: wrong device '%s'. Please specify a string like 'usb0'\n", dev);
-	return NULL;
+        fprintf(stderr, "dpf_ax_open: wrong device '%s'. Please specify a string like 'usb0'\n", dev);
+        return NULL;
     }
 
     usb_init();
@@ -533,64 +533,64 @@ DPFAXHANDLE dpf_ax_open(const char *dev)
     int found = 0;
 
     while (b && !found) {
-	d = b->devices;
-	while (d) {
-	    if ((d->descriptor.idVendor == AX206_VID) && (d->descriptor.idProduct == AX206_PID)) {
-		fprintf(stderr, "dpf_ax_open: found AX206 #%d\n", enumeration + 1);
-		if (enumeration == index) {
-		    found = 1;
-		    break;
-		} else
-		    enumeration++;
-	    }
-	    d = d->next;
-	}
-	b = b->next;
+        d = b->devices;
+        while (d) {
+            if ((d->descriptor.idVendor == AX206_VID) && (d->descriptor.idProduct == AX206_PID)) {
+                fprintf(stderr, "dpf_ax_open: found AX206 #%d\n", enumeration + 1);
+                if (enumeration == index) {
+                    found = 1;
+                    break;
+                } else
+                    enumeration++;
+            }
+            d = d->next;
+        }
+        b = b->next;
     }
 
     if (!d) {
-	fprintf(stderr, "dpf_ax_open: no matching USB device '%s' found!\n", dev);
-	return NULL;
+        fprintf(stderr, "dpf_ax_open: no matching USB device '%s' found!\n", dev);
+        return NULL;
     }
 
     dpf = (DPFContext *) malloc(sizeof(DPFContext));
     if (!dpf) {
-	fprintf(stderr, "dpf_ax_open: error allocation memory.\n");
-	return NULL;
+        fprintf(stderr, "dpf_ax_open: error allocation memory.\n");
+        return NULL;
     }
 
     u = usb_open(d);
     if (u == NULL) {
-	fprintf(stderr, "dpf_ax_open: failed to open usb device '%s'!\n", dev);
-	free(dpf);
-	return NULL;
+        fprintf(stderr, "dpf_ax_open: failed to open usb device '%s'!\n", dev);
+        free(dpf);
+        return NULL;
     }
 
     if (usb_claim_interface(u, 0) < 0) {
-	fprintf(stderr, "dpf_ax_open: failed to claim usb device!\n");
-	usb_close(u);
-	free(dpf);
-	return NULL;
+        fprintf(stderr, "dpf_ax_open: failed to claim usb device!\n");
+        usb_close(u);
+        free(dpf);
+        return NULL;
     }
 
     dpf->udev = u;
 
     static unsigned char buf[5];
     static unsigned char cmd[16] = {
-	0xcd, 0, 0, 0,
-	0, 2, 0, 0,
-	0, 0, 0, 0,
-	0, 0, 0, 0
+        0xcd, 0, 0, 0,
+        0, 2, 0, 0,
+        0, 0, 0, 0,
+        0, 0, 0, 0
     };
-    cmd[5] = 2;			// get LCD parameters
+    cmd[5] = 2;                 // get LCD parameters
     if (wrap_scsi(dpf, cmd, sizeof(cmd), DIR_IN, buf, 5) == 0) {
-	dpf->width = (buf[0]) | (buf[1] << 8);
-	dpf->height = (buf[2]) | (buf[3] << 8);
-	fprintf(stderr, "dpf_ax_open: got LCD dimensions: %dx%d\n", dpf->width, dpf->height);
+        dpf->width = (buf[0]) | (buf[1] << 8);
+        dpf->height = (buf[2]) | (buf[3] << 8);
+        fprintf(stderr, "dpf_ax_open: got LCD dimensions: %dx%d\n", dpf->width, dpf->height);
     } else {
-	fprintf(stderr, "dpf_ax_open: error reading LCD dimensions!\n");
-	dpf_ax_close(dpf);
-	return NULL;
+        fprintf(stderr, "dpf_ax_open: error reading LCD dimensions!\n");
+        dpf_ax_close(dpf);
+        return NULL;
     }
     return (DPFAXHANDLE) dpf;
 }
@@ -668,13 +668,13 @@ void dpf_ax_setbacklight(DPFAXHANDLE h, int b)
     unsigned char *cmd = g_excmd;
 
     if (b < 0)
-	b = 0;
+        b = 0;
     if (b > 7)
-	b = 7;
+        b = 7;
 
     cmd[6] = USBCMD_SETPROPERTY;
-    cmd[7] = 0x01;		// PROPERTY_BRIGHTNESS
-    cmd[8] = 0x00;		//PROPERTY_BRIGHTNESS >> 8;
+    cmd[7] = 0x01;              // PROPERTY_BRIGHTNESS
+    cmd[8] = 0x00;              //PROPERTY_BRIGHTNESS >> 8;
     cmd[9] = b;
     cmd[10] = b >> 8;
 
@@ -683,12 +683,12 @@ void dpf_ax_setbacklight(DPFAXHANDLE h, int b)
 
 
 static unsigned char g_buf[] = {
-    0x55, 0x53, 0x42, 0x43,	// dCBWSignature
-    0xde, 0xad, 0xbe, 0xef,	// dCBWTag
-    0x00, 0x80, 0x00, 0x00,	// dCBWLength
-    0x00,			// bmCBWFlags: 0x80: data in (dev to host), 0x00: Data out
-    0x00,			// bCBWLUN
-    0x10,			// bCBWCBLength
+    0x55, 0x53, 0x42, 0x43,     // dCBWSignature
+    0xde, 0xad, 0xbe, 0xef,     // dCBWTag
+    0x00, 0x80, 0x00, 0x00,     // dCBWLength
+    0x00,                       // bmCBWFlags: 0x80: data in (dev to host), 0x00: Data out
+    0x00,                       // bCBWLUN
+    0x10,                       // bCBWCBLength
 
     // SCSI cmd:
     0xcd, 0x00, 0x00, 0x00,
@@ -701,11 +701,11 @@ static unsigned char g_buf[] = {
 #define ENDPT_IN 0x81
 
 static int wrap_scsi(DPFContext * h, unsigned char *cmd, int cmdlen, char out,
-		     unsigned char *data, unsigned long block_len)
+                     unsigned char *data, unsigned long block_len)
 {
     int len;
     int ret;
-    static unsigned char ansbuf[13];	// Do not change size.
+    static unsigned char ansbuf[13];    // Do not change size.
 
     g_buf[14] = cmdlen;
     memcpy(&g_buf[15], cmd, cmdlen);
@@ -717,39 +717,39 @@ static int wrap_scsi(DPFContext * h, unsigned char *cmd, int cmdlen, char out,
 
     ret = usb_bulk_write(h->udev, ENDPT_OUT, (const char *) g_buf, sizeof(g_buf), 1000);
     if (ret < 0)
-	return ret;
+        return ret;
 
     if (out == DIR_OUT) {
-	if (data) {
-	    ret = usb_bulk_write(h->udev, ENDPT_OUT, (const char *) data, block_len, 3000);
-	    if (ret != (int) block_len) {
-		fprintf(stderr, "dpf_ax ERROR: bulk write.\n");
-		return ret;
-	    }
-	}
+        if (data) {
+            ret = usb_bulk_write(h->udev, ENDPT_OUT, (const char *) data, block_len, 3000);
+            if (ret != (int) block_len) {
+                fprintf(stderr, "dpf_ax ERROR: bulk write.\n");
+                return ret;
+            }
+        }
     } else if (data) {
-	ret = usb_bulk_read(h->udev, ENDPT_IN, (char *) data, block_len, 4000);
-	if (ret != (int) block_len) {
-	    fprintf(stderr, "dpf_ax ERROR: bulk read.\n");
-	    return ret;
-	}
+        ret = usb_bulk_read(h->udev, ENDPT_IN, (char *) data, block_len, 4000);
+        if (ret != (int) block_len) {
+            fprintf(stderr, "dpf_ax ERROR: bulk read.\n");
+            return ret;
+        }
     }
     // get ACK:
     len = sizeof(ansbuf);
     int retry = 0;
     int timeout = 0;
     do {
-	timeout = 0;
-	ret = usb_bulk_read(h->udev, ENDPT_IN, (char *) ansbuf, len, 5000);
-	if (ret != len) {
-	    fprintf(stderr, "dpf_ax ERROR: bulk ACK read.\n");
-	    timeout = 1;
-	}
-	retry++;
+        timeout = 0;
+        ret = usb_bulk_read(h->udev, ENDPT_IN, (char *) ansbuf, len, 5000);
+        if (ret != len) {
+            fprintf(stderr, "dpf_ax ERROR: bulk ACK read.\n");
+            timeout = 1;
+        }
+        retry++;
     } while (timeout && retry < 5);
     if (strncmp((char *) ansbuf, "USBS", 4)) {
-	fprintf(stderr, "dpf_ax ERROR: got invalid reply\n.");
-	return -1;
+        fprintf(stderr, "dpf_ax ERROR: got invalid reply\n.");
+        return -1;
     }
     // pass back return code set by peer:
     return ansbuf[12];

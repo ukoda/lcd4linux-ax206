@@ -62,51 +62,51 @@ static void pyt_exec_str(RESULT * result, const char *module, const char *functi
     Py_DECREF(pName);
 
     if (pModule != NULL) {
-	pDict = PyModule_GetDict(pModule);
-	/* pDict is a borrowed reference */
+        pDict = PyModule_GetDict(pModule);
+        /* pDict is a borrowed reference */
 
-	pFunc = PyDict_GetItemString(pDict, function);
-	/* pFun: Borrowed reference */
+        pFunc = PyDict_GetItemString(pDict, function);
+        /* pFun: Borrowed reference */
 
-	if (pFunc && PyCallable_Check(pFunc)) {
-	    pArgs = PyTuple_New(argc);
-	    for (i = 0; i < argc; ++i) {
-		pValue = PyString_FromString(argv[i]);
-		if (!pValue) {
-		    Py_DECREF(pArgs);
-		    Py_DECREF(pModule);
-		    error("Cannot convert argument \"%s\" to python format", argv[i]);
-		    SetResult(&result, R_STRING, "");
-		    return;
-		}
-		/* pValue reference stolen here: */
-		PyTuple_SetItem(pArgs, i, pValue);
-	    }
-	    pValue = PyObject_CallObject(pFunc, pArgs);
-	    Py_DECREF(pArgs);
-	    if (pValue != NULL) {
-		rv = PyString_AsString(pValue);
-		SetResult(&result, R_STRING, rv);
-		Py_DECREF(pValue);
-		/* rv is now a 'dangling reference' */
-		return;
-	    } else {
-		Py_DECREF(pModule);
-		error("Python call failed (\"%s.%s\")", module, function);
-		/* print traceback on stderr */
-		PyErr_PrintEx(0);
-		SetResult(&result, R_STRING, "");
-		return;
-	    }
-	    /* pDict and pFunc are borrowed and must not be Py_DECREF-ed */
-	} else {
-	    error("Can not find python function \"%s.%s\"", module, function);
-	}
-	Py_DECREF(pModule);
+        if (pFunc && PyCallable_Check(pFunc)) {
+            pArgs = PyTuple_New(argc);
+            for (i = 0; i < argc; ++i) {
+                pValue = PyString_FromString(argv[i]);
+                if (!pValue) {
+                    Py_DECREF(pArgs);
+                    Py_DECREF(pModule);
+                    error("Cannot convert argument \"%s\" to python format", argv[i]);
+                    SetResult(&result, R_STRING, "");
+                    return;
+                }
+                /* pValue reference stolen here: */
+                PyTuple_SetItem(pArgs, i, pValue);
+            }
+            pValue = PyObject_CallObject(pFunc, pArgs);
+            Py_DECREF(pArgs);
+            if (pValue != NULL) {
+                rv = PyString_AsString(pValue);
+                SetResult(&result, R_STRING, rv);
+                Py_DECREF(pValue);
+                /* rv is now a 'dangling reference' */
+                return;
+            } else {
+                Py_DECREF(pModule);
+                error("Python call failed (\"%s.%s\")", module, function);
+                /* print traceback on stderr */
+                PyErr_PrintEx(0);
+                SetResult(&result, R_STRING, "");
+                return;
+            }
+            /* pDict and pFunc are borrowed and must not be Py_DECREF-ed */
+        } else {
+            error("Can not find python function \"%s.%s\"", module, function);
+        }
+        Py_DECREF(pModule);
     } else {
-	error("Failed to load python module \"%s\"", module);
-	/* print traceback on stderr */
-	PyErr_PrintEx(0);
+        error("Failed to load python module \"%s\"", module);
+        /* print traceback on stderr */
+        PyErr_PrintEx(0);
     }
     SetResult(&result, R_STRING, "");
     return;
@@ -125,8 +125,8 @@ static void my_exec(RESULT * result, RESULT * module, RESULT * function, RESULT 
 int plugin_init_python(void)
 {
     if (!Py_IsInitialized()) {
-	Py_Initialize();
-	python_cleanup_responsibility = 1;
+        Py_Initialize();
+        python_cleanup_responsibility = 1;
     }
     AddFunction("python::exec", 3, my_exec);
     return 0;
@@ -138,7 +138,7 @@ void plugin_exit_python(void)
      * is started from inside python
      */
     if (python_cleanup_responsibility) {
-	python_cleanup_responsibility = 0;
-	Py_Finalize();
+        python_cleanup_responsibility = 0;
+        Py_Finalize();
     }
 }

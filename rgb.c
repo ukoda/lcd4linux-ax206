@@ -39,26 +39,26 @@ int color2RGBA(const char *color, RGBA * C)
     unsigned long l;
 
     if (color == NULL || *color == '\0') {
-	return -1;
+        return -1;
     }
 
     l = strtoul(color, &e, 16);
     if (e != NULL && *e != '\0') {
-	return -1;
+        return -1;
     }
 
     if (strlen(color) == 8) {
-	/* RGBA */
-	C->R = (l >> 24) & 0xff;
-	C->G = (l >> 16) & 0xff;
-	C->B = (l >> 8) & 0xff;
-	C->A = (l >> 0) & 0xff;
+        /* RGBA */
+        C->R = (l >> 24) & 0xff;
+        C->G = (l >> 16) & 0xff;
+        C->B = (l >> 8) & 0xff;
+        C->A = (l >> 0) & 0xff;
     } else {
-	/* RGB */
-	C->R = (l >> 16) & 0xff;
-	C->G = (l >> 8) & 0xff;
-	C->B = l & 0xff;
-	C->A = 0xff;
+        /* RGB */
+        C->R = (l >> 16) & 0xff;
+        C->G = (l >> 8) & 0xff;
+        C->B = l & 0xff;
+        C->A = 0xff;
     }
     return 0;
 }

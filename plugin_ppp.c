@@ -67,34 +67,34 @@ static int get_ppp_stats(void)
     /* reread every 10 msec only */
     age = hash_age(&PPP, NULL);
     if (age > 0 && age <= 10)
-	return 0;
+        return 0;
 
     /* open socket only once */
     if (fd == -2) {
-	fd = socket(AF_INET, SOCK_DGRAM, 0);
-	if (fd == -1) {
-	    error("socket() failed: %s", strerror(errno));
-	    return -1;
-	}
+        fd = socket(AF_INET, SOCK_DGRAM, 0);
+        if (fd == -1) {
+            error("socket() failed: %s", strerror(errno));
+            return -1;
+        }
     }
 
     for (unit = 0; unit < 8; unit++) {
-	memset(&req, 0, sizeof(req));
-	req.stats_ptr = (caddr_t) & req.stats;
-	qprintf(req.ifr__name, sizeof(req.ifr__name), "ppp%d", unit);
+        memset(&req, 0, sizeof(req));
+        req.stats_ptr = (caddr_t) & req.stats;
+        qprintf(req.ifr__name, sizeof(req.ifr__name), "ppp%d", unit);
 
-	if (ioctl(fd, SIOCGPPPSTATS, &req) == 0) {
-	    ibytes = req.stats.p.ppp_ibytes;
-	    obytes = req.stats.p.ppp_obytes;
-	} else {
-	    ibytes = obytes = 0;
-	}
-	qprintf(key, sizeof(key), "Rx:%d", unit);
-	qprintf(val, sizeof(val), "%d", ibytes);
-	hash_put_delta(&PPP, key, val);
-	qprintf(key, sizeof(key), "Tx:%d", unit);
-	qprintf(val, sizeof(val), "%d", obytes);
-	hash_put_delta(&PPP, key, val);
+        if (ioctl(fd, SIOCGPPPSTATS, &req) == 0) {
+            ibytes = req.stats.p.ppp_ibytes;
+            obytes = req.stats.p.ppp_obytes;
+        } else {
+            ibytes = obytes = 0;
+        }
+        qprintf(key, sizeof(key), "Rx:%d", unit);
+        qprintf(val, sizeof(val), "%d", ibytes);
+        hash_put_delta(&PPP, key, val);
+        qprintf(key, sizeof(key), "Tx:%d", unit);
+        qprintf(val, sizeof(val), "%d", obytes);
+        hash_put_delta(&PPP, key, val);
 
     }
     return 0;
@@ -106,8 +106,8 @@ static void my_ppp(RESULT * result, RESULT * arg1, RESULT * arg2)
     double value;
 
     if (get_ppp_stats() < 0) {
-	SetResult(&result, R_STRING, "");
-	return;
+        SetResult(&result, R_STRING, "");
+        return;
     }
     value = hash_get_delta(&PPP, R2S(arg1), NULL, R2N(arg2));
     SetResult(&result, R_NUMBER, &value);

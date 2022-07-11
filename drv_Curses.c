@@ -84,22 +84,22 @@ static void drv_Curs_write(const int row, const int col, const char *data, const
     char *p;
 
     while ((p = strpbrk(data, "\r\n")) != NULL) {
-	*p = '\0';
+        *p = '\0';
     }
 
     if (col < DCOLS) {
-	if (DCOLS - col < l)
-	    l = DCOLS - col;
-	mvwprintw(w, row + 1, col + 1, "%.*s", l, data);
-	wmove(w, DROWS + 1, 0);
-	wrefresh(w);
+        if (DCOLS - col < l)
+            l = DCOLS - col;
+        mvwprintw(w, row + 1, col + 1, "%.*s", l, data);
+        wmove(w, DROWS + 1, 0);
+        wrefresh(w);
     }
 }
 
 
-static void drv_Curs_defchar(const __attribute__ ((unused))
-			     int ascii, const __attribute__ ((unused))
-			     unsigned char *buffer)
+static void drv_Curs_defchar(const __attribute__((unused))
+                             int ascii, const __attribute__((unused))
+                             unsigned char *buffer)
 {
     /* empty */
 }
@@ -115,27 +115,27 @@ int curses_error(char *buffer)
     char *p;
 
     if (e == NULL)
-	return 0;
+        return 0;
 
     /* replace \r, \n with underscores */
     while ((p = strpbrk(buffer, "\r\n")) != NULL) {
-	*p = '_';
+        *p = '_';
     }
 
     if (lines >= EROWS) {
-	free(lb[0]);
-	for (i = 1; i <= EROWS; i++) {
-	    lb[i - 1] = lb[i];
-	}
-	start = 0;
+        free(lb[0]);
+        for (i = 1; i <= EROWS; i++) {
+            lb[i - 1] = lb[i];
+        }
+        start = 0;
     } else {
-	start = lines;
+        start = lines;
     }
 
     lb[lines] = strdup(buffer);
     for (i = start; i <= lines; i++) {
-	mvwprintw(e, i + 1, 1, "%s", lb[i]);
-	wclrtoeol(e);
+        mvwprintw(e, i + 1, 1, "%s", lb[i]);
+        wclrtoeol(e);
     }
 
     box(e, 0, 0);
@@ -143,7 +143,7 @@ int curses_error(char *buffer)
     wrefresh(e);
 
     if (lines < EROWS)
-	lines++;
+        lines++;
 
     return 1;
 }
@@ -154,21 +154,21 @@ static int drv_Curs_start(const char *section, const int quiet)
     char *s;
 
     if (!running_foreground) {
-	error("%s: You want me to display on /dev/null? Sorry, I can't ...", Name);
-	error("%s: Maybe you want me to run in foreground? Try '-F'", Name);
-	return -1;
+        error("%s: You want me to display on /dev/null? Sorry, I can't ...", Name);
+        error("%s: Maybe you want me to run in foreground? Try '-F'", Name);
+        return -1;
     }
 
     s = cfg_get(section, "Size", "20x4");
     if (s == NULL || *s == '\0') {
-	error("%s: no '%s.Size' entry from %s", Name, section, cfg_source());
-	free(s);
-	return -1;
+        error("%s: no '%s.Size' entry from %s", Name, section, cfg_source());
+        free(s);
+        return -1;
     }
     if (sscanf(s, "%dx%d", &DCOLS, &DROWS) != 2 || DROWS < 1 || DCOLS < 1) {
-	error("%s: bad %s.Size '%s' from %s", Name, section, s, cfg_source());
-	free(s);
-	return -1;
+        error("%s: bad %s.Size '%s' from %s", Name, section, s, cfg_source());
+        free(s);
+        return -1;
     }
     free(s);
 
@@ -181,40 +181,40 @@ static int drv_Curs_start(const char *section, const int quiet)
 
     EROWS = LINES - DROWS - 3;
     if (EROWS > 99)
-	EROWS = 99;
+        EROWS = 99;
     debug("EROWS=%d", EROWS);
 
     if (EROWS >= 4) {
-	e = newwin(EROWS, COLS, DROWS + 3, 0);
-	EROWS -= 3;
-	box(e, 0, 0);
-	mvwprintw(e, 0, 3, "Stderr:");
-	wmove(e, 1, 0);
-	wrefresh(e);
+        e = newwin(EROWS, COLS, DROWS + 3, 0);
+        EROWS -= 3;
+        box(e, 0, 0);
+        mvwprintw(e, 0, 3, "Stderr:");
+        wmove(e, 1, 0);
+        wrefresh(e);
     }
 
     drv_Curs_clear();
 
     if (!quiet) {
-	char buffer[40];
-	qprintf(buffer, sizeof(buffer), "%s %dx%d", Name, DCOLS, DROWS);
-	if (drv_generic_text_greet(buffer, NULL)) {
-	    sleep(3);
-	    drv_Curs_clear();
-	}
+        char buffer[40];
+        qprintf(buffer, sizeof(buffer), "%s %dx%d", Name, DCOLS, DROWS);
+        if (drv_generic_text_greet(buffer, NULL)) {
+            sleep(3);
+            drv_Curs_clear();
+        }
     }
 
     return 0;
 }
 
-static void drv_Curs_timer(void __attribute__ ((unused)) * notused)
+static void drv_Curs_timer(void __attribute__((unused)) * notused)
 {
     int c;
     while (1) {
-	c = wgetch(w);
-	if (c <= 0)
-	    break;
-	drv_generic_keypad_press(c);
+        c = wgetch(w);
+        if (c <= 0)
+            break;
+        drv_generic_keypad_press(c);
     }
 }
 
@@ -224,28 +224,28 @@ static int drv_Curs_keypad(const int num)
 
     switch (num) {
     case KEY_UP:
-	debug("Key Up");
-	val += WIDGET_KEY_PRESSED;
-	val += WIDGET_KEY_UP;
-	break;
+        debug("Key Up");
+        val += WIDGET_KEY_PRESSED;
+        val += WIDGET_KEY_UP;
+        break;
     case KEY_DOWN:
-	debug("Key Down");
-	val += WIDGET_KEY_PRESSED;
-	val += WIDGET_KEY_DOWN;
-	break;
+        debug("Key Down");
+        val += WIDGET_KEY_PRESSED;
+        val += WIDGET_KEY_DOWN;
+        break;
     case KEY_LEFT:
-	debug("Key Left");
-	val += WIDGET_KEY_PRESSED;
-	val += WIDGET_KEY_LEFT;
-	break;
+        debug("Key Left");
+        val += WIDGET_KEY_PRESSED;
+        val += WIDGET_KEY_LEFT;
+        break;
     case KEY_RIGHT:
-	debug("Key Right");
-	val += WIDGET_KEY_PRESSED;
-	val += WIDGET_KEY_RIGHT;
-	break;
+        debug("Key Right");
+        val += WIDGET_KEY_PRESSED;
+        val += WIDGET_KEY_RIGHT;
+        break;
     default:
-	debug("Unbound Key '%d'", num);
-	break;
+        debug("Unbound Key '%d'", num);
+        break;
     }
 
     return val;
@@ -290,11 +290,11 @@ int drv_Curs_init(const char *section, const int quiet)
     info("%s: %s", Name, "$Rev$");
 
     /* display preferences */
-    XRES = 1;			/* pixel width of one char  */
-    YRES = 1;			/* pixel height of one char  */
-    CHARS = 0;			/* number of user-defineable characters */
-    CHAR0 = 0;			/* ASCII of first user-defineable char */
-    GOTO_COST = 0;		/* number of bytes a goto command requires */
+    XRES = 1;                   /* pixel width of one char  */
+    YRES = 1;                   /* pixel height of one char  */
+    CHARS = 0;                  /* number of user-defineable characters */
+    CHAR0 = 0;                  /* ASCII of first user-defineable char */
+    GOTO_COST = 0;              /* number of bytes a goto command requires */
 
     /* real worker functions */
     drv_generic_text_real_write = drv_Curs_write;
@@ -306,24 +306,24 @@ int drv_Curs_init(const char *section, const int quiet)
 
     /* start display */
     if ((ret = drv_Curs_start(section, quiet)) != 0) {
-	return ret;
+        return ret;
     }
 
     /* initialize generic text driver */
     if ((ret = drv_generic_text_init(section, Name)) != 0)
-	return ret;
+        return ret;
 
     /* initialize generic bar driver */
     if ((ret = drv_generic_text_bar_init(1)) != 0)
-	return ret;
+        return ret;
 
     /* initialize generic key pad driver */
     if ((ret = drv_generic_keypad_init(section, Name)) != 0)
-	return ret;
+        return ret;
 
     /* add fixed chars to the bar driver */
-    drv_generic_text_bar_add_segment(0, 0, 255, 32);	/* ASCII  32 = blank */
-    drv_generic_text_bar_add_segment(255, 255, 255, '*');	/* asterisk */
+    drv_generic_text_bar_add_segment(0, 0, 255, 32);    /* ASCII  32 = blank */
+    drv_generic_text_bar_add_segment(255, 255, 255, '*');       /* asterisk */
 
     /* register text widget */
     wc = Widget_Text;
@@ -356,7 +356,7 @@ int drv_Curs_quit(const int quiet)
 
     /* say goodbye... */
     if (!quiet) {
-	drv_generic_text_greet("goodbye!", NULL);
+        drv_generic_text_greet("goodbye!", NULL);
     }
 
     endwin();

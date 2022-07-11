@@ -57,7 +57,7 @@ void message(const int level, const char *format, ...)
     static int log_open = 0;
 
     if (level > verbose_level)
-	return;
+        return;
 
     va_start(ap, format);
     vsnprintf(buffer, sizeof(buffer), format, ap);
@@ -66,28 +66,28 @@ void message(const int level, const char *format, ...)
     if (!running_background) {
 
 #ifdef WITH_CURSES
-	extern int curses_error(char *);
-	if (!curses_error(buffer))
+        extern int curses_error(char *);
+        if (!curses_error(buffer))
 #endif
-	    fprintf(level ? stdout : stderr, "%s\n", buffer);
+            fprintf(level ? stdout : stderr, "%s\n", buffer);
     }
 
     if (running_foreground)
-	return;
+        return;
 
     if (!log_open) {
-	openlog("LCD4Linux", LOG_PID, LOG_USER);
-	log_open = 1;
+        openlog("LCD4Linux", LOG_PID, LOG_USER);
+        log_open = 1;
     }
 
     switch (level) {
     case 0:
-	syslog(LOG_ERR, "%s", buffer);
-	break;
+        syslog(LOG_ERR, "%s", buffer);
+        break;
     case 1:
-	syslog(LOG_INFO, "%s", buffer);
-	break;
+        syslog(LOG_INFO, "%s", buffer);
+        break;
     default:
-	syslog(LOG_DEBUG, "%s", buffer);
+        syslog(LOG_DEBUG, "%s", buffer);
     }
 }

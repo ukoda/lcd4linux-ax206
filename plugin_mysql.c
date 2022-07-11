@@ -80,54 +80,54 @@ static int configure_mysql(void)
     char *s;
 
     if (configured != 0)
-	return configured;
+        return configured;
 
     s = cfg_get(Section, "server", "localhost");
     if (*s == '\0') {
-	info("[MySQL] empty '%s.server' entry from %s, assuming 'localhost'", Section, cfg_source());
-	strcpy(server, "localhost");
+        info("[MySQL] empty '%s.server' entry from %s, assuming 'localhost'", Section, cfg_source());
+        strcpy(server, "localhost");
     } else
-	strcpy(server, s);
+        strcpy(server, s);
     free(s);
 
     if (cfg_number(Section, "port", 0, 1, 65536, &port) < 1) {
-	/* using 0 as default port because mysql_real_connect() will convert it to real default one */
-	info("[MySQL] no '%s.port' entry from %s using MySQL's default", Section, cfg_source());
+        /* using 0 as default port because mysql_real_connect() will convert it to real default one */
+        info("[MySQL] no '%s.port' entry from %s using MySQL's default", Section, cfg_source());
     }
 
     s = cfg_get(Section, "user", "");
     if (*s == '\0') {
-	/* If user is NULL or the empty string "", the lcd4linux Unix user is assumed. */
-	info("[MySQL] empty '%s.user' entry from %s, assuming lcd4linux owner", Section, cfg_source());
-	strcpy(user, "");
+        /* If user is NULL or the empty string "", the lcd4linux Unix user is assumed. */
+        info("[MySQL] empty '%s.user' entry from %s, assuming lcd4linux owner", Section, cfg_source());
+        strcpy(user, "");
     } else
-	strcpy(user, s);
+        strcpy(user, s);
     free(s);
 
     s = cfg_get(Section, "password", "");
     /* Do not encrypt the password because encryption is handled automatically by the MySQL client API. */
     if (*s == '\0') {
-	info("[MySQL] empty '%s.password' entry in %s, assuming none", Section, cfg_source());
-	strcpy(password, "");
+        info("[MySQL] empty '%s.password' entry in %s, assuming none", Section, cfg_source());
+        strcpy(password, "");
     } else
-	strcpy(password, s);
+        strcpy(password, s);
     free(s);
 
     s = cfg_get(Section, "database", "");
     if (*s == '\0') {
-	error("[MySQL] no '%s:database' entry from %s, specify one", Section, cfg_source());
-	free(s);
-	configured = -1;
-	return configured;
+        error("[MySQL] no '%s:database' entry from %s, specify one", Section, cfg_source());
+        free(s);
+        configured = -1;
+        return configured;
     }
     strcpy(database, s);
     free(s);
 
     mysql_init(&conex);
     if (!mysql_real_connect(&conex, server, user, password, database, port, NULL, 0)) {
-	error("[MySQL] conection error: %s", mysql_error(&conex));
-	configured = -1;
-	return configured;
+        error("[MySQL] conection error: %s", mysql_error(&conex));
+        configured = -1;
+        return configured;
     }
 
     configured = 1;
@@ -141,9 +141,9 @@ static void my_MySQLcount(RESULT * result, RESULT * query)
     MYSQL_RES *res;
 
     if (configure_mysql() < 0) {
-	value = -1;
-	SetResult(&result, R_NUMBER, &value);
-	return;
+        value = -1;
+        SetResult(&result, R_NUMBER, &value);
+        return;
     }
 
     q = R2S(query);
@@ -152,15 +152,15 @@ static void my_MySQLcount(RESULT * result, RESULT * query)
     /* If it has gone down, an automatic reconnection is attempted. */
     mysql_ping(&conex);
     if (mysql_real_query(&conex, q, (unsigned int) strlen(q))) {
-	error("[MySQL] query error: %s", mysql_error(&conex));
-	value = -1;
+        error("[MySQL] query error: %s", mysql_error(&conex));
+        value = -1;
     } else {
-	/* We don't use res=mysql_use_result();  because mysql_num_rows() will not */
-	/* return the correct value until all the rows in the result set have been retrieved */
-	/* with mysql_fetch_row(), so we use res=mysql_store_result(); instead */
-	res = mysql_store_result(&conex);
-	value = (double) mysql_num_rows(res);
-	mysql_free_result(res);
+        /* We don't use res=mysql_use_result();  because mysql_num_rows() will not */
+        /* return the correct value until all the rows in the result set have been retrieved */
+        /* with mysql_fetch_row(), so we use res=mysql_store_result(); instead */
+        res = mysql_store_result(&conex);
+        value = (double) mysql_num_rows(res);
+        mysql_free_result(res);
     }
 
     SetResult(&result, R_NUMBER, &value);
@@ -175,9 +175,9 @@ static void my_MySQLquery(RESULT * result, RESULT * query)
     MYSQL_ROW row = NULL;
 
     if (configure_mysql() < 0) {
-	value = -1;
-	SetResult(&result, R_NUMBER, &value);
-	return;
+        value = -1;
+        SetResult(&result, R_NUMBER, &value);
+        return;
     }
 
     q = R2S(query);
@@ -186,15 +186,15 @@ static void my_MySQLquery(RESULT * result, RESULT * query)
     /* If it has gone down, an automatic reconnection is attempted. */
     mysql_ping(&conex);
     if (mysql_real_query(&conex, q, (unsigned int) strlen(q))) {
-	error("[MySQL] query error: %s", mysql_error(&conex));
-	value = -1;
+        error("[MySQL] query error: %s", mysql_error(&conex));
+        value = -1;
     } else {
-	/* We don't use res=mysql_use_result();  because mysql_num_rows() will not */
-	/* return the correct value until all the rows in the result set have been retrieved */
-	/* with mysql_fetch_row(), so we use res=mysql_store_result(); instead */
-	res = mysql_store_result(&conex);
-	row = mysql_fetch_row(res);
-	mysql_free_result(res);
+        /* We don't use res=mysql_use_result();  because mysql_num_rows() will not */
+        /* return the correct value until all the rows in the result set have been retrieved */
+        /* with mysql_fetch_row(), so we use res=mysql_store_result(); instead */
+        res = mysql_store_result(&conex);
+        row = mysql_fetch_row(res);
+        mysql_free_result(res);
     }
 
     SetResult(&result, R_STRING, row[0]);
@@ -208,14 +208,14 @@ static void my_MySQLstatus(RESULT * result)
 
     if (configure_mysql() > 0) {
 
-	mysql_ping(&conex);
-	status = mysql_stat(&conex);
-	if (!status) {
-	    error("[MySQL] status error: %s", mysql_error(&conex));
-	    value = "error";
-	} else {
-	    value = status;
-	}
+        mysql_ping(&conex);
+        status = mysql_stat(&conex);
+        if (!status) {
+            error("[MySQL] status error: %s", mysql_error(&conex));
+            value = "error";
+        } else {
+            value = status;
+        }
     }
 
     SetResult(&result, R_STRING, value);

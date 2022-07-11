@@ -58,29 +58,29 @@ int getloadavg(double loadavg[], int nelem)
     int i;
 
     if (fd == -2)
-	fd = open("/proc/loadavg", O_RDONLY);
+        fd = open("/proc/loadavg", O_RDONLY);
     if (fd < 0)
-	return -1;
+        return -1;
 
     lseek(fd, 0, SEEK_SET);
     nread = read(fd, buf, sizeof buf - 1);
 
     if (nread < 0)
-	return -1;
+        return -1;
     buf[nread - 1] = '\0';
 
     if (nelem > 3)
-	nelem = 3;
+        nelem = 3;
     p = buf;
     for (i = 0; i < nelem; ++i) {
-	char *endp;
-	loadavg[i] = strtod(p, &endp);
-	if (endp == NULL || endp == p)
-	    /* This should not happen.  The format of /proc/loadavg
-	       must have changed.  Don't return with what we have,
-	       signal an error.  */
-	    return -1;
-	p = endp;
+        char *endp;
+        loadavg[i] = strtod(p, &endp);
+        if (endp == NULL || endp == p)
+            /* This should not happen.  The format of /proc/loadavg
+               must have changed.  Don't return with what we have,
+               signal an error.  */
+            return -1;
+        p = endp;
     }
 
     return i;
@@ -103,20 +103,20 @@ static void my_loadavg(RESULT * result, RESULT * arg1)
     /* reread every 10 msec only */
     if (nelem == -1 || age == 0 || age > 10) {
 
-	nelem = getloadavg(loadavg, 3);
-	if (nelem < 0) {
-	    error("getloadavg() failed!");
-	    SetResult(&result, R_STRING, "");
-	    return;
-	}
-	last_value = now;
+        nelem = getloadavg(loadavg, 3);
+        if (nelem < 0) {
+            error("getloadavg() failed!");
+            SetResult(&result, R_STRING, "");
+            return;
+        }
+        last_value = now;
     }
 
     index = R2N(arg1);
     if (index < 1 || index > nelem) {
-	error("loadavg(%d): index out of range!", index);
-	SetResult(&result, R_STRING, "");
-	return;
+        error("loadavg(%d): index out of range!", index);
+        SetResult(&result, R_STRING, "");
+        return;
     }
 
 
@@ -135,7 +135,7 @@ void plugin_exit_loadavg(void)
 {
 #ifndef HAVE_GETLOADAVG
     if (fd > 0)
-	close(fd);
+        close(fd);
     fd = -2;
 #endif
 }

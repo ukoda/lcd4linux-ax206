@@ -36,20 +36,20 @@ typedef enum { ALIGN_LEFT, ALIGN_CENTER, ALIGN_RIGHT, ALIGN_MARQUEE, ALIGN_AUTOM
 } TEXT_ALIGN;
 
 typedef struct WIDGET_TEXT {
-    PROPERTY prefix;		/* label on the left side */
-    PROPERTY postfix;		/* label on the right side */
-    PROPERTY value;		/* value of text widget */
-    PROPERTY style;		/* text style (plain/bold/slant) */
-    char *string;		/* formatted value */
-    char *buffer;		/* string with 'width+1' bytes allocated  */
-    int width;			/* field width */
-    int precision;		/* number of digits after the decimal point */
-    TEXT_ALIGN align;		/* alignment: L(eft), C(enter), R(ight), M(arquee), A(utomatic) */
-    int update;			/* update interval */
-    int scroll;			/* marquee starting point */
-    int speed;			/* marquee scrolling speed */
-    int direction;		/* pingpong direction, 0=right, 1=left */
-    int delay;			/* pingpong scrolling, wait before switch direction */
+    PROPERTY prefix;            /* label on the left side */
+    PROPERTY postfix;           /* label on the right side */
+    PROPERTY value;             /* value of text widget */
+    PROPERTY style;             /* text style (plain/bold/slant) */
+    char *string;               /* formatted value */
+    char *buffer;               /* string with 'width+1' bytes allocated  */
+    int width;                  /* field width */
+    int precision;              /* number of digits after the decimal point */
+    TEXT_ALIGN align;           /* alignment: L(eft), C(enter), R(ight), M(arquee), A(utomatic) */
+    int update;                 /* update interval */
+    int scroll;                 /* marquee starting point */
+    int speed;                  /* marquee scrolling speed */
+    int direction;              /* pingpong direction, 0=right, 1=left */
+    int delay;                  /* pingpong scrolling, wait before switch direction */
 } WIDGET_TEXT;
 
 

@@ -71,7 +71,7 @@ static int drv_FW8888_open(const char *section)
     /* don't mind about device, speed and stuff, this function will take care of */
 
     if (drv_generic_serial_open(section, Name, 0) < 0)
-	return -1;
+        return -1;
 
     return 0;
 }
@@ -104,8 +104,8 @@ static void drv_FW8888_send_text(const char *text, const unsigned int len)
     cmd_str[0] = 0x12;
 
     for (i = 0; i < len; i++) {
-	cmd_str[1] = text[i];
-	drv_generic_serial_write(cmd_str, 2);
+        cmd_str[1] = text[i];
+        drv_generic_serial_write(cmd_str, 2);
     }
 }
 
@@ -115,32 +115,32 @@ static void drv_FW8888_clear(void)
     drv_FW8888_send_cmd(0x01);
 }
 
-static void __attribute__ ((unused)) drv_FW8888_home(void)
+static void __attribute__((unused)) drv_FW8888_home(void)
 {
     drv_FW8888_send_cmd(0x02);
 }
 
-static void __attribute__ ((unused)) drv_FW8888_display_off(void)
+static void __attribute__((unused)) drv_FW8888_display_off(void)
 {
     drv_FW8888_send_cmd(0x08);
 }
 
-static void __attribute__ ((unused)) drv_FW8888_display_on_cursor_off(void)
+static void __attribute__((unused)) drv_FW8888_display_on_cursor_off(void)
 {
     drv_FW8888_send_cmd(0x0C);
 }
 
-static void __attribute__ ((unused)) drv_FW8888_display_on_cursor_on(void)
+static void __attribute__((unused)) drv_FW8888_display_on_cursor_on(void)
 {
     drv_FW8888_send_cmd(0x0E);
 }
 
-static void __attribute__ ((unused)) drv_FW8888_backlight_off(void)
+static void __attribute__((unused)) drv_FW8888_backlight_off(void)
 {
     drv_FW8888_send_cmd(0x38);
 }
 
-static void __attribute__ ((unused)) drv_FW8888_backlight_on(void)
+static void __attribute__((unused)) drv_FW8888_backlight_on(void)
 {
     drv_FW8888_send_cmd(0x39);
 }
@@ -150,14 +150,14 @@ static void drv_FW8888_set_cursor(int row, int col)
     int pos;
     switch (row) {
     case 0:
-	pos = 0x80 + col;
-	break;
+        pos = 0x80 + col;
+        break;
     case 1:
-	pos = 0xC0 + col;
-	break;
+        pos = 0xC0 + col;
+        break;
     default:
-	error("%s: invalid row(%d) or col(%d)", Name, row, col);
-	return;
+        error("%s: invalid row(%d) or col(%d)", Name, row, col);
+        return;
     }
     drv_FW8888_send_cmd(pos);
 }
@@ -178,21 +178,21 @@ static void drv_FW8888_write(const int row, const int col, const char *data, int
 static int drv_FW8888_start(const char *section)
 {
     /* display preferences */
-    XRES = 5;			/* pixel width of one char  */
-    YRES = 8;			/* pixel height of one char  */
-    CHARS = 0;			/* number of user-defineable characters */
-    CHAR0 = 0;			/* ASCII of first user-defineable char */
+    XRES = 5;                   /* pixel width of one char  */
+    YRES = 8;                   /* pixel height of one char  */
+    CHARS = 0;                  /* number of user-defineable characters */
+    CHAR0 = 0;                  /* ASCII of first user-defineable char */
     DROWS = 2;
     DCOLS = 16;
 
-    GOTO_COST = -1;		/* number of bytes a goto command requires */
+    GOTO_COST = -1;             /* number of bytes a goto command requires */
 
     /* open communication with the display */
     if (drv_FW8888_open(section) < 0) {
-	return -1;
+        return -1;
     }
 
-    drv_FW8888_clear();		/* clear display */
+    drv_FW8888_clear();         /* clear display */
 
     return 0;
 }
@@ -239,30 +239,30 @@ int drv_FW8888_init(const char *section, const int quiet)
     info("%s: %s", Name, "$Rev$");
 
     /* display preferences */
-    XRES = 5;			/* pixel width of one char  */
-    YRES = 7;			/* pixel height of one char  */
-    CHARS = 0;			/* number of user-defineable characters */
-    CHAR0 = 0;			/* ASCII of first user-defineable char */
+    XRES = 5;                   /* pixel width of one char  */
+    YRES = 7;                   /* pixel height of one char  */
+    CHARS = 0;                  /* number of user-defineable characters */
+    CHAR0 = 0;                  /* ASCII of first user-defineable char */
 
     /* real worker functions */
     drv_generic_text_real_write = drv_FW8888_write;
 
     /* start display */
     if ((ret = drv_FW8888_start(section)) != 0)
-	return ret;
+        return ret;
 
     if (!quiet) {
-	char buffer[40];
-	qprintf(buffer, sizeof(buffer), "%s %dx%d", Name, DCOLS, DROWS);
-	if (drv_generic_text_greet(buffer, "www.linum.com")) {
-	    sleep(3);
-	    drv_FW8888_clear();
-	}
+        char buffer[40];
+        qprintf(buffer, sizeof(buffer), "%s %dx%d", Name, DCOLS, DROWS);
+        if (drv_generic_text_greet(buffer, "www.linum.com")) {
+            sleep(3);
+            drv_FW8888_clear();
+        }
     }
 
     /* initialize generic text driver */
     if ((ret = drv_generic_text_init(section, Name)) != 0)
-	return ret;
+        return ret;
 
     /* register text widget */
     wc = Widget_Text;
@@ -290,7 +290,7 @@ int drv_FW8888_quit(const int quiet)
 
     /* say goodbye... */
     if (!quiet) {
-	drv_generic_text_greet("goodbye!", NULL);
+        drv_generic_text_greet("goodbye!", NULL);
     }
 
     debug("closing connection");

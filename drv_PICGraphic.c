@@ -107,7 +107,7 @@ static int drv_PICGraphic_open(const char *section)
 {
     /* open serial port */
     if (drv_generic_serial_open(section, Name, 0) < 0)
-	return -1;
+        return -1;
 
     return 0;
 }
@@ -123,14 +123,14 @@ static void convert2ASCII(char input, char *output)
 {
     unsigned char temp = input >> 4;
     if (temp < 10)
-	output[0] = temp + '0';
+        output[0] = temp + '0';
     else
-	output[0] = temp - 10 + 'a';
+        output[0] = temp - 10 + 'a';
     input &= 0xf;
     if (input < 10)
-	output[1] = input + '0';
+        output[1] = input + '0';
     else
-	output[1] = input - 10 + 'a';
+        output[1] = input - 10 + 'a';
 }
 
 static void drv_PICGraphic_send(const char *data, const unsigned int len)
@@ -140,9 +140,9 @@ static void drv_PICGraphic_send(const char *data, const unsigned int len)
     hexDigits[2] = 0;
     drv_generic_serial_write(data, len);
     info("sending %d bytes: ", len);
-    for (i = 0; i < min(10, len); i++) {	// min(10, len)
-	convert2ASCII(data[i], hexDigits);
-	debug("0x%s (%c)", hexDigits, data[i]);
+    for (i = 0; i < min(10, len); i++) {        // min(10, len)
+        convert2ASCII(data[i], hexDigits);
+        debug("0x%s (%c)", hexDigits, data[i]);
     }
 }
 
@@ -151,24 +151,24 @@ static int drv_PICGraphic_recv(char *dest, const unsigned int len, const char *e
     unsigned int bytes = 0;
     int status;
     while (bytes < len) {
-	status = drv_generic_serial_read((char *) dest + bytes, 1);
-	if (status == 1) {
-	    if (dest[bytes] != 0xa && dest[bytes] != 0xd) {
-		if (dest[bytes] != '@') {
-		    bytes += status;
-		}
-	    }
-	} else {
-	    info("error receiving response: %d", status);
-	    return status;
-	}
-	usleep(10000);
+        status = drv_generic_serial_read((char *) dest + bytes, 1);
+        if (status == 1) {
+            if (dest[bytes] != 0xa && dest[bytes] != 0xd) {
+                if (dest[bytes] != '@') {
+                    bytes += status;
+                }
+            }
+        } else {
+            info("error receiving response: %d", status);
+            return status;
+        }
+        usleep(10000);
     }
     status = strncmp((const char *) dest, expect, len);
     if (!status) {
-	return 0;
+        return 0;
     } else {
-	return 1;
+        return 1;
     }
 
 }
@@ -181,56 +181,56 @@ static void drv_PICGraphic_blit(const int row, const int col, const int height, 
 
     debug("blit from (%d,%d) to (%d,%d) out of (%d,%d)", row, col, row + height, col + width, DROWS, DCOLS);
     if (!fbPG)
-	return;
+        return;
     for (c = min(col, DCOLS - 1); c < min(col + width, DCOLS); c++) {
-	for (r = min(row, DROWS - 1); r < min(row + height, DROWS); r++) {
-	    index = DCOLS * (r / 8) + c;
-	    if (index < 0 || index >= DCOLS * DROWS / 8) {
-		error("index too large: %d, r: %d, c: %d", index, r, c);
-		break;
-	    }
-	    if (drv_generic_graphic_black(r, c)) {
-		fbPG[index] |= (1 << (r % 8));
-	    } else {
-		fbPG[index] &= ~(1 << (r % 8));
-	    }
-	}
+        for (r = min(row, DROWS - 1); r < min(row + height, DROWS); r++) {
+            index = DCOLS * (r / 8) + c;
+            if (index < 0 || index >= DCOLS * DROWS / 8) {
+                error("index too large: %d, r: %d, c: %d", index, r, c);
+                break;
+            }
+            if (drv_generic_graphic_black(r, c)) {
+                fbPG[index] |= (1 << (r % 8));
+            } else {
+                fbPG[index] &= ~(1 << (r % 8));
+            }
+        }
     }
 
     // send rectangular portion with height divisible by 8
 #ifdef partialFrame
     if (delayDone) {
-	delayDone = 0;
-	int row8, height8;
-	row8 = 8 * (row / 8);
-	height8 = 8 * (height / 8) + ! !(height % 8);
-	info("sending blit");
-	cmd[0] = 'b';
-	cmd[1] = row8;
-	cmd[2] = col;
-	cmd[3] = height8;
-	cmd[4] = width;
-	drv_PICGraphic_send(cmd, 5);
-	for (r = min(row8, DROWS - 1); r < min(row8 + height8, DROWS); r += 8) {
-	    drv_PICGraphic_send(fbPG + DCOLS * (r / 8) + col, width);
-	}
+        delayDone = 0;
+        int row8, height8;
+        row8 = 8 * (row / 8);
+        height8 = 8 * (height / 8) + !!(height % 8);
+        info("sending blit");
+        cmd[0] = 'b';
+        cmd[1] = row8;
+        cmd[2] = col;
+        cmd[3] = height8;
+        cmd[4] = width;
+        drv_PICGraphic_send(cmd, 5);
+        for (r = min(row8, DROWS - 1); r < min(row8 + height8, DROWS); r += 8) {
+            drv_PICGraphic_send(fbPG + DCOLS * (r / 8) + col, width);
+        }
     }
 #else
     // send full frame
     if (delayDone) {
-	delayDone = 0;
-	info("sending frame");
-	cmd[0] = 'f';
-	drv_PICGraphic_send((char *) cmd, 1);
-	drv_PICGraphic_send(fbPG, DROWS * DCOLS / 8);
-	usleep(20000);
-	// wait for reception of confirmation code
-	status = drv_PICGraphic_recv((char *) cmd, 2, "ff");
-	if (!status) {
-	    info("received ff from device");
-	} else {
-	    info("did not receive ff from device");
-	}
+        delayDone = 0;
+        info("sending frame");
+        cmd[0] = 'f';
+        drv_PICGraphic_send((char *) cmd, 1);
+        drv_PICGraphic_send(fbPG, DROWS * DCOLS / 8);
+        usleep(20000);
+        // wait for reception of confirmation code
+        status = drv_PICGraphic_recv((char *) cmd, 2, "ff");
+        if (!status) {
+            info("received ff from device");
+        } else {
+            info("did not receive ff from device");
+        }
 
     }
 #endif
@@ -238,7 +238,7 @@ static void drv_PICGraphic_blit(const int row, const int col, const int height, 
 
 static int drv_PICGraphic_GPO(const int num, const int val)
 {
-    char __attribute__ ((unused)) cmd[3];
+    char __attribute__((unused)) cmd[3];
 
     cmd[0] = 'g';
     cmd[1] = val ? 's' : 'c';
@@ -252,7 +252,7 @@ static int drv_PICGraphic_GPO(const int num, const int val)
 
 static int drv_PICGraphic_GPI(const int num)
 {
-    char __attribute__ ((unused)) cmd[3];
+    char __attribute__((unused)) cmd[3];
     int ret = 0;
 
     cmd[0] = 'g';
@@ -264,21 +264,21 @@ static int drv_PICGraphic_GPI(const int num)
     // ret = drv_generic_serial_read(cmd, 1);
 
     if (ret)
-	return -1;
+        return -1;
     else
-	return cmd[0];
+        return cmd[0];
 }
 
 /* example function used in a plugin */
 static int drv_PICGraphic_contrast(int contrast)
 {
-    char __attribute__ ((unused)) cmd[2];
+    char __attribute__((unused)) cmd[2];
 
     /* adjust limits according to the display */
     if (contrast < 0)
-	contrast = 0;
+        contrast = 0;
     if (contrast > 15)
-	contrast = 15;
+        contrast = 15;
 
     /* call a 'contrast' function */
     cmd[0] = 'c';
@@ -299,55 +299,55 @@ static int drv_PICGraphic_start2(const char *section)
     /* read display size from config */
     s = cfg_get(section, "Size", NULL);
     if (s == NULL || *s == '\0') {
-	error("%s: no '%s.Size' entry from %s", Name, section, cfg_source());
-	return -1;
+        error("%s: no '%s.Size' entry from %s", Name, section, cfg_source());
+        return -1;
     }
 
     DROWS = -1;
     DCOLS = -1;
     if (sscanf(s, "%dx%d", &DCOLS, &DROWS) != 2 || DCOLS < 1 || DROWS < 1) {
-	error("%s: bad Size '%s' from %s", Name, s, cfg_source());
-	return -1;
+        error("%s: bad Size '%s' from %s", Name, s, cfg_source());
+        return -1;
     }
 
     s = cfg_get(section, "Font", "6x8");
     if (s == NULL || *s == '\0') {
-	error("%s: no '%s.Font' entry from %s", Name, section, cfg_source());
-	return -1;
+        error("%s: no '%s.Font' entry from %s", Name, section, cfg_source());
+        return -1;
     }
 
     XRES = -1;
     YRES = -1;
     if (sscanf(s, "%dx%d", &XRES, &YRES) != 2 || XRES < 1 || YRES < 1) {
-	error("%s: bad Font '%s' from %s", Name, s, cfg_source());
-	return -1;
+        error("%s: bad Font '%s' from %s", Name, s, cfg_source());
+        return -1;
     }
 
     if (XRES != 6 && YRES != 8) {
-	error("%s: bad Font '%s' from %s (only 6x8 at the moment)", Name, s, cfg_source());
-	return -1;
+        error("%s: bad Font '%s' from %s (only 6x8 at the moment)", Name, s, cfg_source());
+        return -1;
     }
 
     /* you surely want to allocate a framebuffer or something... */
     fbPG = calloc(DCOLS * DROWS / 8, 1);
     if (!fbPG) {
-	error("failed to allocate framebuffer");
-	return -1;
+        error("failed to allocate framebuffer");
+        return -1;
     }
 
     info("allocated framebuffer with size %d", DCOLS * DROWS / 8);
     if (cfg_number("Variables", "tick", 500, 100, 0, &tick) > 0 &&
-	cfg_number("Variables", "tack", 500, 100, 0, &tack) > 0) {
-	info("tick & tack read from config");
-	timer_add(drv_PICGraphic_delay, 0, min(tick, tack), 0);	// 
+        cfg_number("Variables", "tack", 500, 100, 0, &tack) > 0) {
+        info("tick & tack read from config");
+        timer_add(drv_PICGraphic_delay, 0, min(tick, tack), 0); // 
     } else {
-	info("tick & tack not read from config");
-	timer_add(drv_PICGraphic_delay, 0, 80, 0);	// 
+        info("tick & tack not read from config");
+        timer_add(drv_PICGraphic_delay, 0, 80, 0);      // 
     }
 
     /* open communication with the display */
     if (drv_PICGraphic_open(section) < 0) {
-	return -1;
+        return -1;
     }
 
     /* reset & initialize display */
@@ -358,13 +358,13 @@ static int drv_PICGraphic_start2(const char *section)
     status = drv_PICGraphic_recv(cmd, 2, "fi");
 
     if (!status) {
-	info("received fi from device");
+        info("received fi from device");
     } else {
-	info("did not receive fi from device");
+        info("did not receive fi from device");
     }
 
     if (cfg_number(section, "Contrast", 8, 0, 15, &contrast) > 0) {
-	drv_PICGraphic_contrast(contrast);
+        drv_PICGraphic_contrast(contrast);
     }
 
     return 0;
@@ -419,19 +419,19 @@ int drv_PICGraphic_init2(const char *section, const int quiet)
 
     /* start display */
     if ((ret = drv_PICGraphic_start2(section)) != 0)
-	return ret;
+        return ret;
 
     /* initialize generic graphic driver */
     if ((ret = drv_generic_graphic_init(section, Name)) != 0)
-	return ret;
+        return ret;
 
     if (!quiet) {
-	char buffer[40];
-	qprintf(buffer, sizeof(buffer), "%s %dx%d", Name, DCOLS, DROWS);
-	if (drv_generic_graphic_greet(buffer, NULL)) {
-	    sleep(3);
-	    drv_generic_graphic_clear();	// also clears main framebuffer
-	}
+        char buffer[40];
+        qprintf(buffer, sizeof(buffer), "%s %dx%d", Name, DCOLS, DROWS);
+        if (drv_generic_graphic_greet(buffer, NULL)) {
+            sleep(3);
+            drv_generic_graphic_clear();        // also clears main framebuffer
+        }
     }
 
     /* register plugins */
@@ -455,7 +455,7 @@ int drv_PICGraphic_quit2(const int quiet)
 
     /* say goodbye... */
     if (!quiet) {
-	drv_generic_graphic_greet("goodbye!", NULL);
+        drv_generic_graphic_greet("goodbye!", NULL);
     }
 
     info("freeing framebuffer");

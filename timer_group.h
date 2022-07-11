@@ -34,8 +34,8 @@ void timer_process_group(void *data);
 
 void timer_exit_group(void);
 
-int timer_add_widget(void (*callback) (void *data), void *data, const int interval, const int one_shot);
+int timer_add_widget(void (*callback)(void *data), void *data, const int interval, const int one_shot);
 
-int timer_remove_widget(void (*callback) (void *data), void *data);
+int timer_remove_widget(void (*callback)(void *data), void *data);
 
 #endif

@@ -74,39 +74,39 @@ static int parse_xmms_info(void)
     /* reread every 100msec only */
     age = hash_age(&xmms, NULL);
     if (age >= 0 && age <= 200)
-	return 0;
+        return 0;
     /* Open Filestream for '/tmp/xmms-info' */
     xmms_stream = fopen("/tmp/xmms-info", "r");
 
     /* Check for File */
     if (!xmms_stream) {
-	error("Error: Cannot open XMMS-Info Stream! Is XMMS started?");
-	return -1;
+        error("Error: Cannot open XMMS-Info Stream! Is XMMS started?");
+        return -1;
     }
 
     /* Read Lines from the Stream */
     while (fgets(zeile, sizeof(zeile), xmms_stream)) {
-	char *c, *key, *val;
-	c = strchr(zeile, ':');
-	if (c == NULL)
-	    continue;
-	key = zeile;
-	val = c + 1;
-	/* strip leading blanks from key */
-	while (isspace(*key))
-	    *key++ = '\0';
-	/* strip trailing blanks from key */
-	do
-	    *c = '\0';
-	while (isspace(*--c));
-	/* strip leading blanks from value */
-	while (isspace(*val))
-	    *val++ = '\0';
-	/* strip trailing blanks from value */
-	for (c = val; *c != '\0'; c++);
-	while (isspace(*--c))
-	    *c = '\0';
-	hash_put(&xmms, key, val);
+        char *c, *key, *val;
+        c = strchr(zeile, ':');
+        if (c == NULL)
+            continue;
+        key = zeile;
+        val = c + 1;
+        /* strip leading blanks from key */
+        while (isspace(*key))
+            *key++ = '\0';
+        /* strip trailing blanks from key */
+        do
+            *c = '\0';
+        while (isspace(*--c));
+        /* strip leading blanks from value */
+        while (isspace(*val))
+            *val++ = '\0';
+        /* strip trailing blanks from value */
+        for (c = val; *c != '\0'; c++);
+        while (isspace(*--c))
+            *c = '\0';
+        hash_put(&xmms, key, val);
     }
 
     fclose(xmms_stream);
@@ -119,14 +119,14 @@ static void my_xmms(RESULT * result, RESULT * arg1)
     char *key, *val;
 
     if (parse_xmms_info() < 0) {
-	SetResult(&result, R_STRING, "");
-	return;
+        SetResult(&result, R_STRING, "");
+        return;
     }
 
     key = R2S(arg1);
     val = hash_get(&xmms, key, NULL);
     if (val == NULL)
-	val = "";
+        val = "";
 
     SetResult(&result, R_STRING, val);
 }

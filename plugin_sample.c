@@ -100,7 +100,7 @@ static void my_diff(RESULT * result, RESULT * arg1, RESULT * arg2)
 
     /* some more calculations... */
     if (value < 0)
-	value = -value;
+        value = -value;
 
     /* store result */
     SetResult(&result, R_NUMBER, &value);
@@ -152,7 +152,7 @@ static void my_upcase(RESULT * result, RESULT * arg1)
 
     /* process the string */
     for (p = value; *p != '\0'; p++)
-	*p = toupper(*p);
+        *p = toupper(*p);
 
     /* store result */
     /* when called with R_STRING, it assumes the */
@@ -180,10 +180,10 @@ static void my_concat(RESULT * result, int argc, RESULT * argv[])
 
     /* process all arguments */
     for (i = 0; i < argc; i++) {
-	part = R2S(argv[i]);
-	len = strlen(value) + strlen(part);
-	value = realloc(value, len + 1);
-	strcat(value, part);
+        part = R2S(argv[i]);
+        len = strlen(value) + strlen(part);
+        value = realloc(value, len + 1);
+        strcat(value, part);
     }
 
     /* store result */
