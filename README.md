@@ -1,8 +1,8 @@
 # LCD4Linux supporting current RHEL like systems and improved AX206 DPF options
 
-This is a fork of (MaxWiesel's lcd4linux-max)[https://github.com/MaxWiesel/lcd4linux-max) to address my fustrations with trying to use that software.
+This is a fork of [MaxWiesel's lcd4linux-max](https://github.com/MaxWiesel/lcd4linux-max) to address my fustrations with trying to use that software.
 
-The best source for information about LCD4Linux appears to be (The unoffical LCD4Linux Wiki)[https://wiki.lcd4linux.tk/doku.php/start].
+The best source for information about LCD4Linux appears to be [The unoffical LCD4Linux Wiki](https://wiki.lcd4linux.tk/doku.php/start).
 
 ## Objectives
 
