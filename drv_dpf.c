@@ -475,7 +475,7 @@ DRIVER drv_DPF = {
 // See http://dpf-ax.sourceforge.net/
 //###################################################################
 
-#include <usb.h>
+#include "libusb-1.0/libusb.h"
 
 #define AX206_VID 0x1908        // Hacked frames USB Vendor ID
 #define AX206_PID 0x0102        // Hacked frames USB Product ID
@@ -491,7 +491,7 @@ DRIVER drv_DPF = {
 /* The DPF context structure */
 typedef
     struct dpf_context {
-    usb_dev_handle *udev;
+    libusb_device_handle *udev;
     unsigned int width;
     unsigned int height;
 } DPFContext;
@@ -513,7 +513,13 @@ DPFAXHANDLE dpf_ax_open(const char *dev)
 {
     DPFContext *dpf;
     int index = -1;
-    usb_dev_handle *u;
+    libusb_device_handle *u;
+    libusb_device **devs;
+    ssize_t cnt;
+    int r, i;
+    int enumeration = 0;
+    struct libusb_device *d = NULL;
+    struct libusb_device_descriptor desc;
 
     if (dev && strlen(dev) == 4 && (strncmp(dev, "usb", 3) == 0 || strncmp(dev, "dpf", 3) == 0))
         index = dev[3] - '0';
@@ -523,29 +529,35 @@ DPFAXHANDLE dpf_ax_open(const char *dev)
         return NULL;
     }
 
-    usb_init();
-    usb_find_busses();
-    usb_find_devices();
+    r = libusb_init(NULL);
+    if (r < 0) {
+        fprintf(stderr, "dpf_ax_open: libusb_init failed with error %d\n", r);
+        return NULL;
+    }
 
-    struct usb_bus *b = usb_get_busses();
-    struct usb_device *d = NULL;
-    int enumeration = 0;
-    int found = 0;
+    cnt = libusb_get_device_list(NULL, &devs);
+    if (cnt < 0) {
+        libusb_exit(NULL);
+        fprintf(stderr, "dpf_ax_open: libusb_init failed with error %d\n", r);
+        return NULL;
+    }
 
-    while (b && !found) {
-        d = b->devices;
-        while (d) {
-            if ((d->descriptor.idVendor == AX206_VID) && (d->descriptor.idProduct == AX206_PID)) {
-                fprintf(stderr, "dpf_ax_open: found AX206 #%d\n", enumeration + 1);
-                if (enumeration == index) {
-                    found = 1;
-                    break;
-                } else
-                    enumeration++;
-            }
-            d = d->next;
+    for (i = 0; devs[i]; i++) {
+        r = libusb_get_device_descriptor(devs[i], &desc);
+        if (r < 0) {
+            fprintf(stderr, "dpf_ax_open: failed to get device descriptor");
+            return NULL;
         }
-        b = b->next;
+
+        if ((desc.idVendor == AX206_VID) && (desc.idProduct == AX206_PID)) {
+            fprintf(stderr, "dpf_ax_open: found AX206 #%d\n", enumeration + 1);
+            if (enumeration == index) {
+                d = devs[i];
+                break;
+            } else {
+                enumeration++;
+            }
+        }
     }
 
     if (!d) {
@@ -559,16 +571,18 @@ DPFAXHANDLE dpf_ax_open(const char *dev)
         return NULL;
     }
 
-    u = usb_open(d);
-    if (u == NULL) {
+    r = libusb_open(d, &u);
+    if ((r != 0) || (u == NULL)) {
         fprintf(stderr, "dpf_ax_open: failed to open usb device '%s'!\n", dev);
         free(dpf);
         return NULL;
     }
 
-    if (usb_claim_interface(u, 0) < 0) {
+    libusb_free_device_list(devs, 1);
+
+    if (libusb_claim_interface(u, 0) < 0) {
         fprintf(stderr, "dpf_ax_open: failed to claim usb device!\n");
-        usb_close(u);
+        libusb_close(u);
         free(dpf);
         return NULL;
     }
@@ -603,8 +617,8 @@ void dpf_ax_close(DPFAXHANDLE h)
 {
     DPFContext *dpf = (DPFContext *) h;
 
-    usb_release_interface(dpf->udev, 0);
-    usb_close(dpf->udev);
+    libusb_release_interface(dpf->udev, 0);
+    libusb_close(dpf->udev);
     free(dpf);
 }
 
@@ -704,6 +718,7 @@ static int wrap_scsi(DPFContext * h, unsigned char *cmd, int cmdlen, char out,
                      unsigned char *data, unsigned long block_len)
 {
     int len;
+    int transfered;
     int ret;
     static unsigned char ansbuf[13];    // Do not change size.
 
@@ -715,21 +730,21 @@ static int wrap_scsi(DPFContext * h, unsigned char *cmd, int cmdlen, char out,
     g_buf[10] = block_len >> 16;
     g_buf[11] = block_len >> 24;
 
-    ret = usb_bulk_write(h->udev, ENDPT_OUT, (const char *) g_buf, sizeof(g_buf), 1000);
-    if (ret < 0)
+    ret = libusb_bulk_transfer(h->udev, ENDPT_OUT, g_buf, sizeof(g_buf), &transfered, 1000);
+    if (ret != 0)
         return ret;
 
     if (out == DIR_OUT) {
         if (data) {
-            ret = usb_bulk_write(h->udev, ENDPT_OUT, (const char *) data, block_len, 3000);
-            if (ret != (int) block_len) {
+            ret = libusb_bulk_transfer(h->udev, ENDPT_OUT, data, block_len, &transfered, 3000);
+            if ((ret != 0) || (transfered != (int) block_len)) {
                 fprintf(stderr, "dpf_ax ERROR: bulk write.\n");
                 return ret;
             }
         }
     } else if (data) {
-        ret = usb_bulk_read(h->udev, ENDPT_IN, (char *) data, block_len, 4000);
-        if (ret != (int) block_len) {
+        ret = libusb_bulk_transfer(h->udev, ENDPT_IN, data, block_len, &transfered, 4000);
+        if ((ret != 0) || (transfered != (int) block_len)) {
             fprintf(stderr, "dpf_ax ERROR: bulk read.\n");
             return ret;
         }
@@ -740,9 +755,10 @@ static int wrap_scsi(DPFContext * h, unsigned char *cmd, int cmdlen, char out,
     int timeout = 0;
     do {
         timeout = 0;
-        ret = usb_bulk_read(h->udev, ENDPT_IN, (char *) ansbuf, len, 5000);
-        if (ret != len) {
-            fprintf(stderr, "dpf_ax ERROR: bulk ACK read.\n");
+        ret = libusb_bulk_transfer(h->udev, ENDPT_IN, ansbuf, len, &transfered, 5000);
+        if ((ret != 0) || (transfered != (int) len)) {
+            fprintf(stderr, "dpf_ax ERROR: bulk ACK read. ret = %d transfered = %d expected %d\n", ret, transfered,
+                    len);
             timeout = 1;
         }
         retry++;
