@@ -12,6 +12,10 @@ My focus is using the now commonly available 3.5" USB LCD displays that are offe
 
 More details below.
 
+## Current status
+
+Now building and working on Rocky 8.6 with DPF and X11 drivers.
+
 ## Warnings
 
 I am an embedded systems engineer more used to writing C code for bare metal systems and basic Posix tools.  The way I do things here may not be the proper way for such a project but the lack of documentation in the original project left me unable to simply build a binary I needed.  Therefore I have simply done what works for me.  If you don't like it I would refer you back to the original project.  I will try and make commits somewhat atomic so they may still be of use in other forks as a reference for potential changes.
@@ -20,10 +24,13 @@ An example of the troubles you may have is the first commit was to replace all t
 
 Be aware that AIDA64 is actually Windows software, not the displays themselves.  So while LCD4Linux will work with the 3.5" AIDA64 displays I have purchased so far it will not work 5" AIDA64 displays as these are actaully HDMI.  The 3.5" USB displays are using the AX206 chipset designed for photo frames but can be hacked for general use.  All 3.5" USB displays I have purchased so far have the correct firmware for use with LCD4Linux as this appears to be what the AIDA64 software needs.  Searching online for AX206 displays yields few results so you are better searching for AIDA64 displays then filtering for USB versions only.
 
-## Core issues addressed, or to address
+## Core issues addressed
 
-- The generic install instructions don't work.  The default build system tools are ver 1.14 but the current versions in Rocky (cicia 2022) are version 1.16 so I am moving the build system to use that.
-- Code, for AX206 display atleast, uses libusb version 0.1 where as Rocky currently uses 1.0 and gets really pissy if you try to install 0.1 so I am updating source code to use 1.0 libraries.
+- The generic install instructions don't work.  The default build system tools are ver 1.14 but the current versions in Rocky (cicia 2022) are version 1.16 so moved the build system to use that.
+- Code, for AX206 display atleast, uses libusb version 0.1 where as Rocky currently uses 1.0 and gets really pissy if you try to install 0.1 so I updated the DPF source code to use 1.0 USB libraries.
+
+## Core issues to address
+
 - The confiuration options used by lcd4linux at runtime were originally conceived for mono text LCDs, not colour graphics LCDs.  There are bugs with some colour names, such as 'white', not working.  These can be worked around but I wish get to the bottom it so common sense conf files can be used.  Likewise I would like to be able to change the colour of bar graphs depending on the value range e.g. green below 90% and red above that.
 
 ## Building
@@ -48,3 +55,6 @@ Configure the build enviroment. To keep it simple I configured only for the DPF 
 - automake --add-missing --copy --foreign 
 - autoconf
 - ./configure --with-drivers=DPF
+
+You can also support the X11 driver using:
+- ./configure --with-drivers=DPF,X11
