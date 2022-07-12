@@ -41,7 +41,7 @@ In my case I found it helped to install these packages:
 - dnf install libjpeg-turbo-devel
 - dnf install usblib* 
 
-Confuire the build enviroment. To keep it simple I configured only for the DPF driver, which is the one that supports AX206 displays. From the top level of the repo directory:
+Configure the build enviroment. To keep it simple I configured only for the DPF driver, which is the one that supports AX206 displays. From the top level of the repo directory:
 - aclocal
 - libtoolize --copy --force 
 - autoheader
