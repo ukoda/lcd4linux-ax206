@@ -393,7 +393,7 @@ fi
 if test "$DPF" = "yes"; then
    GRAPHIC="yes"
    DRIVERS="$DRIVERS drv_dpf.o"
-   LIBUSB="yes"
+   LIBUSB10="yes"
    AC_DEFINE(WITH_DPF,1,[DPF driver])
 fi
 
