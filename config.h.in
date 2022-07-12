@@ -97,6 +97,9 @@
 /* Define to 1 if you have the <linux/ppdev.h> header file. */
 #undef HAVE_LINUX_PPDEV_H
 
+/* Define to 1 if you have the <linux/spi/spidev.h> header file. */
+#undef HAVE_LINUX_SPI_SPIDEV_H
+
 /* Define to 1 if you have the <linux/wireless.h> header file. */
 #undef HAVE_LINUX_WIRELESS_H
 
@@ -290,8 +293,7 @@
    slash. */
 #undef LSTAT_FOLLOWS_SLASHED_SYMLINK
 
-/* Define to the sub-directory in which libtool stores uninstalled libraries.
-   */
+/* Define to the sub-directory where libtool stores uninstalled libraries. */
 #undef LT_OBJDIR
 
 /* Set to reflect version of ncurses */
@@ -528,6 +530,9 @@
 /* I2C bus driver */
 #undef WITH_I2C
 
+/* ili9486 fb driver */
+#undef WITH_ILI9486_FB
+
 /* image widget */
 #undef WITH_IMAGE
 
@@ -624,6 +629,9 @@
 /* SimpleLCD driver */
 #undef WITH_SIMPLELCD
 
+/* SPIDEV driver */
+#undef WITH_SPIDEV
+
 /* st2205 driver */
 #undef WITH_ST2205
 
@@ -632,6 +640,9 @@
 
 /* TeakLCM driver */
 #undef WITH_TEAK_LCM
+
+/* TEW673GRU driver */
+#undef WITH_TEW673GRU
 
 /* TREFON driver */
 #undef WITH_TREFON
@@ -647,6 +658,9 @@
 
 /* vnc driver */
 #undef WITH_VNC
+
+/* vuplus4k driver */
+#undef WITH_VUPLUS4K
 
 /* WincorNixdorf driver */
 #undef WITH_WINCORNIXDORF
