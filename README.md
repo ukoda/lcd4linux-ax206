@@ -58,3 +58,49 @@ Configure the build enviroment. To keep it simple I configured only for the DPF 
 
 You can also support the X11 driver using:
 - ./configure --with-drivers=DPF,X11
+
+## Config file information
+
+The best documentation I have found on the configuration file is at [The unoffical LCD4Linux Wiki](https://wiki.lcd4linux.tk/doku.php/start).  Here I have added information I could not find there.
+
+### Upstream repo
+
+This is things that this code has inherited from the up stream repo.
+
+#### TrueType Widget
+
+The most notable of these is the widget class TrueType from Eric Loxat.  Having discovered this I realsied it will save me a lot of work I was planning on improving the larger font appearance with the AX206 displays, thanks Eric.
+
+For the Widget declaration the fields appear to be:
+- `class`: Must be 'Truetype'.
+- `expression`: The expresion for the text to display.
+- `font`: The full path the True Type font to use.
+- `size`: The height of the font, not including decenders, in pixels.
+- `width`: The width of the box in pixels to fit the text, not the character width, see below.
+- `height`: The height of the box in pixels to fit the text, see below.
+- `align`: Horizontal alignment of 'L', 'C' or 'R'.
+- `center`: Doesn't appear to do anything.
+- `fcolor`: Font color as RGB or RGBA.  The background is always transparent.
+- `inverted`: Inverts the fcolor value e.g. '0000ff' would become 'ffff00'.
+- `update`: Update time in mS, as per other widgets.
+- `visible`: Visiblity,  as per other widgets.
+- `debugborder`: The colour to use to show the bounding box.  If black or ommited will not be rendered.
+NB: If `size` is ommited or 0 the largest font size that will fit in the `width` x `height` box will be used depending on what limited is reached first.  If the font `size` is given the text will be cropped to fit the box if it too big.  The text is always vertically center alligned, ignoring decenders.  While expermenting with layouts setting `debugborder` to 'ffffff' can be handy.
+
+An example:
+```
+Widget Debug {
+    class 'Truetype'
+    expression 'Test'
+    font '/usr/share/fonts/gnu-free/FreeSans.ttf'
+    width 60
+    height 80
+    fcolor colour_white
+}
+```
+
+For the layout section the same X Y position format used by images should be used.
+
+### REpo specific additions
+
+Here is where I will document any extensions I make to the code.
