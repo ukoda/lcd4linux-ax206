@@ -95,7 +95,8 @@ static void widget_ttf_render(const char *Name, WIDGET_TTF * Image)
     char *dborder;
     double size;
     char *font, *err, *align;
-
+    char *background;
+    int backgroundcl;
 
     /* clear bitmap */
     if (Image->bitmap) {
@@ -194,6 +195,29 @@ static void widget_ttf_render(const char *Name, WIDGET_TTF * Image)
             x = brect[6];
 
         y = (_height - mrect[1] - mrect[7]) / 2;
+
+        if (property_valid(&Image->background)) {
+            background = P2S(&Image->background);
+            if (strlen(background) == 8) {
+                l = strtoul(background, &e, 16);
+                r = (l >> 24) & 0xff;
+                g = (l >> 16) & 0xff;
+                b = (l >> 8) & 0xff;
+                a = (l & 0xff) / 2;
+
+                backgroundcl = gdImageColorAllocateAlpha(Image->gdImage, r, g, b, a);
+            } else {
+                l = strtoul(background, &e, 16);
+                r = (l >> 16) & 0xff;
+                g = (l >> 8) & 0xff;
+                b = l & 0xff;
+
+                backgroundcl = gdImageColorAllocate(Image->gdImage, r, g, b);
+            }
+
+            if (backgroundcl)
+                gdImageFilledRectangle(Image->gdImage, 1, 1, _width - 1, _height - 1, backgroundcl);
+        }
 
         dborder = P2S(&Image->debugborder);
 
@@ -294,6 +318,7 @@ static void widget_ttf_update(void *Self)
         property_eval(&Image->_height);
         property_eval(&Image->align);
         property_eval(&Image->debugborder);
+        property_eval(&Image->background);
 
         /* render image into bitmap */
         widget_ttf_render(W->name, Image);
@@ -348,6 +373,7 @@ int widget_ttf_init(WIDGET * Self)
         property_load(section, "height", "0", &Image->_height);
         property_load(section, "align", "C", &Image->align);
         property_load(section, "debugborder", "000000", &Image->debugborder);
+        property_load(section, "background", NULL, &Image->background);
 
         /* sanity checks */
         if (!property_valid(&Image->font)) {
@@ -398,6 +424,7 @@ int widget_ttf_quit(WIDGET * Self)
                 property_eval(&Image->_height);
                 property_eval(&Image->align);
                 property_free(&Image->debugborder);
+                property_free(&Image->background);
 
                 free(Self->data);
                 Self->data = NULL;
