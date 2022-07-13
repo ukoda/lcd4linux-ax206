@@ -33,6 +33,28 @@ Be aware that AIDA64 is actually Windows software, not the displays themselves. 
 
 - The confiuration options used by lcd4linux at runtime were originally conceived for mono text LCDs, not colour graphics LCDs.  There are bugs with some colour names, such as 'white', not working.  These can be worked around but I wish get to the bottom it so common sense conf files can be used.  Likewise I would like to be able to change the colour of bar graphs depending on the value range e.g. green below 90% and red above that.
 
+### Variables not being defined
+
+If in the Variables you have:
+```
+Variables {
+    blue      '0000ff'
+    std_fg     blue
+}
+```
+Then std_fg will have the value '0000ff'.
+
+However if in the Variables you have:
+```
+Variables {
+    white      'ffffff'
+    std_fg     white
+}
+```
+Then stg_fg will have the value ''.
+
+It would appear values are evaluated in alphabetical order, not defintion order.  I have not seen this behaviour documented anywhere.
+
 ## Building
 
 These are the additions to the generic instructions that I needed in able to build the project.
