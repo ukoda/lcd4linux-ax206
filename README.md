@@ -98,11 +98,14 @@ For the Widget declaration the fields appear to be:
 - `height`: The height of the box in pixels to fit the text, see below.
 - `align`: Horizontal alignment of 'L', 'C' or 'R'.
 - `center`: Doesn't appear to do anything.
-- `fcolor`: Font color as RGB or RGBA.  The background is always transparent.
+- `fcolor`: Font color as RGB or RGBA.  The background is transparent unless `background` is defined.
 - `inverted`: Inverts the fcolor value e.g. '0000ff' would become 'ffff00'.
 - `update`: Update time in mS, as per other widgets.
 - `visible`: Visiblity,  as per other widgets.
 - `debugborder`: The colour to use to show the bounding box.  If black or ommited will not be rendered.
+I have added to this widget these fields:
+- `background`: Background color as RGB or RGBA.  If not defined the background is transparent.
+
 
 NB: If `size` is ommited or 0 the largest font size that will fit in the `width` x `height` box will be used depending on what limited is reached first.  If the font `size` is given the text will be cropped to fit the box if it too big.  The text is always vertically center alligned, ignoring decenders.  While expermenting with layouts setting `debugborder` to 'ffffff' can be handy.
 
@@ -122,4 +125,8 @@ For the layout section the same X Y position format used by images should be use
 
 ### Repo specific additions
 
-Here is where I will document any extensions I make to the code.
+This is extensiond not present in the upstream repo.
+
+#### TrueType Widget
+
+Added `background` field, see above Upstream repo TrueType Widget for more detail.
