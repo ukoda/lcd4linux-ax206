@@ -59,6 +59,24 @@ Configure the build enviroment. To keep it simple I configured only for the DPF 
 You can also support the X11 driver using:
 - ./configure --with-drivers=DPF,X11
 
+### Mint
+
+This will probably apply to similar Ubuntu distros.
+
+In my case I found it helped to install these packages:
+- apt install libtool-bin
+
+Configure the build enviroment. To keep it simple I configured only for the DPF driver, which is the one that supports AX206 displays. From the top level of the repo directory:
+- aclocal
+- libtoolize --copy --force 
+- autoheader
+- automake --add-missing --copy --foreign 
+- autoconf
+- ./configure --with-drivers=DPF
+
+You can also support the X11 driver using:
+- ./configure --with-drivers=DPF,X11
+
 ## Config file information
 
 The best documentation I have found on the configuration file is at [The unoffical LCD4Linux Wiki](https://wiki.lcd4linux.tk/doku.php/start).  Here I have added information I could not find there.
