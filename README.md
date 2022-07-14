@@ -81,6 +81,13 @@ Configure the build enviroment. To keep it simple I configured only for the DPF 
 You can also support the X11 driver using:
 - ./configure --with-drivers=DPF,X11
 
+If you want to use the VNC driver you will probably need:
+- dnf -y install dnf-plugins-core
+- dnf upgrade
+- dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
+- dnf config-manager --set-enabled powertools
+- dnf install libvncserver libvncserver-devel
+
 ### Mint
 
 This will probably apply to similar Ubuntu distros.
