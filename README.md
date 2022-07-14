@@ -115,7 +115,7 @@ For the Widget declaration the fields appear to be:
 - `class`: Must be 'Truetype'.
 - `expression`: The expression for the text to display.
 - `font`: The full path the True Type font to use.
-- `size`: The height of the font, not including decenders, in pixels.
+- `size`: The height of the font, not including decenders, not in pixels.
 - `width`: The width of the box in pixels to fit the text, not the character width, see below.
 - `height`: The height of the box in pixels to fit the text, see below.
 - `align`: Horizontal alignment of 'L', 'C' or 'R'.
