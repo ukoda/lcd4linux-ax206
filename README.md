@@ -64,11 +64,13 @@ These are the additions to the generic instructions that I needed in able to bui
 This will probably apply to similar RHEL distros.
 
 In my case I found it helped to install these packages:
+- dnf group install "Development Tools"
 - dnf install ncurses-devel ncurses
 - dnf install libX11-devel
 - dnf install gd-devel.x86_64
 - dnf install libjpeg-turbo-devel
-- dnf install usblib* 
+- dnf install libusb-devel
+If usblib-devel doesn't work try usblib*
 
 Configure the build enviroment. To keep it simple I configured only for the DPF driver, which is the one that supports AX206 displays. From the top level of the repo directory:
 - aclocal
