@@ -50,7 +50,7 @@ void drv_X11_parseArgs(int *argc, char *arvg[]);
 #endif
 
 int drv_list(void);
-int drv_init(const char *section, const char *driver, const int quiet);
+int drv_init(const char *section, const char *driver, const int quiet, const int mirror);
 int drv_quit(const int quiet);
 
 #endif

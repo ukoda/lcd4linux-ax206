@@ -44,6 +44,7 @@
 #include "pid.h"
 #include "udelay.h"
 #include "drv.h"
+#include "drv_generic_graphic.h"
 #include "timer.h"
 #include "timer_group.h"
 #include "layout.h"
@@ -211,6 +212,8 @@ int main(int argc, char *argv[])
     char *pidfile = PIDFILE;
     char *display, *driver, *layout;
     char section[64];
+    char *mirrordisplay, *mirrordriver;
+    char mirrorsection[64];
     int c;
     int quiet = 1;
     int interactive = 0;
@@ -332,6 +335,26 @@ int main(int argc, char *argv[])
         exit(1);
     }
 
+    mirrordisplay = cfg_get(NULL, "Mirror", NULL);
+    mirrordriver = NULL;
+    if (mirrordisplay == NULL || *mirrordisplay == '\0') {
+        debug("No mirror driver defined");
+    } else {
+        debug("Mirror driver %s requested", mirrordisplay);
+        usemirror = 1;
+        qprintf(mirrorsection, sizeof(mirrorsection), "Display:%s", mirrordisplay);
+        free(mirrordisplay);
+        mirrordriver = cfg_get(mirrorsection, "Driver", NULL);
+        if (mirrordriver == NULL || *mirrordriver == '\0') {
+            error("missing '%s.Driver' entry in %s for mirror!", mirrorsection, cfg_source());
+            exit(1);
+        }
+        if (strcmp(section, mirrorsection) == 0) {
+            error("Mirror driver must be different from main driver '%s.Driver' entry in %s!", section, cfg_source());
+            exit(1);
+        }
+    }
+
     if (!running_foreground) {
 
         debug("going background...");
@@ -365,8 +388,20 @@ int main(int argc, char *argv[])
         cfg_number(NULL, "Quiet", 0, 0, 1, &quiet);
     }
 
+    if (usemirror) {
+        debug("initializing mirror driver %s", mirrordriver);
+        if (drv_init(mirrorsection, mirrordriver, quiet, 1) == -1) {
+            error("Error initializing mirror driver %s: Exit!", mirrordriver);
+            pid_exit(pidfile);
+            exit(1);
+        }
+        drv_generic_graphic_real_blit_mirror = drv_generic_graphic_real_blit;
+        drv_generic_graphic_real_blit = NULL;
+        free(mirrordriver);
+    }
+
     debug("initializing driver %s", driver);
-    if (drv_init(section, driver, quiet) == -1) {
+    if (drv_init(section, driver, quiet, 0) == -1) {
         error("Error initializing driver %s: Exit!", driver);
         pid_exit(pidfile);
         exit(1);

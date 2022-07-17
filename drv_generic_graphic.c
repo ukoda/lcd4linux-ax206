@@ -98,6 +98,9 @@ static int INVERTED = 0;
 
 /* must be implemented by the real driver */
 void (*drv_generic_graphic_real_blit)() = NULL;
+void (*drv_generic_graphic_real_blit_mirror)() = NULL;
+int usemirror = 0;
+
 
 
 /****************************************/
@@ -172,6 +175,9 @@ static void drv_generic_graphic_blit(const int row, const int col, const int hei
         drv_generic_graphic_window(col, width, DCOLS, &c, &w);
         if (h > 0 && w > 0) {
             drv_generic_graphic_real_blit(r, c, h, w);
+            if (usemirror && drv_generic_graphic_real_blit_mirror) {
+                drv_generic_graphic_real_blit_mirror(r, c, h, w);
+            }
         }
     }
 }

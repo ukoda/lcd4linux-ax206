@@ -161,3 +161,68 @@ This is extensiond not present in the upstream repo.
 #### TrueType Widget
 
 Added `background` field, see above Upstream repo TrueType Widget for more detail.
+
+#### Driver mirroring
+
+This allows a second driver to mirror the normal driver.  Intended use case is where machine has a local physical display, such as an AX206, and you wish to view that screen remotely via VNC or X11.
+
+Mirror driver must be different from the main driver and both must be graphics displays with the same resolution.
+
+To use you will need to have two `Display` driver defintion sections and add a `Mirror` declaration to point to one of the defined drivers.
+
+NB: It has currently only been tested with the DPF driver paired with a VNC or X11 driver.  Other combinations may break things.  Where the Mirror declartion is absent I do not expect problems with anything.  There is an unresolved issue with drv_quit() in drv.h but it does not currently seem to cause problems.  You will also see warnings about duplicate widgets but again this does not appear to cause problems.
+
+An example:
+```
+# A very simple mirror example configuration for lcd4linux
+
+Layout  'Compact' 
+
+Display 'DPF'
+Mirror  'VNC'
+
+Variables {
+    _black '000000'
+    _white 'ffffff'
+}
+
+Display dpf {
+    driver      'DPF'
+    port        'usb0'
+    font        '6x8'
+    orientation 0
+    backlight   4
+    foreground  _white
+    background  _black
+    basecolor   _black
+}
+
+Display VNC {
+    Driver       'VNC'
+    Font         '6x8'
+    Port         '5900'
+    Xres         '480'
+    Yres         '320'
+    Bpp          '4'
+    Maxclients   '2'
+    Osd_showtime '2000'
+}
+
+Widget Uptime {
+    class      'Truetype'
+    expression 'Uptime: ' . uptime('%d days %H:%M:%S')
+    font       '/usr/share/fonts/gnu-free/FreeSans.ttf'
+    size       24
+    width      480
+    height     100
+    fcolor     _white
+    reload     '1'
+    update     1000
+}
+
+Layout Compact {
+    layer 1 {
+        X100.Y1 'Uptime'
+    }
+}
+```

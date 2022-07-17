@@ -287,6 +287,7 @@ DRIVER *Driver[] = {
 
 
 static DRIVER *Drv = NULL;
+static DRIVER *Mirror = NULL;
 
 
 /* maybe we need this */
@@ -315,15 +316,22 @@ int drv_list(void)
 }
 
 
-int drv_init(const char *section, const char *driver, const int quiet)
+int drv_init(const char *section, const char *driver, const int quiet, const int mirror)
 {
     int i;
     for (i = 0; Driver[i]; i++) {
         if (strcmp(Driver[i]->name, driver) == 0) {
-            Drv = Driver[i];
-            if (Drv->init == NULL)
-                return 0;
-            return Drv->init(section, quiet);
+            if (mirror) {
+                Mirror = Driver[i];
+                if (Mirror->init == NULL)
+                    return 0;
+                return Mirror->init(section, quiet);
+            } else {
+                Drv = Driver[i];
+                if (Drv->init == NULL)
+                    return 0;
+                return Drv->init(section, quiet);
+            }
         }
     }
     error("drv_init(%s) failed: no such driver", driver);
@@ -333,6 +341,9 @@ int drv_init(const char *section, const char *driver, const int quiet)
 
 int drv_quit(const int quiet)
 {
+// TODO: Currently this cause segfaults as I suspect drivers may be release same resources twice?  Needs looked into    
+//    if ((Mirror != NULL) && (Mirror->quit != NULL))
+//        Mirror->quit(quiet);
     if (Drv->quit == NULL)
         return 0;
     return Drv->quit(quiet);
