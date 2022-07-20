@@ -156,7 +156,7 @@ For the layout section the same X Y position format used by images should be use
 
 ### Repo specific additions
 
-This is extensiond not present in the upstream repo.
+This is extensions not present in the upstream repo.
 
 #### TrueType Widget
 
