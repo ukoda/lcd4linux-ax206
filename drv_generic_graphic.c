@@ -70,6 +70,7 @@
 #include "widget_bar.h"
 #include "widget_image.h"
 #include "widget_ttf.h"
+#include "widget_graphicbar.h"
 #include "rgb.h"
 #include "drv.h"
 #include "drv_generic.h"
@@ -464,6 +465,7 @@ int drv_generic_graphic_bar_draw(WIDGET * W)
     }
 
     /* maybe grow layout framebuffer */
+
     if (dir & (DIR_EAST | DIR_WEST)) {
         drv_generic_graphic_resizeFB(row + YRES, col + XRES * len);
     } else {
@@ -492,6 +494,7 @@ int drv_generic_graphic_bar_draw(WIDGET * W)
         val1 = max - val1;
         val2 = max - val2;
         rev = 1;
+        __attribute__ ((fallthrough));
 
     case DIR_EAST:
         for (y = 0; y < YRES; y++) {
@@ -520,6 +523,7 @@ int drv_generic_graphic_bar_draw(WIDGET * W)
         val1 = max - val1;
         val2 = max - val2;
         rev = 1;
+        __attribute__ ((fallthrough));
 
     case DIR_SOUTH:
         for (x = 0; x < XRES; x++) {
@@ -549,7 +553,6 @@ int drv_generic_graphic_bar_draw(WIDGET * W)
     } else {
         drv_generic_graphic_blit(row, col, YRES * len, XRES);
     }
-
     return 0;
 }
 
@@ -692,7 +695,12 @@ int drv_generic_graphic_init(const char *section, const char *driver)
     wc = Widget_Image;
     wc.draw = drv_generic_graphic_image_draw;
     widget_register(&wc);
+
     wc = Widget_Truetype;
+    wc.draw = drv_generic_graphic_image_draw;
+    widget_register(&wc);
+    
+    wc = Widget_GraphicBar;
     wc.draw = drv_generic_graphic_image_draw;
     widget_register(&wc);
 #endif

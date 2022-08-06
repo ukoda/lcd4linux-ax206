@@ -7506,7 +7506,7 @@ fi
 if test "$GRAPHIC" = "yes"; then
    DRIVERS="$DRIVERS drv_generic_graphic.o"
    if test "$has_gd" = "true"; then
-      DRIVERS="$DRIVERS widget_image.o widget_ttf.o"
+      DRIVERS="$DRIVERS widget_image.o widget_ttf.o widget_graphicbar.o"
       DRVLIBS="$DRVLIBS -lgd"
 
 $as_echo "#define WITH_GD 1" >>confdefs.h
@@ -16371,6 +16371,10 @@ _lt_linker_boilerplate=`cat conftest.err`
 $RM -r conftest*
 
 
+## CAVEAT EMPTOR:
+## There is no encapsulation within the following macros, do not change
+## the running order or otherwise move them around unless you know exactly
+## what you are doing...
 if test -n "$compiler"; then
 
 lt_prog_compiler_no_builtin_flag=

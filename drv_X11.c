@@ -259,7 +259,7 @@ static void drv_X11_expose(const int x, const int y, const int width, const int 
     int yoffset = border + (DROWS / YRES) * rgap;
     int yk;
     char *s;
-    char unknownTxt[10];
+    char unknownTxt[16];
     XRectangle rect[DROWS * DCOLS];
     int nrect = 0;
     RGBA col;
@@ -337,7 +337,7 @@ static void drv_X11_expose(const int x, const int y, const int width, const int 
                 s = "Cancel";
                 break;
             default:
-                snprintf(unknownTxt, sizeof(unknownTxt), "#%d??", r);
+                snprintf(unknownTxt, sizeof(unknownTxt)-1, "#%d??", r);
                 s = unknownTxt;
             }
             XDrawRectangle(dp, w, gc, xoffset, yk, btnwidth, btnheight - 2);
@@ -515,6 +515,7 @@ static void drv_X11_timer( __attribute__((unused))
             debug("%s: Got XClient message 0x%lx %lx %lx %lx %lx", Name, ev.xclient.data.l[0],
                   ev.xclient.data.l[1], ev.xclient.data.l[2], ev.xclient.data.l[3], ev.xclient.data.l[4]);
         }
+        break;
 
     default:
         debug("%s: unknown XEvent %d", Name, ev.type);

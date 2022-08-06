@@ -1465,4 +1465,5 @@ void DelTree(void *tree)
     if (Tree->Result)
         FreeResult(Tree->Result);
     free(Tree);
+    tree = NULL;
 }

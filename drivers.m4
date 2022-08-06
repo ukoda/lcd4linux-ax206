@@ -933,7 +933,7 @@ fi
 if test "$GRAPHIC" = "yes"; then
    DRIVERS="$DRIVERS drv_generic_graphic.o"
    if test "$has_gd" = "true"; then
-      DRIVERS="$DRIVERS widget_image.o widget_ttf.o"
+      DRIVERS="$DRIVERS widget_image.o widget_ttf.o widget_graphicbar.o"
       DRVLIBS="$DRVLIBS -lgd"
       AC_DEFINE(WITH_GD, 1, [GD library])
       AC_DEFINE(WITH_IMAGE, 1, [image widget])

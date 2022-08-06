@@ -134,6 +134,7 @@ font_6x8.h                    \
 font_6x8_bold.h               \
 widget_image.c widget_image.h \
 widget_ttf.c widget_ttf.h \
+widget_graphicbar.c  widget_graphicbar.h \
                               \
 lcd4linux_i2c.h               \
                               \

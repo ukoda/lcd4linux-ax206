@@ -70,6 +70,7 @@ void message(const int level, const char *format, ...)
         if (!curses_error(buffer))
 #endif
             fprintf(level ? stdout : stderr, "%s\n", buffer);
+            fflush(level ? stdout : stderr);
     }
 
     if (running_foreground)

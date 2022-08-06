@@ -14,7 +14,10 @@ More details below.
 
 ## Current status
 
-Now building and working on Rocky 8.6 with DPF and X11 drivers.
+- Now building and working on Rocky 8.6 with DPF and X11 drivers.
+- Added display mirroring feature.
+- Added a graphics based bar graph.
+See below for details on added features.
 
 ## Warnings
 
@@ -55,6 +58,10 @@ Then stg_fg will have the value ''.
 
 It would appear values are evaluated in alphabetical order, not defintion order.  I have not seen this behaviour documented anywhere.
 
+### New widget acting strange
+
+In creating a new widget it may act strangle.  The problem occurs if you define your "typedef struct WIDGET_MYNEWWIDGET" wrong.  Undocumented is that some code assumes your widget is a WIDGET_IMAGE so will be expecting things like 'gdImage' to be in the same place in your structure.  Risk fields appear to be down to the 'visible' property.
+
 ## Building
 
 These are the additions to the generic instructions that I needed in able to build the project.
@@ -79,6 +86,7 @@ Configure the build enviroment. To keep it simple I configured only for the DPF 
 - automake --add-missing --copy --foreign 
 - autoconf
 - ./configure --with-drivers=DPF
+NB: I found there is script called `bootstrap` that is probably intended to do the build enviroment stuff and that you may find works the same as the above steps, except the last step.
 
 You can also support the X11 driver using:
 - ./configure --with-drivers=DPF,X11
@@ -226,3 +234,28 @@ Layout Compact {
     }
 }
 ```
+
+#### GraphicBar Widget
+
+The original Bar widget is optimised for use on text displays and therefore is a compromise on graphics displays.  I have added a new widget type, for graphics displays only, call GraphicBar.  Key differences from the text Bar are:
+- There is only one value.  The two values on the text Bar are a kludge to make the most of the limitation of text displays and is a needless conplication on graphics displays.
+- The bar size and postions are pixel based instead of character based.
+- The bar can have a negative minimum value and will start the bar from the effective 0 point, reversing direction for negative values.
+- The bar can change colors above or below set value thresholds.  For example a CPU usage graphic bar could be green at low loads, turning yellow under moderate loads and red under high loads.
+
+For the Widget declaration the fields are:
+- `class`: Must be 'GraphicBar'.
+- `expression`: The expression for the bar value to display.
+- `length`: The length of the axis the bar moves along, in pixels.
+- `width`: The width or thickness of the bar in pixels.
+- `direction`: The direction of the bar travel, for positive values, 'N', 'E', 'S' or 'W'.  Default is 'E'.
+- `min`: The value for the minimum end of the axis, may be negative.  If missing will auto range.
+- `max`: The value for the maximum end of the axis, should be higher than `min`.  If missing will auto range.
+- `color`: The nominal bar color as RGB or RGBA.  Defaults to bright green.
+- `background`: Background color as RGB or RGBA.  Defaults to dark gray.
+- `valuelow`: If defined sets the value below which the `colorlow` is used for the bar.
+- `colorlow`: The bar color as RGB or RGBA to use when the value is below `valuelow`.
+- `valuehigh`: If defined sets the value above which the `colorhigh` is used for the bar.
+- `colorhigh`: The bar color as RGB or RGBA to use when the value is above `valuehigh`.
+- `style`: If set to 'H' will draw a hollow bar, otherwise it is the default solid bar.
+- `update`: Update time in mS, as per other widgets.
