@@ -116,6 +116,22 @@ Configure the build enviroment. To keep it simple I configured only for the DPF 
 You can also support the X11 driver using:
 - ./configure --with-drivers=DPF,X11
 
+### Raspberry Pi
+
+Installing on a Raspberry Pi was done by building on the RPi, not crosscompling from an x86 work station.
+
+I need to install:
+- sudo apt install libtool-bin
+- sudo apt install gettext
+- sudo apt install libusb-1.0-0-dev
+- sudo apt install libncurses-dev
+- sudo apt install libgd-dev
+
+Used the bootstrap script to set up enviroment and build:
+- ./bootstrap
+- ./configure --with-drivers=DPF
+- make
+
 ## Config file information
 
 The best documentation I have found on the configuration file is at [The unoffical LCD4Linux Wiki](https://wiki.lcd4linux.tk/doku.php/start).  Here I have added information I could not find there.
