@@ -4,9 +4,11 @@ This is a fork of [MaxWiesel's lcd4linux-max](https://github.com/MaxWiesel/lcd4l
 
 The best source for information about LCD4Linux appears to be [The unoffical LCD4Linux Wiki](https://wiki.lcd4linux.tk/doku.php/start).
 
+I also have another repo, https://github.com/ukoda/lcd4linux-ax206, that provides an AX206 VNC client that can be paired up with the LCD4Linux VNC server display driver.  When paired with display mirroring feature added in this repo it makes for an easy way to have an AX206 on a server in a rack and see the same information on a remote AX206 display.
+
 ## Objectives
 
-Make it easier to build this software on Rocky, Mint and OpenWRT for support of USB LCD displays and add new options in support of those displays.
+Make it easier to build this software on Rocky, Mint, RPi and OpenWRT for support of USB LCD displays and add new options in support of those displays.
 
 My focus is using the now commonly available 3.5" USB LCD displays that are offered at many online stores as 'AIDA64' displays.  These are more correctly called AX206 displays, hence the repo name, see the warning below before buying a display for use with LCD4Linux.  
 
@@ -62,11 +64,12 @@ It would appear values are evaluated in alphabetical order, not defintion order.
 
 In creating a new widget it may act strangle.  The problem occurs if you define your "typedef struct WIDGET_MYNEWWIDGET" wrong.  Undocumented is that some code assumes your widget is a WIDGET_IMAGE so will be expecting things like 'gdImage' to be in the same place in your structure.  Risk fields appear to be down to the 'visible' property.
 
-## Building
+Building
+========
 
 These are the additions to the generic instructions that I needed in able to build the project.
 
-### Rocky
+## Rocky
 
 This will probably apply to similar RHEL distros.
 
@@ -98,7 +101,7 @@ If you want to use the VNC driver you will probably need:
 - dnf config-manager --set-enabled powertools
 - dnf install libvncserver libvncserver-devel
 
-### Mint
+## Mint
 
 This will probably apply to similar Ubuntu distros.
 
@@ -116,7 +119,7 @@ Configure the build enviroment. To keep it simple I configured only for the DPF 
 You can also support the X11 driver using:
 - ./configure --with-drivers=DPF,X11
 
-### Raspberry Pi
+## Raspberry Pi native build
 
 Installing on a Raspberry Pi was done by building on the RPi, not crosscompling from an x86 work station.
 
@@ -132,15 +135,32 @@ Used the bootstrap script to set up enviroment and build:
 - ./configure --with-drivers=DPF
 - make
 
-## Config file information
+## Raspberry Pi cross compile build
+
+NB: Not working yet.
+
+In this case we are using a Mint x64 system to cross conpile for a RPi.  Unlike a native build we need to know if we are building for a tradtional 32 bit RPi or a newer 64 bit model such as the RPi 4 or CM4.
+
+I installed:
+- For 32 bit: sudo apt install crossbuild-essential-armhf
+- For 64 bit: sudo apt install crossbuild-essential-arm64
+
+For a 32 bit build I used the bootstrap script to set up enviroment and build:
+- ./bootstrap
+- ./configure --with-drivers=DPF --host arm-linux-gnueabihf
+- make
+NB: It failed during linking looking for gd, usb-1.0 and dbus-1.  See https://askubuntu.com/questions/611822/help-with-cross-compiling-for-arm for a potential solution.
+
+Config file information
+=======================
 
 The best documentation I have found on the configuration file is at [The unoffical LCD4Linux Wiki](https://wiki.lcd4linux.tk/doku.php/start).  Here I have added information I could not find there.
 
-### Upstream repo
+## Upstream repo
 
 This is things that this code has inherited from the up stream repo.
 
-#### TrueType Widget
+### TrueType Widget
 
 The most notable of these is the widget class TrueType from Eric Loxat.  Having discovered this I realsied it will save me a lot of work with plans I had on improving the larger font appearance with the AX206 displays, thanks Eric.
 
@@ -178,15 +198,15 @@ Widget Debug {
 
 For the layout section the same X Y position format used by images should be used.
 
-### Repo specific additions
+## Repo specific additions
 
 This is extensions not present in the upstream repo.
 
-#### TrueType Widget
+### TrueType Widget
 
 Added `background` field, see above Upstream repo TrueType Widget for more detail.
 
-#### Driver mirroring
+### Driver mirroring
 
 This allows a second driver to mirror the normal driver.  Intended use case is where machine has a local physical display, such as an AX206, and you wish to view that screen remotely via VNC or X11.
 
@@ -251,7 +271,7 @@ Layout Compact {
 }
 ```
 
-#### GraphicBar Widget
+### GraphicBar Widget
 
 The original Bar widget is optimised for use on text displays and therefore is a compromise on graphics displays.  I have added a new widget type, for graphics displays only, call GraphicBar.  Key differences from the text Bar are:
 - There is only one value.  The two values on the text Bar are a kludge to make the most of the limitation of text displays and is a needless conplication on graphics displays.
