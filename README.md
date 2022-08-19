@@ -12,6 +12,9 @@ Make it easier to build this software on Rocky, Mint, RPi and OpenWRT for suppor
 
 My focus is using the now commonly available 3.5" USB LCD displays that are offered at many online stores as 'AIDA64' displays.  These are more correctly called AX206 displays, hence the repo name, see the warning below before buying a display for use with LCD4Linux.  
 
+As an example here is a screen capture of a VNC client mirroring the physical AX206 display on a remote server showing some of the imporved graphics features:
+![Example](lcd4linux_example.png)
+
 More details below.
 
 ## Current status
