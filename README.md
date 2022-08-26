@@ -43,6 +43,8 @@ Be aware that AIDA64 is actually Windows software, not the displays themselves. 
 
 - The confiuration options used by lcd4linux at runtime were originally conceived for mono text LCDs, not colour graphics LCDs.  There are bugs with some colour names, such as 'white', not working.  These can be worked around but I wish get to the bottom it so common sense conf files can be used.
 
+- There appears to be a Python plug in that is worth investigating, see https://neutrino-images.de/wiki/lcd4linux/plugin_python
+
 ### Variables not being defined
 
 If in the Variables you have:
@@ -107,6 +109,35 @@ If you want to use the VNC driver you will probably need:
 - dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
 - dnf config-manager --set-enabled powertools
 - dnf install libvncserver libvncserver-devel
+
+### Starting with systemd
+
+To start with systemd you will need to create a service file.  This should work on most recent Linux systems but the conetents may need to change depending on the OS and where LCD4Linux is installed to etc.
+
+Here is what I did to get LCD4Linux working on a Rocky server:
+- created the file `/etc/systemd/system/lcd4linux.service`
+- `systemctl daemon-reload`
+- `systemctl start lcd4linux.service`
+- `systemctl enable lcd4linux.service`
+
+In my `/etc/systemd/system/lcd4linux.service` I put:
+```
+[Unit]
+Description = LCD4Linux status display
+StartLimitIntervalSec = 30
+
+[Service]
+Type = simple
+ExecStart = /usr/local/bin/lcd4linux -F
+User = root
+Restart = on-failure
+StandardOutput = syslog
+StandardError = syslog
+
+[Install]
+WantedBy = multi-user.target
+```
+
 
 ## Mint
 
