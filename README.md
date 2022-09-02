@@ -112,7 +112,7 @@ If you want to use the VNC driver you will probably need:
 
 ### Starting with systemd
 
-To start with systemd you will need to create a service file.  This should work on most recent Linux systems but the conetents may need to change depending on the OS and where LCD4Linux is installed to etc.
+To start with systemd you will need to create a service file.  This should work on most recent Linux systems but the contents may need to change depending on the OS and where LCD4Linux is installed to etc.
 
 Here is what I did to get LCD4Linux working on a Rocky server:
 - created the file `/etc/systemd/system/lcd4linux.service`
@@ -124,13 +124,15 @@ In my `/etc/systemd/system/lcd4linux.service` I put:
 ```
 [Unit]
 Description = LCD4Linux status display
-StartLimitIntervalSec = 30
+After = network.target
+StartLimitIntervalSec = 0
 
 [Service]
 Type = simple
 ExecStart = /usr/local/bin/lcd4linux -F
 User = root
 Restart = on-failure
+RestartSec = 15
 StandardOutput = syslog
 StandardError = syslog
 
