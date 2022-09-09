@@ -146,6 +146,18 @@ static void my_decode(RESULT * result, int argc, RESULT * argv[])
     CopyResult(&result, argv[index + 1]);
 }
 
+static void my_precision(RESULT * result, RESULT * arg1, RESULT * arg2)
+{
+    double a1 = R2N(arg1);
+    double a2 = R2N(arg2);
+    char format[8];
+    char formatted[16];
+
+    snprintf(format, 8, "%%0.%df", (int) a2);
+    snprintf(formatted, 16, format, a1);
+    SetResult(&result, R_STRING, formatted);
+}
+
 
 int plugin_init_math(void)
 {
@@ -176,6 +188,8 @@ int plugin_init_math(void)
     /* decode */
     AddFunction("decode", -1, my_decode);
 
+    /* precision */
+    AddFunction("precision", 2, my_precision);
     return 0;
 }
 

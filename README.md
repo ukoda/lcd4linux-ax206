@@ -337,3 +337,10 @@ For the Widget declaration the fields are:
 - `colorhigh`: The bar color as RGB or RGBA to use when the value is above `valuehigh`.
 - `style`: If set to 'H' will draw a hollow bar, otherwise it is the default solid bar.
 - `update`: Update time in mS, as per other widgets.
+
+### precision function
+
+Added a precision function to the maths library.  It is intened to add tailing zeros to floating point number so columns of them line up nicely.  The first argument is the value to be formated and the second argument is the number of trailing digits needed.  It should be noted that the output is a sting, not a number, so it would be used after any maths was done.
+
+An example of its usage:
+- `expression  precision(file::readline(F_PW, 3), 3) . ' kW '`
