@@ -87,6 +87,7 @@ In my case I found it helped to install these packages:
 - dnf install gd-devel.x86_64
 - dnf install libjpeg-turbo-devel
 - dnf install libusb-devel
+- dnf install mariadb-connector-c-devel
 
 If usblib-devel doesn't work try usblib*
 
@@ -146,7 +147,8 @@ WantedBy = multi-user.target
 This will probably apply to similar Ubuntu distros.
 
 In my case I found it helped to install these packages:
-- apt install libtool-bin
+- sudo apt install libtool-bin
+- sudo apt install libmysqlclient-dev
 
 Configure the build enviroment. To keep it simple I configured only for the DPF driver, which is the one that supports AX206 displays. From the top level of the repo directory:
 - aclocal
