@@ -23,6 +23,8 @@ More details below.
 - Now building and working on native Raspberry Pi with DPF driver.
 - Added display mirroring feature.
 - Added a graphics based bar graph.
+- Improved TrueType Widget
+- Improved SQL plugin
 
 See below for details on added features.
 
@@ -98,6 +100,7 @@ Configure the build enviroment. To keep it simple I configured only for the DPF 
 - automake --add-missing --copy --foreign 
 - autoconf
 - ./configure --with-drivers=DPF
+- touch lcd4linux.c;make
 
 NB: I found there is script called `bootstrap` that is probably intended to do the build enviroment stuff and that you may find works the same as the above steps, except the last step.
 
@@ -157,6 +160,7 @@ Configure the build enviroment. To keep it simple I configured only for the DPF 
 - automake --add-missing --copy --foreign 
 - autoconf
 - ./configure --with-drivers=DPF
+- touch lcd4linux.c;make
 
 You can also support the X11 driver using:
 - ./configure --with-drivers=DPF,X11
@@ -176,7 +180,7 @@ I need to install:
 Used the bootstrap script to set up enviroment and build:
 - ./bootstrap
 - ./configure --with-drivers=DPF
-- make
+- touch lcd4linux.c;make
 
 ## Raspberry Pi cross compile build
 
@@ -242,6 +246,10 @@ Widget Debug {
 ```
 
 For the layout section the same X Y position format used by images should be used.
+
+### SQL plugin
+
+Fixed bug where display was not show SQL results if SQL server was restarted.
 
 ## Repo specific additions
 

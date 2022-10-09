@@ -66,12 +66,11 @@
 static MYSQL conex;
 
 static char Section[] = "Plugin:MySQL";
+static int configured = 0;
 
 
 static int configure_mysql(void)
 {
-    static int configured = 0;
-
     char server[256];
     int port;
     char user[128];
@@ -79,10 +78,11 @@ static int configure_mysql(void)
     char database[256];
     char *s;
 
-    if (configured != 0)
+    if (configured == 1)
         return configured;
 
     s = cfg_get(Section, "server", "localhost");
+    info("[MySQL] Configuring");
     if (*s == '\0') {
         info("[MySQL] empty '%s.server' entry from %s, assuming 'localhost'", Section, cfg_source());
         strcpy(server, "localhost");
@@ -130,6 +130,7 @@ static int configure_mysql(void)
         return configured;
     }
 
+    info("[MySQL] Configured OK");
     configured = 1;
     return configured;
 }
@@ -150,7 +151,14 @@ static void my_MySQLcount(RESULT * result, RESULT * query)
 
     /* mysql_ping(MYSQL *mysql) checks whether the connection to the server is working. */
     /* If it has gone down, an automatic reconnection is attempted. */
-    mysql_ping(&conex);
+    if (mysql_ping(&conex)) {
+        error("[MySQL] server ping failed: %s", mysql_error(&conex));
+        configured = 0;
+        value = -1;
+        SetResult(&result, R_NUMBER, &value);
+        return;
+    }        
+
     if (mysql_real_query(&conex, q, (unsigned int) strlen(q))) {
         error("[MySQL] query error: %s", mysql_error(&conex));
         value = -1;
@@ -184,7 +192,14 @@ static void my_MySQLquery(RESULT * result, RESULT * query)
 
     /* mysql_ping(MYSQL *mysql) checks whether the connection to the server is working. */
     /* If it has gone down, an automatic reconnection is attempted. */
-    mysql_ping(&conex);
+    if (mysql_ping(&conex)) {
+        error("[MySQL] server ping failed: %s", mysql_error(&conex));
+        configured = 0;
+        value = -1;
+        SetResult(&result, R_NUMBER, &value);
+        return;
+    }        
+
     if (mysql_real_query(&conex, q, (unsigned int) strlen(q))) {
         error("[MySQL] query error: %s", mysql_error(&conex));
         value = -1;
@@ -208,7 +223,14 @@ static void my_MySQLstatus(RESULT * result)
 
     if (configure_mysql() > 0) {
 
-        mysql_ping(&conex);
+        if (mysql_ping(&conex)) {
+            error("[MySQL] server ping failed: %s", mysql_error(&conex));
+            configured = 0;
+            value = -1;
+            SetResult(&result, R_NUMBER, &value);
+            return;
+        }        
+
         status = mysql_stat(&conex);
         if (!status) {
             error("[MySQL] status error: %s", mysql_error(&conex));
