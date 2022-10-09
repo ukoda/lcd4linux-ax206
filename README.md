@@ -171,6 +171,7 @@ I need to install:
 - sudo apt install libusb-1.0-0-dev
 - sudo apt install libncurses-dev
 - sudo apt install libgd-dev
+- sudo apt install libmariadb-dev-compat
 
 Used the bootstrap script to set up enviroment and build:
 - ./bootstrap
@@ -181,7 +182,7 @@ Used the bootstrap script to set up enviroment and build:
 
 NB: Not working yet.
 
-In this case we are using a Mint x64 system to cross conpile for a RPi.  Unlike a native build we need to know if we are building for a tradtional 32 bit RPi or a newer 64 bit model such as the RPi 4 or CM4.
+In this case we are using a Mint x64 system to cross compile for a RPi.  Unlike a native build we need to know if we are building for a tradtional 32 bit RPi or a newer 64 bit model such as the RPi 4 or CM4.
 
 I installed:
 - For 32 bit: sudo apt install crossbuild-essential-armhf
