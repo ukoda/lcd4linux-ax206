@@ -208,7 +208,7 @@ This is things that this code has inherited from the up stream repo.
 
 ### Display settings
 
-The `backlight` setting is not linear and will simply blank the display or flicker at low values making it difficult to use in low light appliactions such as a bed side night display.  To improve this a new `brightness` setting has been added with the range 0 to 100, and with 100 as the default.  It scales the pixel values as a percentage.  You would normally set lowest value backlight settinh that gives a stable backlight that supports the brightest white you need, then use the brightness value to dim it to suit the user needs.  NB:While the brightness setting can be used to dim with any backlight level setting the backlight higer than needed will lead to light bleed on black areas of the screen.
+The `backlight` setting is not linear and will simply blank the display or flicker at low values making it difficult to use in low light appliactions such as a bed side night display.  To improve this a new `brightness` setting has been added with the range 0 to 100, and with 100 as the default.  It scales the pixel values as a percentage.  You would normally set lowest value backlight setting that gives a stable backlight that supports the brightest white you need, then use the brightness value to dim it to suit the user needs.  NB:While the brightness setting can be used to dim with any backlight level setting the backlight higer than needed will lead to light bleed on black areas of the screen.
 
 ### Display Plugins
 
