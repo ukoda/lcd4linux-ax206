@@ -25,6 +25,7 @@ More details below.
 - Added a graphics based bar graph.
 - Improved TrueType Widget
 - Improved SQL plugin
+- Added brightness setting and plugin
 
 See below for details on added features.
 
@@ -44,8 +45,6 @@ Be aware that AIDA64 is actually Windows software, not the displays themselves. 
 ## Core issues to address
 
 - The confiuration options used by lcd4linux at runtime were originally conceived for mono text LCDs, not colour graphics LCDs.  There are bugs with some colour names, such as 'white', not working.  These can be worked around but I wish get to the bottom it so common sense conf files can be used.
-
-- There appears to be a Python plug in that is worth investigating, see https://neutrino-images.de/wiki/lcd4linux/plugin_python
 
 ### Variables not being defined
 
@@ -144,7 +143,6 @@ StandardError = syslog
 WantedBy = multi-user.target
 ```
 
-
 ## Mint
 
 This will probably apply to similar Ubuntu distros.
@@ -207,6 +205,16 @@ The best documentation I have found on the configuration file is at [The unoffic
 ## Upstream repo
 
 This is things that this code has inherited from the up stream repo.
+
+### Display settings
+
+The `backlight` setting is not linear and will simply blank the display or flicker at low values making it difficult to use in low light appliactions such as a bed side night display.  To improve this a new `brightness` setting has been added with the range 0 to 100, and with 100 as the default.  It scales the pixel values as a percentage.  You would normally set lowest value backlight settinh that gives a stable backlight that supports the brightest white you need, then use the brightness value to dim it to suit the user needs.  NB:While the brightness setting can be used to dim with any backlight level setting the backlight higer than needed will lead to light bleed on black areas of the screen.
+
+### Display Plugins
+
+The display has an undocumented `LCD::backlight` plugin that you would normally call from a Timer Widget, https://wiki.lcd4linux.tk/doku.php/widget_timer, to adjust the backlight brightness during operation.
+
+I have also added a `LCD::brightness` plugin to set the pixel brightness in the same way.
 
 ### TrueType Widget
 

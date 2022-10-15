@@ -140,6 +140,7 @@ static struct {
     // Config properties
     int orientation;
     int backlight;
+    int brightness;
 } dpf;
 
 
@@ -183,6 +184,17 @@ static void drv_set_pixel(int x, int y, RGBA pix)
         error("dpf: x/y out of bounds (x=%d, y=%d, rot=%d, flip=%d, lx=%d, ly=%d)\n", x, y, dpf.rotate90, dpf.flip, lx,
               ly);
         return;
+    }
+
+    if (dpf.brightness < 100) {
+        int comp;
+
+        comp = pix.R * dpf.brightness / 100;
+        pix.R = (unsigned char) comp;
+        comp = pix.G * dpf.brightness / 100;
+        pix.G = (unsigned char) comp;
+        comp = pix.B * dpf.brightness / 100;
+        pix.B = (unsigned char) comp;
     }
 
     unsigned char c1 = _RGB565_0(pix);
@@ -301,6 +313,12 @@ static int drv_dpf_start(const char *section)
     else
         dpf.backlight = 7;
 
+    // Get the brightness value (0 = off, 100 = max brightness)
+    if (cfg_number(section, "Brightness", 100, 0, 100, &i) > 0)
+        dpf.brightness = i;
+    else
+        dpf.brightness = 100;
+
     /* open communication with the display */
     dpf.dpfh = dpf_ax_open(dev);
     if (dpf.dpfh == NULL) {
@@ -362,6 +380,19 @@ static void plugin_backlight(RESULT * result, RESULT * arg1)
 }
 
 
+static void plugin_brightness(RESULT * result, RESULT * arg1)
+{
+    int b = R2N(arg1);
+    if (b < 0)
+        b = 0;
+    if (b > 100)
+        b = 100;
+
+    dpf.brightness = b;
+    SetResult(&result, R_NUMBER, &b);
+}
+
+
 /****************************************/
 /***        exported functions        ***/
 /****************************************/
@@ -404,6 +435,7 @@ int drv_dpf_init(const char *section, const int quiet)
 
     /* register plugins */
     AddFunction("LCD::backlight", 1, plugin_backlight);
+    AddFunction("LCD::brightness", 1, plugin_brightness);
 
     return 0;
 }
@@ -433,13 +465,13 @@ int drv_dpf_quit(const int quiet)
     } else {
         i = 0;
         while (!feof(fp) && i++ < 1) {
-            fgets(value, sizeof(value), fp);
+            (void)!fgets(value, sizeof(value), fp);
             size = strcspn(value, "\r\n");
             strncpy(line1, value, size);
             line1[size] = '\0';
             /* more than 80 chars, chew up rest of line */
             while (!feof(fp) && strchr(value, '\n') == NULL) {
-                fgets(value, sizeof(value), fp);
+                (void)!fgets(value, sizeof(value), fp);
             }
         }
         fclose(fp);
