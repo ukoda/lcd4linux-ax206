@@ -4,7 +4,7 @@ This is a fork of [MaxWiesel's lcd4linux-max](https://github.com/MaxWiesel/lcd4l
 
 The best source for information about LCD4Linux appears to be [The unoffical LCD4Linux Wiki](https://wiki.lcd4linux.tk/doku.php/start).
 
-I also have another repo, https://github.com/ukoda/lcd4linux-ax206, that provides an AX206 VNC client that can be paired up with the LCD4Linux VNC server display driver.  When paired with display mirroring feature added in this repo it makes for an easy way to have an AX206 on a server in a rack and see the same information on a remote AX206 display.
+I also have another repo, https://github.com/ukoda/ax206vncclient, that provides an AX206 VNC client that can be paired up with the LCD4Linux VNC server display driver.  When paired with display mirroring feature added in this repo it makes for an easy way to have an AX206 on a server in a rack and see the same information on a remote AX206 display.
 
 ## Objectives
 
@@ -148,8 +148,7 @@ WantedBy = multi-user.target
 This will probably apply to similar Ubuntu distros.
 
 In my case I found it helped to install these packages:
-- sudo apt install libtool-bin
-- sudo apt install libmysqlclient-dev
+- sudo apt install libtool-bin libmysqlclient-dev libgd-dev libvncserver libx11-dev libusb-1.0-0-dev
 
 Configure the build enviroment. To keep it simple I configured only for the DPF driver, which is the one that supports AX206 displays. From the top level of the repo directory:
 - aclocal
@@ -335,7 +334,7 @@ Layout Compact {
 ### GraphicBar Widget
 
 The original Bar widget is optimised for use on text displays and therefore is a compromise on graphics displays.  I have added a new widget type, for graphics displays only, call GraphicBar.  Key differences from the text Bar are:
-- There is only one value.  The two values on the text Bar are a kludge to make the most of the limitation of text displays and is a needless conplication on graphics displays.
+- There is only one value.  The two values on the text Bar are a kludge to make the most of the limitation of text displays and is a needless complication on graphics displays.
 - The bar size and postions are pixel based instead of character based.
 - The bar can have a negative minimum value and will start the bar from the effective 0 point, reversing direction for negative values.
 - The bar can change colors above or below set value thresholds.  For example a CPU usage graphic bar could be green at low loads, turning yellow under moderate loads and red under high loads.
